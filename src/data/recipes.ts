@@ -81,51 +81,19 @@ export const menuRecipes: MenuRecipe[] = [
 
 export const navItems = [
   { zh: '理念', en: 'MANIFESTO', href: '#manifesto' },
-  { zh: '功能', en: 'FEATURES', href: '#features' },
-  { zh: '菜单', en: 'MENU', href: '#menu' },
+  { zh: '菜谱', en: 'RECIPES', href: '#features' },
+  { zh: '烹饪', en: 'COOK', href: '#cook' },
   { zh: '下载', en: 'DOWNLOAD', href: '#download' },
 ]
 
 export const heatSections = [
   { id: 'top', num: '00', name: '开火', zh: '首页' },
   { id: 'manifesto', num: '01', name: '文火', zh: '理念' },
-  { id: 'features', num: '02', name: '中火', zh: '找菜' },
+  { id: 'features', num: '02', name: '中火', zh: '菜谱' },
   { id: 'cook', num: '03', name: '大火', zh: '烹饪' },
   { id: 'understand', num: '04', name: '余温', zh: '懂菜' },
-  { id: 'menu', num: '05', name: '上菜', zh: '菜单' },
-  { id: 'next', num: '06', name: '备菜', zh: '下一步' },
-  { id: 'download', num: '07', name: '上桌', zh: '下载' },
-]
-
-export const searchResults = [
-  {
-    title: '番茄豆腐汤',
-    meta: '家常菜 · 快手菜',
-    time: '15 MIN · 难度 2',
-    cover: './photos/tomato-tofu-soup.jpg',
-  },
-  {
-    title: '北非风味番茄炖蛋',
-    meta: '国际菜 · 早餐',
-    time: '20 MIN',
-    cover: './photos/shakshuka.jpg',
-  },
-  {
-    title: '澳门湿版免治牛肉饭',
-    meta: '家常菜 · 肉类',
-    time: '30 MIN · 难度 2',
-    cover: './photos/minced-beef-rice.jpg',
-  },
-]
-
-export const tickerWords = [
-  { zh: '大火爆炒', en: 'SEAR' },
-  { zh: '小火慢炖', en: 'SIMMER' },
-  { zh: '中火收汁', en: 'REDUCE' },
-  { zh: '余温静置', en: 'REST' },
-  { zh: '上锅蒸透', en: 'STEAM' },
-  { zh: '热油快炸', en: 'FRY' },
-  { zh: '凉拌入味', en: 'TOSS' },
+  { id: 'next', num: '05', name: '备菜', zh: '下一步' },
+  { id: 'download', num: '06', name: '上桌', zh: '下载' },
 ]
 
 export const cookSteps = [

@@ -7,7 +7,7 @@ export function Roadmap() {
         <div className="sec-head">
           <div className="sec-head__label">
             <span className="heat-tag">备菜 · PREP</span>
-            <span className="label">06 / WHAT&apos;S NEXT</span>
+            <span className="label">05 / WHAT&apos;S NEXT</span>
           </div>
           <div>
             <h2 className="h2" data-reveal>

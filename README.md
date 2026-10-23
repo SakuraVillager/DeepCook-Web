@@ -3,7 +3,7 @@
 DeepCook 的官方网站首页。以「火候」为叙事线索，介绍 DeepCook Android 菜谱 App，提供 APK 下载与在线版入口。
 
 - 设计参考：`rerise.co` 的编辑式排版、逐字动画、翻字导航、全屏滚动叙事与慢速缓动
-- 色彩与结构为 DeepCook 重做：暖米纸、灶火黄、墨黑与橄榄绿；7 个「火候」章节
+- 色彩与结构为 DeepCook 重做：暖米纸、灶火黄、墨黑与橄榄绿；6 个「火候」章节
 - 内容以当前 Android 0.5.1 为准：494 道离线菜谱、搜索、烹饪模式、计时、营养/评分、收藏与自建菜谱
 
 ## 本地运行
@@ -37,20 +37,18 @@ npm run preview
 | --- | --- |
 | Loader | 0–100 计数器，`clip-path` 上掀；同一会话内只播放一次 |
 | Hero | 三张菜谱图慢速交叉淡入、逐字标题 `COOK DEEPER.`、旋转印章、下载/在线入口 |
-| Ticker | 火候跑马灯，滚动速度会影响滚动速度与轻微倾斜 |
 | 01 Manifesto | 产品理念、494 / 372 / 219 / 100% 数据 |
-| 02 Find | 搜索与筛选说明、真实搜索界面示意（番茄 + 鸡蛋 = 11 道） |
+| 02 Find + Tonight | 搜索说明 + 横向菜谱卡轨（6 道精选），左右按钮与原生横滑 |
 | 03 Cook | 红烧肉步骤节选、滚动点亮当前步骤、计时器卡片 |
 | 04 Understand | 每份营养四列（示例数据）、10 分制评分与本地交流 |
-| 05 Menu | 6 道菜谱横向卡片，桌面 pin + 横向位移，移动端原生横滑 |
-| 06 Next | AI 方向与概念对话，明确标注 COMING SOON / 非实际功能 |
-| 07 Download | APK 下载与在线版入口 |
+| 05 Next | AI 方向与概念对话，明确标注 COMING SOON / 非实际功能 |
+| 06 Download | APK 下载与在线版入口 |
 | Footer | 大字标、链接、内容/图片来源说明 |
 
 ## 技术栈
 
 - Vite + React 19 + TypeScript
-- GSAP + ScrollTrigger（首屏逐字、跑马灯、菜单 pin、视差）
+- GSAP + ScrollTrigger（首屏逐字、视差）
 - Lenis（平滑滚动）
 - Fontsource 本地字体：Archivo Variable、Instrument Serif Italic、Noto Sans SC Variable
 - 纯 CSS 设计令牌，无 UI 框架
@@ -58,8 +56,8 @@ npm run preview
 ## 动效与无障碍
 
 - 主缓动 `cubic-bezier(.165,.84,.44,1)`，段落揭示 0.9–1.05s
-- 导航、按钮逐字母上翻；标题逐字上升；图片慢速 Ken Burns
-- `prefers-reduced-motion` 下跳过 Loader、逐字与 pin，改用原生滚动；菜单区可横向滚动
+- 导航、按钮逐字母上翻；标题逐字上升；图片慢速 Ken Burns；菜谱卡悬停不位移、不缩放
+- `prefers-reduced-motion` 下跳过 Loader 与逐字，改用原生滚动；菜谱卡轨可直接横向滚动
 - 跳转链接、语义化标题、可见焦点、图片 alt、`aria-current` / progressbar 均已处理
 
 ## 内容与素材

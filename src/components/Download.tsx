@@ -6,7 +6,7 @@ export function Download() {
           <div>
             <div className="sec-head__label" style={{ paddingTop: 0, marginBottom: 20 }}>
               <span className="heat-tag">上桌 · SERVE</span>
-              <span className="label">07 / GET IT</span>
+              <span className="label">06 / GET IT</span>
             </div>
             <h2 className="download__title" data-reveal>
               把厨房，

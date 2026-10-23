@@ -4,12 +4,10 @@ import { Cursor } from './components/Cursor'
 import { Header } from './components/Header'
 import { HeatRail } from './components/HeatRail'
 import { Hero } from './components/Hero'
-import { Ticker } from './components/Ticker'
 import { Manifesto } from './components/Manifesto'
 import { Find } from './components/Find'
 import { Cook } from './components/Cook'
 import { Understand } from './components/Understand'
-import { MenuRail } from './components/MenuRail'
 import { Roadmap } from './components/Roadmap'
 import { Download } from './components/Download'
 import { Footer } from './components/Footer'
@@ -57,12 +55,10 @@ export default function App() {
 
       <main id="main">
         <Hero play={introDone} reduced={reduced} />
-        <Ticker reduced={reduced} />
         <Manifesto />
         <Find />
         <Cook />
         <Understand />
-        <MenuRail reduced={reduced} />
         <Roadmap />
         <Download />
       </main>
