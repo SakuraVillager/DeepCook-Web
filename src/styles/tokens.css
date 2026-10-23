@@ -1,0 +1,37 @@
+:root {
+  /* Palette — warm paper, ink, yolk. Built from the app's kitchen-yellow theme. */
+  --paper: #f3ede0;
+  --paper-2: #e9e1d1;
+  --paper-3: #fbf7ee;
+  --ink: #16130d;
+  --ink-soft: #2a251c;
+  --ink-2: #3a3327;
+  --yolk: #f0b41c;
+  --yolk-deep: #d99b0b;
+  --chili: #c8472b;
+  --olive: #4e5a39;
+  --olive-deep: #3f4a2e;
+  --muted: #837b6b;
+  --muted-light: #a9a08d;
+  --line: rgba(22, 19, 13, 0.16);
+  --line-strong: rgba(22, 19, 13, 0.32);
+  --line-light: rgba(243, 237, 224, 0.22);
+  --line-light-strong: rgba(243, 237, 224, 0.4);
+
+  /* Type */
+  --font-display: 'Archivo Variable', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-serif: 'Instrument Serif', 'Times New Roman', serif;
+  --font-zh: 'Noto Sans SC Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Noto Sans CJK SC', sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
+
+  /* Layout */
+  --gutter: clamp(20px, 3.4vw, 52px);
+  --max: 1600px;
+  --header-h: 76px;
+  --radius-card: 16px;
+}
