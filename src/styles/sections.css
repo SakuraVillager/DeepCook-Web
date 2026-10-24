@@ -69,6 +69,8 @@
    ========================================================= */
 
 .hero {
+  --hero-content-inset: clamp(28px, 4.8vw, 72px);
+
   position: relative;
   height: 100svh;
   min-height: 640px;
@@ -112,7 +114,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: calc(var(--header-h) + 22px) var(--gutter) 26px;
+  padding: calc(var(--header-h) + 22px) var(--gutter) var(--hero-content-inset);
 }
 
 .hero__top {
@@ -194,9 +196,14 @@
   min-height: 24px;
 }
 
+.hero__title,
+.hero__bottom {
+  margin-left: calc(var(--hero-content-inset) - var(--gutter));
+}
+
 .hero__title {
   font-family: var(--font-display);
-  font-size: clamp(54px, min(12.4vw, 19.2vh), 188px);
+  font-size: clamp(54px, min(12.4vw, 19.2vh, calc((100svh - 520px) / 2.28)), 188px);
   font-weight: 900;
   line-height: 0.8;
   letter-spacing: -0.055em;
@@ -1794,7 +1801,6 @@
 
   .hero__inner {
     padding-top: calc(var(--header-h) + 16px);
-    padding-bottom: 24px;
   }
 
   .stamp {
