@@ -1,4 +1,5 @@
-/* Both marks share a single animated anchor; only their size changes on hover. */
+/* Separate animated anchors preserve the trailing ring. The marks themselves
+   own percentage centering, without extra negative margins. */
 .cursor {
   position: fixed;
   left: 0;
@@ -9,6 +10,13 @@
   pointer-events: none;
   mix-blend-mode: difference;
   opacity: 0;
+}
+.cursor__anchor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
 }
 .cursor__dot,
 .cursor__ring {
@@ -34,6 +42,18 @@
 .cursor.is-active .cursor__ring {
   width: 64px;
   height: 64px;
+}
+.cursor--home.is-active .cursor__dot {
+  opacity: 0;
+}
+.cursor--online .cursor__ring {
+  width: 32px;
+  height: 32px;
+  border-color: rgba(255, 255, 255, 0.65);
+}
+.cursor--online.is-active .cursor__ring {
+  width: 50px;
+  height: 50px;
 }
 @media (hover: hover) and (pointer: fine) {
   .has-cursor,

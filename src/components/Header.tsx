@@ -1,19 +1,38 @@
 import { useEffect, useState, type MouseEvent } from 'react'
 import { LetterLink } from './LetterLink'
 import { navItems } from '../data/recipes'
-import { scrollToSection, scrollToTop, startScroll, stopScroll } from '../lib/scroll'
+import {
+  scrollToSection,
+  scrollToTop,
+  startScroll,
+  stopScroll,
+} from '../lib/scroll'
 
-export function Header() {
+type HeaderEdition = {
+  items: { href: string; zh: string; en: string }[]
+  activeHref: string
+  onNavigate: (href: string) => void
+}
+
+export function Header({ edition }: { edition?: HeaderEdition } = {}) {
   const [open, setOpen] = useState(false)
   const [onLight, setOnLight] = useState(false)
+  const online = Boolean(edition)
+  const items = edition?.items ?? navItems
+  const ctaHref = online ? '../index.html' : './app/'
+  const ctaText = online ? '官网首页' : '在线使用'
+  const linkHref = (href: string) => (online ? `#${href}` : href)
 
   useEffect(() => {
+    if (online) return
     let frame = 0
 
     const update = () => {
       frame = 0
       const probe = 38
-      const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-theme]'))
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-theme]'),
+      )
       let light = false
       for (const section of sections) {
         const rect = section.getBoundingClientRect()
@@ -38,7 +57,7 @@ export function Header() {
       window.removeEventListener('resize', onScroll)
       if (frame) window.cancelAnimationFrame(frame)
     }
-  }, [])
+  }, [online])
 
   useEffect(() => {
     if (!open) return
@@ -61,17 +80,24 @@ export function Header() {
   const go = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
     event.preventDefault()
     setOpen(false)
+    if (edition) {
+      edition.onNavigate(href)
+      return
+    }
     window.setTimeout(() => scrollToSection(href), 80)
   }
 
   return (
     <>
-      <header className={`site-header${onLight ? ' is-on-light' : ''}`}>
+      <header
+        className={`site-header${online ? ' site-header--online' : ''}${online || onLight ? ' is-on-light' : ''}`}
+      >
         <a
           className="site-header__brand"
-          href="#top"
-          aria-label="DeepCook，回到顶部"
+          href={online ? '../index.html' : '#top'}
+          aria-label={online ? 'DeepCook 官网首页' : 'DeepCook，回到顶部'}
           onClick={(event) => {
+            if (online) return
             event.preventDefault()
             scrollToTop()
           }}
@@ -83,11 +109,14 @@ export function Header() {
         </a>
 
         <nav className="site-nav" aria-label="主导航">
-          {navItems.map((item) => (
+          {items.map((item) => (
             <LetterLink
               key={item.href}
               text={item.zh}
-              href={item.href}
+              href={linkHref(item.href)}
+              ariaCurrent={
+                edition?.activeHref === item.href ? 'page' : undefined
+              }
               onClick={(event) => go(event, item.href)}
             />
           ))}
@@ -95,10 +124,10 @@ export function Header() {
 
         <div className="site-header__right">
           <LetterLink
-            text="在线使用"
-            href="./app/"
+            text={ctaText}
+            href={ctaHref}
             className="header-cta letter-link--en"
-            ariaLabel="在线使用 DeepCook"
+            ariaLabel={online ? 'DeepCook 官网首页' : '在线使用 DeepCook'}
             arrow
           />
           <button
@@ -119,6 +148,7 @@ export function Header() {
         id="mobile-menu"
         className={`mobile-menu${open ? ' is-open' : ''}`}
         aria-hidden={!open}
+        inert={!open}
       >
         <div className="mobile-menu__top">
           <span className="inline-brand">
@@ -136,11 +166,14 @@ export function Header() {
         </div>
 
         <nav className="mobile-menu__nav" aria-label="移动端导航">
-          {navItems.map((item, index) => (
+          {items.map((item, index) => (
             <a
               key={item.href}
               className="mobile-menu__link"
-              href={item.href}
+              href={linkHref(item.href)}
+              aria-current={
+                edition?.activeHref === item.href ? 'page' : undefined
+              }
               tabIndex={open ? 0 : -1}
               onClick={(event) => go(event, item.href)}
             >
@@ -152,23 +185,27 @@ export function Header() {
           ))}
           <a
             className="mobile-menu__link"
-            href="./app/"
+            href={ctaHref}
             tabIndex={open ? 0 : -1}
             onClick={() => setOpen(false)}
           >
-            <span>在线使用</span>
-            <span>05 / OPEN APP</span>
+            <span>{ctaText}</span>
+            <span>{online ? '05 / HOME' : '05 / OPEN APP'}</span>
           </a>
         </nav>
 
         <div className="mobile-menu__foot">
           <div>
-            <p className="label">DEEPCOOK 0.5.1</p>
-            <p className="label muted">ANDROID 8.0+ · OFFLINE</p>
+            <p className="label">
+              {online ? 'DEEPCOOK / ONLINE EDITION' : 'DEEPCOOK 0.5.1'}
+            </p>
+            <p className="label muted">
+              {online ? '好好吃饭，慢慢下厨。' : 'ANDROID 8.0+ · OFFLINE'}
+            </p>
           </div>
           <a
             className="btn btn--ink btn--small"
-            href="./download/DeepCook-0.5.1-preview.apk"
+            href={`${online ? '../' : './'}download/DeepCook-0.5.1-preview.apk`}
             download
             tabIndex={open ? 0 : -1}
           >

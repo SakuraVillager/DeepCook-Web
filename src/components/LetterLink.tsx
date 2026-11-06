@@ -10,6 +10,7 @@ type LetterLinkProps = {
   onClick?: MouseEventHandler<HTMLAnchorElement>
   ariaLabel?: string
   arrow?: boolean
+  ariaCurrent?: 'page'
 }
 
 export function LetterLink({
@@ -22,6 +23,7 @@ export function LetterLink({
   onClick,
   ariaLabel,
   arrow = false,
+  ariaCurrent,
 }: LetterLinkProps) {
   const chars = Array.from(text)
 
@@ -34,6 +36,7 @@ export function LetterLink({
       rel={rel}
       onClick={onClick}
       aria-label={ariaLabel ?? text}
+      aria-current={ariaCurrent}
     >
       <span className="sr-only">{text}</span>
       <span className="letter-link__chars" aria-hidden="true">

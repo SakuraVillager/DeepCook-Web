@@ -167,21 +167,6 @@
   font-size: calc(var(--reading-size) - 5px);
   line-height: 1.9;
 }
-.k-reader__ingredients {
-  border-top: 1px solid var(--line);
-  padding-top: 18px;
-  margin-top: 24px;
-}
-.k-reader__ingredients > .label {
-  display: block;
-  font-size: 10px;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-.k-reader__ingredients p {
-  font-size: calc(var(--reading-size) - 8px);
-  line-height: 1.9;
-}
 .k-reader__companion {
   display: flex;
   flex-direction: column;
@@ -218,77 +203,6 @@
   color: var(--muted);
   white-space: nowrap;
   letter-spacing: 0.08em;
-}
-.k-reader__reference {
-  display: flex;
-  flex-direction: column;
-  max-height: min(100%, 600px);
-  min-height: 0;
-  border: 1px solid var(--line);
-  background: var(--paper-3);
-  padding: clamp(22px, 2.5vw, 40px);
-}
-.k-reader__reference > header {
-  flex: none;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--line);
-}
-.k-reader__reference header .label {
-  color: var(--muted);
-  font-size: 8px;
-}
-.k-reader__reference h2 {
-  font-size: clamp(21px, 2vw, 29px);
-  font-weight: 550;
-  line-height: 1.45;
-  letter-spacing: -0.04em;
-  margin-top: 14px;
-}
-.k-reader__reference header p {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 10px;
-}
-.k-reader__reference ul {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  min-height: 0;
-  scrollbar-width: thin;
-  padding-right: 8px;
-  margin-right: -8px;
-}
-.k-reader__reference li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(72px, 0.8fr);
-  gap: 20px;
-  border-bottom: 1px solid var(--line);
-  padding: 13px 0;
-  font-size: 13px;
-  line-height: 1.85;
-}
-.k-reader__reference li:last-child {
-  border: 0;
-}
-.k-reader__reference li > span {
-  overflow-wrap: anywhere;
-}
-.k-reader__reference li > span:last-child {
-  color: var(--muted);
-  text-align: right;
-}
-.k-reader__reference-foot {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 16px;
-  padding-top: 18px;
-  margin-top: 6px;
-  border-top: 1px solid var(--line);
-  font-size: 10px;
-  color: var(--muted);
-}
-.k-reader__reference-foot > span {
-  white-space: nowrap;
 }
 .k-reader__footer {
   border-top: 1px solid var(--line);
@@ -355,16 +269,6 @@
   }
   .k-reader__visual .k-photo {
     max-height: min(52dvh, calc(100dvh - 280px));
-  }
-  .k-reader__reference {
-    padding: 22px;
-  }
-  .k-reader__reference h2 {
-    font-size: 22px;
-    margin-top: 10px;
-  }
-  .k-reader__reference > header {
-    padding-bottom: 14px;
   }
 }
 @media (max-width: 1100px) and (min-width: 901px) {
@@ -436,13 +340,6 @@
   .k-reader__visual .k-photo {
     max-height: none;
   }
-  .k-reader__reference {
-    max-height: none;
-    padding: 24px;
-  }
-  .k-reader__reference ul {
-    overflow: visible;
-  }
   .k-reader__position > .label {
     display: none;
   }
@@ -496,12 +393,6 @@
   }
   .k-reader__visual figcaption > .label {
     font-size: 7px;
-  }
-  .k-reader__reference {
-    padding: 22px;
-  }
-  .k-reader__reference h2 {
-    font-size: 23px;
   }
   .k-reader__footer {
     padding-inline: 20px;

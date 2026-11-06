@@ -103,6 +103,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   --recipe-nav-height: 74px;
+  top: var(--header-h);
   min-height: var(--recipe-nav-height);
   padding-block: 0;
   gap: 32px;
@@ -167,7 +168,7 @@
   column-gap: clamp(20px, 2.5vw, 36px);
   padding-block: 68px;
   align-items: start;
-  scroll-margin-top: 98px;
+  scroll-margin-top: calc(var(--header-h) + 98px);
 }
 .k-detail-content .k-detail-section > :not(.k-section-title) {
   grid-column: 2;
@@ -175,7 +176,7 @@
 }
 .k-detail-content .k-section-title {
   position: sticky;
-  top: 102px;
+  top: calc(var(--header-h) + 102px);
   align-self: start;
   min-width: 0;
 }
@@ -438,7 +439,7 @@
     font-size: 12px;
   }
   .k-detail-content .k-detail-section {
-    scroll-margin-top: 82px;
+    scroll-margin-top: calc(var(--header-h) + 82px);
     padding-block: 36px;
   }
   .k-detail-content .k-section-title h2 {

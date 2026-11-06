@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { LetterLink } from '../components/LetterLink'
+import { Header } from '../components/Header'
 import { Footer } from '../components/Footer'
 import { Cursor } from '../components/Cursor'
 import { useReducedMotion } from '../hooks/useReducedMotion'
@@ -12,7 +12,7 @@ import { RecipeView } from './RecipeView'
 import { Reader } from './Reader'
 import { readUser, updateUser } from './storage'
 import type { Recipe, UserData } from './types'
-import { Empty, Flip, RollingText } from './ui'
+import { Empty, Flip } from './ui'
 
 function currentRoute() {
   return window.location.hash.startsWith('#/')
@@ -27,10 +27,10 @@ function decode(value = '') {
   }
 }
 const navItems = [
-  ['/discover', '01', '找菜', 'FIND'],
-  ['/favorites', '02', '收藏', 'SAVE'],
-  ['/mine', '03', '我的菜谱', 'WRITE'],
-  ['/profile', '04', '我的厨房', 'KITCHEN'],
+  { href: '/discover', zh: '找菜', en: 'FIND' },
+  { href: '/favorites', zh: '收藏', en: 'SAVE' },
+  { href: '/mine', zh: '我的菜谱', en: 'WRITE' },
+  { href: '/profile', zh: '我的厨房', en: 'KITCHEN' },
 ]
 
 export default function KitchenApp() {
@@ -290,53 +290,15 @@ export default function KitchenApp() {
         >
           跳到主要内容
         </a>
-        <Cursor reduced={reduced} />
+        <Cursor reduced={reduced} variant="online" />
         {!reader && (
-          <header className="k-header">
-            <a
-              className="k-brand"
-              href="../index.html"
-              onClick={(e) => {
-                if (guard.current?.() === false) e.preventDefault()
-              }}
-            >
-              <span className="k-seal" aria-hidden="true">
-                炊
-              </span>
-              <span>
-                DEEPCOOK<small>THE ONLINE EDITION</small>
-              </span>
-            </a>
-            <nav aria-label="主导航">
-              {navItems.map(([path, number, label, en]) => (
-                <a
-                  key={path}
-                  href={`#${path}`}
-                  className="letter-link"
-                  aria-current={selectedNav === path ? 'page' : undefined}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    go(path!)
-                  }}
-                >
-                  <span className="label">
-                    {number} / {en}
-                  </span>
-                  <span className="k-nav-text">
-                    <span className="sr-only">{label}</span>
-                    <RollingText text={label!} />
-                    <span aria-hidden="true">↗</span>
-                  </span>
-                </a>
-              ))}
-            </nav>
-            <LetterLink
-              className="k-home-link"
-              text="官网首页"
-              href="../index.html"
-              arrow
-            />
-          </header>
+          <Header
+            edition={{
+              items: navItems,
+              activeHref: selectedNav,
+              onNavigate: go,
+            }}
+          />
         )}
         {storageError && (
           <div className="k-storage-alert" role="alert">

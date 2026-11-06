@@ -95,96 +95,6 @@
   min-height: 44px;
   letter-spacing: 0.08em;
 }
-.k-header {
-  padding: 0 clamp(24px, 4vw, 72px);
-  display: grid;
-  grid-template-columns: minmax(190px, 1fr) minmax(400px, 1.6fr) minmax(
-      120px,
-      1fr
-    );
-  align-items: center;
-  gap: 36px;
-  background: #16130d;
-  color: #f3ede0;
-  min-height: 112px;
-}
-.k-brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  font: 750 24px/1 var(--font-display);
-  letter-spacing: -0.04em;
-  width: fit-content;
-}
-.k-brand small {
-  display: block;
-  font: 450 8px/1 var(--font-display);
-  letter-spacing: 0.2em;
-  margin-top: 8px;
-}
-.k-seal {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 40px;
-  border: 1px solid #c8472b;
-  background: #c8472b;
-  font: 500 23px/1 var(--font-zh);
-  transform: rotate(-4deg);
-}
-.k-header nav {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  align-self: stretch;
-  gap: 28px;
-}
-.k-header nav a {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-bottom: 3px solid transparent;
-  padding: 20px 0 17px;
-  color: #a9a08d;
-  transition:
-    color 0.5s var(--ease),
-    border-color 0.5s var(--ease);
-}
-.k-header nav a[aria-current],
-.k-header nav a:hover {
-  color: #f0b41c;
-  border-bottom-color: #f0b41c;
-}
-.k-header nav .label {
-  font-size: 8px;
-  white-space: nowrap;
-  letter-spacing: 0.12em;
-  margin-bottom: 8px;
-}
-.k-nav-text {
-  font-size: 13px;
-  letter-spacing: 0.14em;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  white-space: nowrap;
-}
-.k-nav-text > span:last-child {
-  opacity: 0;
-  transform: translate(-5px, 5px);
-  transition:
-    opacity 0.4s var(--ease),
-    transform 0.5s var(--ease);
-}
-.k-header nav a:hover .k-nav-text > span:last-child,
-.k-header nav a[aria-current] .k-nav-text > span:last-child {
-  opacity: 1;
-  transform: none;
-}
-.k-home-link {
-  justify-self: end;
-  font-size: 11px;
-}
 .k-main {
   max-width: 1600px;
   padding: 0 clamp(24px, 4vw, 72px) 100px;
@@ -1126,14 +1036,6 @@
   }
 }
 @media (max-width: 1100px) {
-  .k-header {
-    grid-template-columns: 185px 1fr;
-    gap: 32px;
-    padding-inline: 32px;
-  }
-  .k-home-link {
-    display: none;
-  }
   .k-heading__aside {
     display: none;
   }
@@ -1170,31 +1072,6 @@
   }
 }
 @media (max-width: 760px) {
-  .k-header {
-    grid-template-columns: 1fr;
-    gap: 0;
-    padding: 22px 24px 0;
-  }
-  .k-brand {
-    font-size: 22px;
-  }
-  .k-header nav {
-    gap: 20px;
-    padding-top: 15px;
-  }
-  .k-header nav a {
-    padding: 14px 0 16px;
-  }
-  .k-header nav .label {
-    font-size: 7px;
-  }
-  .k-nav-text {
-    font-size: 12px;
-    letter-spacing: 0.06em;
-  }
-  .k-nav-text > span:last-child {
-    display: none;
-  }
   .k-main {
     padding: 0 24px 64px;
   }
@@ -1443,12 +1320,6 @@
   }
   .k-main {
     padding-inline: 18px;
-  }
-  .k-header {
-    padding-inline: 18px;
-  }
-  .k-header nav {
-    gap: 14px;
   }
   .k-card__cover-meta {
     font-size: 7px;

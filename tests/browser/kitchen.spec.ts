@@ -427,7 +427,7 @@ test('online footer reuses the homepage footer and keeps app navigation intact',
   ).toEqual(onlineStyle)
 })
 
-test('cursor dot and ring stay concentric while moving and resizing on both entries', async ({
+test('cursor ring trails the dot while moving and centers on the pointer at rest', async ({
   page,
 }) => {
   await page.addInitScript(() => sessionStorage.setItem('deepcook-intro', '1'))
@@ -460,7 +460,33 @@ test('cursor dot and ring stay concentric while moving and resizing on both entr
         }
         return values
       })
-      expect(Math.max(...distances)).toBeLessThan(0.1)
+      expect(Math.max(...distances)).toBeGreaterThan(2)
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const d = document
+                .querySelector('.cursor__dot')!
+                .getBoundingClientRect(),
+              r = document
+                .querySelector('.cursor__ring')!
+                .getBoundingClientRect()
+            return Math.max(
+              Math.abs(d.x + d.width / 2 - r.x - r.width / 2),
+              Math.abs(d.y + d.height / 2 - r.y - r.height / 2),
+            )
+          }),
+        )
+        .toBeLessThan(0.1)
+      const centers = await page.evaluate(() =>
+        ['.cursor__dot', '.cursor__ring'].map((selector) => {
+          const rect = document.querySelector(selector)!.getBoundingClientRect()
+          return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+        }),
+      )
+      for (const center of centers) {
+        expect(Math.abs(center.x - x!)).toBeLessThan(0.1)
+        expect(Math.abs(center.y - y!)).toBeLessThan(0.1)
+      }
     }
     await page.locator('header a').first().hover()
     await expect(page.locator('.cursor')).toHaveClass(/is-active/)
@@ -470,16 +496,19 @@ test('cursor dot and ring stay concentric while moving and resizing on both entr
           .locator('.cursor__ring')
           .evaluate((el) => el.getBoundingClientRect().width),
       )
-      .toBe(64)
-    const distance = await page.evaluate(() => {
-      const d = document.querySelector('.cursor__dot')!.getBoundingClientRect(),
-        r = document.querySelector('.cursor__ring')!.getBoundingClientRect()
-      return Math.hypot(
-        d.x + d.width / 2 - r.x - r.width / 2,
-        d.y + d.height / 2 - r.y - r.height / 2,
-      )
-    })
-    expect(distance).toBeLessThan(0.1)
+      .toBe(path === '/app/' ? 50 : 64)
+    const distance = () =>
+      page.evaluate(() => {
+        const d = document
+            .querySelector('.cursor__dot')!
+            .getBoundingClientRect(),
+          r = document.querySelector('.cursor__ring')!.getBoundingClientRect()
+        return Math.hypot(
+          d.x + d.width / 2 - r.x - r.width / 2,
+          d.y + d.height / 2 - r.y - r.height / 2,
+        )
+      })
+    await expect.poll(distance).toBeLessThan(0.1)
   }
 })
 
@@ -512,18 +541,21 @@ test('detail body remains centered and chapter rail sticks only inside its secti
           200,
       ),
     )
+    const stickyTop = await page
+      .locator('.site-header')
+      .evaluate((el) => Math.round(el.getBoundingClientRect().height) + 102)
     const rail = page.locator('#steps .k-section-title')
     await expect
       .poll(() =>
         rail.evaluate((el) => Math.round(el.getBoundingClientRect().top)),
       )
-      .toBe(102)
+      .toBe(stickyTop)
     await page.evaluate(() => scrollBy(0, 450))
     await expect
       .poll(() =>
         rail.evaluate((el) => Math.round(el.getBoundingClientRect().top)),
       )
-      .toBe(102)
+      .toBe(stickyTop)
     await page.evaluate(() =>
       scrollTo(
         0,
@@ -533,14 +565,14 @@ test('detail body remains centered and chapter rail sticks only inside its secti
     )
     await expect
       .poll(() => rail.evaluate((el) => el.getBoundingClientRect().bottom))
-      .toBeLessThan(102)
+      .toBeLessThan(stickyTop)
     await expect(page.locator('.k-detail-nav a[aria-current]')).toHaveText(
       '来源',
     )
   }
 })
 
-test('desktop reader fits landscape screens with side-by-side content and a scrollable material sheet', async ({
+test('desktop reader keeps steps on the left and only step images on the right', async ({
   page,
 }) => {
   test.setTimeout(90000)
@@ -561,28 +593,35 @@ test('desktop reader fits landscape screens with side-by-side content and a scro
             .querySelector('.k-reader__copy')!
             .getBoundingClientRect(),
           side = document
-            .querySelector('.k-reader__companion')!
-            .getBoundingClientRect(),
+            .querySelector('.k-reader__companion')
+            ?.getBoundingClientRect(),
           footer = document
             .querySelector('.k-reader__footer')!
             .getBoundingClientRect()
-        const list = document.querySelector('.k-reader__reference ul')
+        const stage = document
+          .querySelector('.k-reader__stage')!
+          .getBoundingClientRect()
         return {
-          horizontal: side.left > copy.right,
-          inside: copy.bottom <= footer.top && side.bottom <= footer.top,
+          horizontal: side
+            ? side.left > copy.right
+            : copy.right < stage.x + stage.width * 0.6,
+          inside:
+            copy.bottom <= footer.top && (!side || side.bottom <= footer.top),
           footer: footer.bottom <= innerHeight + 1,
           fits:
             document.documentElement.scrollWidth <= innerWidth &&
             document.documentElement.scrollHeight <= innerHeight,
-          list: list && { height: list.clientHeight, total: list.scrollHeight },
+          image: Boolean(side),
         }
       })
       expect(layout.horizontal, `${width}×${height}`).toBeTruthy()
       expect(layout.inside).toBeTruthy()
       expect(layout.footer).toBeTruthy()
       expect(layout.fits).toBeTruthy()
-      if (step === 1 && height! <= 900)
-        expect(layout.list!.total).toBeGreaterThan(layout.list!.height)
+      expect(layout.image).toBe(step === 9)
+      await expect(
+        page.locator('.k-reader__reference, .k-reader__ingredients'),
+      ).toHaveCount(0)
     }
   }
 })
@@ -617,4 +656,69 @@ test('long reader instructions scroll independently and reset when switching ste
     'aria-valuenow',
     '1',
   )
+})
+
+test('online header uses the slim homepage design with a solid background and functional mobile menu', async ({
+  page,
+}) => {
+  await open(page)
+  const header = page.locator('header.site-header')
+  await expect(header).toHaveClass(/site-header--online/)
+  await expect(header).toHaveCSS('height', '76px')
+  await expect(header).toHaveCSS('background-color', 'rgb(243, 237, 224)')
+  await page
+    .locator('.site-nav')
+    .getByRole('link', { name: '收藏', exact: true })
+    .click()
+  await expect(page).toHaveURL(/#\/favorites$/)
+  await expect(page.locator('.site-nav a[aria-current]')).toHaveAccessibleName(
+    '收藏',
+  )
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(header).toHaveCSS('height', '64px')
+  await expect(page.locator('.site-nav')).not.toBeVisible()
+  await page.getByRole('button', { name: '打开菜单' }).click()
+  await expect(page.locator('#mobile-menu')).toHaveAttribute(
+    'aria-hidden',
+    'false',
+  )
+  await page
+    .locator('.mobile-menu__link')
+    .filter({ hasText: '我的厨房' })
+    .click()
+  await expect(page).toHaveURL(/#\/profile$/)
+  await expect(page.locator('#mobile-menu')).toHaveAttribute(
+    'aria-hidden',
+    'true',
+  )
+  await expect(page.locator('body')).not.toHaveClass(/is-locked/)
+  await expect(
+    page.getByRole('heading', { name: '好好吃饭，从这里开始。' }),
+  ).toBeVisible()
+})
+
+test('mobile reader places the step above its image and never shows preparation materials', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  for (const step of [1, 9]) {
+    await open(page, `/read/braised-pork/braised-pork-s${step}`)
+    await expect(page.locator('.k-reader__instruction')).toBeVisible()
+    await expect(
+      page.locator('.k-reader__reference, .k-reader__ingredients'),
+    ).toHaveCount(0)
+    if (step === 1)
+      await expect(page.locator('.k-reader__companion')).toHaveCount(0)
+    else {
+      const positions = await page.evaluate(() => ({
+        copy: document.querySelector('.k-reader__copy')!.getBoundingClientRect()
+          .bottom,
+        photo: document
+          .querySelector('.k-reader__companion')!
+          .getBoundingClientRect().top,
+      }))
+      expect(positions.photo).toBeGreaterThan(positions.copy)
+    }
+    await expect(page.locator('.k-reader__footer')).toBeInViewport()
+  }
 })

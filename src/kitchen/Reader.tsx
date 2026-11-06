@@ -64,12 +64,6 @@ export function Reader({
       `/read/${encodeURIComponent(recipe.id)}/${encodeURIComponent(recipe.steps[n]!.id)}`,
     )
   const hasImage = Boolean(user.preferences.showStepImages && step.image)
-  const stepIngredients = recipe.ingredients.filter((i) =>
-    step.ingredientRefs?.includes(i.id),
-  )
-  const ingredients = stepIngredients.length
-    ? stepIngredients
-    : recipe.ingredients
   const stepNumber = String(index + 1).padStart(2, '0')
   const total = String(recipe.steps.length).padStart(2, '0')
 
@@ -110,7 +104,7 @@ export function Reader({
 
       <div className="k-reader__content" ref={content}>
         <div
-          className={`k-reader__stage ${hasImage ? 'k-reader__stage--photo' : 'k-reader__stage--notes'}`}
+          className={`k-reader__stage ${hasImage ? 'k-reader__stage--photo' : 'k-reader__stage--text'}`}
           key={step.id}
         >
           <article
@@ -138,23 +132,10 @@ export function Reader({
                 <p>{step.cue}</p>
               </aside>
             )}
-            {hasImage && stepIngredients.length > 0 && (
-              <div className="k-reader__ingredients">
-                <span className="label">本步骤材料</span>
-                {stepIngredients.map((i) => (
-                  <p key={i.id}>
-                    {i.name} · {i.amount}
-                  </p>
-                ))}
-              </div>
-            )}
           </article>
 
-          <aside
-            className="k-reader__companion"
-            aria-label={hasImage ? '步骤配图' : '材料参考'}
-          >
-            {hasImage ? (
+          {hasImage && (
+            <aside className="k-reader__companion" aria-label="步骤配图">
               <figure className="k-reader__visual">
                 <Photo
                   path={step.image}
@@ -168,43 +149,8 @@ export function Reader({
                   <span className="label">第 {index + 1} 步 · 步骤配图</span>
                 </figcaption>
               </figure>
-            ) : (
-              <section
-                className="k-reader__reference"
-                aria-labelledby="reader-ingredients-title"
-              >
-                <header>
-                  <span className="label">KEEP AT HAND / 手边的食材</span>
-                  <h2 id="reader-ingredients-title">
-                    {stepIngredients.length
-                      ? '这一步，要用到。'
-                      : '先备好，再从容下厨。'}
-                  </h2>
-                  <p>
-                    {stepIngredients.length
-                      ? '本步骤材料'
-                      : `原始份量 · ${recipe.servings}`}
-                  </p>
-                </header>
-                <ul
-                  tabIndex={0}
-                  aria-label={
-                    stepIngredients.length ? '本步骤材料清单' : '菜谱材料清单'
-                  }
-                >
-                  {ingredients.map((i) => (
-                    <li key={i.id}>
-                      <span>{i.name}</span>
-                      <span>{i.amount || '无'}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="k-reader__reference-foot">
-                  {recipe.title} <span>{ingredients.length} 样材料</span>
-                </p>
-              </section>
-            )}
-          </aside>
+            </aside>
+          )}
         </div>
       </div>
 
