@@ -815,115 +815,6 @@
     opacity: 0.15;
   }
 }
-.kitchen--reader .k-main {
-  max-width: none;
-  padding: 0;
-}
-.k-reader {
-  --reading-size: 25px;
-  height: 100dvh;
-  display: grid;
-  grid-template-rows: auto 2px minmax(0, 1fr) auto;
-  background: var(--paper);
-}
-.k-reader.k-reading-large {
-  --reading-size: 29px;
-}
-.k-reader.k-reading-extra {
-  --reading-size: 33px;
-}
-.k-reader__header,
-.k-reader__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding: 22px clamp(24px, 5vw, 72px);
-}
-.k-reader__header > span {
-  font-size: 13px;
-  text-align: center;
-}
-.k-reader__progress {
-  background: var(--line);
-}
-.k-reader__progress i {
-  display: block;
-  height: 2px;
-  background: var(--chili);
-  transition: width 0.7s var(--ease);
-}
-.k-reader__content {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  display: grid;
-  grid-template-columns: 22% minmax(0, 1fr);
-  gap: 5%;
-  padding: 50px max(24px, calc((100vw - 1200px) / 2));
-}
-.k-reader__number {
-  font: italic 400 clamp(100px, 19vw, 280px)/0.9 var(--font-serif);
-  color: var(--yolk);
-  padding-top: 24px;
-}
-.k-reader article {
-  max-width: 780px;
-  padding-right: 24px;
-}
-.k-reader article > .label {
-  color: var(--muted);
-}
-.k-reader h1 {
-  font-size: clamp(25px, 3.5vw, 44px);
-  font-weight: 600;
-  letter-spacing: -0.04em;
-  margin: 18px 0 28px;
-}
-.k-reader p {
-  font-size: var(--reading-size);
-  line-height: 1.85;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-}
-.k-reader .k-photo {
-  aspect-ratio: 4 / 3;
-  margin: 30px 0;
-  border-radius: 8px;
-}
-.k-reader .k-observation p {
-  font-size: calc(var(--reading-size) - 5px);
-}
-.k-reader__ingredients {
-  margin-top: 24px;
-  border-top: 1px solid var(--line);
-  padding-top: 16px;
-}
-.k-reader__ingredients p {
-  font-size: calc(var(--reading-size) - 7px);
-}
-.k-reader__footer {
-  border-top: 1px solid var(--line);
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
-}
-.k-reader__footer > .label {
-  color: var(--muted);
-}
-.k-directory button {
-  display: flex;
-  width: 100%;
-  gap: 24px;
-  text-align: left;
-  padding: 16px 8px;
-  border-bottom: 1px solid var(--line);
-  font-size: 14px;
-}
-.k-directory button[aria-current] {
-  background: var(--paper-2);
-  color: var(--chili);
-}
-.k-directory button > span {
-  font: italic 400 24px var(--font-serif);
-}
 .k-editor .k-editor-section:first-child {
   padding-top: 28px;
 }
@@ -1474,60 +1365,6 @@
   .k-observation {
     padding: 16px;
   }
-  .k-reader__header {
-    padding: 14px 20px;
-    gap: 12px;
-  }
-  .k-reader__header .k-flip {
-    font-size: 11px;
-    letter-spacing: 0;
-  }
-  .k-reader__header > span {
-    font-size: 11px;
-    max-width: 100px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-  .k-reader__content {
-    display: block;
-    padding: 24px;
-    position: relative;
-  }
-  .k-reader__number {
-    font-size: 100px;
-    padding: 0;
-    margin-bottom: 24px;
-  }
-  .k-reader article {
-    padding-right: 0;
-  }
-  .k-reader h1 {
-    font-size: 27px;
-  }
-  .k-reader {
-    --reading-size: 22px;
-  }
-  .k-reader.k-reading-large {
-    --reading-size: 26px;
-  }
-  .k-reader.k-reading-extra {
-    --reading-size: 30px;
-  }
-  .k-reader__footer {
-    padding-inline: 20px;
-    gap: 16px;
-  }
-  .k-reader__footer > .label {
-    display: none;
-  }
-  .k-reader__footer .btn {
-    padding: 0 24px;
-    min-height: 50px;
-  }
-  .k-reader__footer .k-flip {
-    font-size: 12px;
-  }
   .k-profile {
     grid-template-columns: 1fr;
     padding-bottom: 36px;
@@ -1624,7 +1461,6 @@
   .k-page {
     animation: none;
   }
-  .k-reader__progress i,
   .kitchen *,
   .kitchen *::before,
   .kitchen *::after {

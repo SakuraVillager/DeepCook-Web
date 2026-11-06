@@ -419,13 +419,11 @@ test('online footer reuses the homepage footer and keeps app navigation intact',
     'DEEPCOOK',
   )
   expect(
-    await page
-      .locator('footer.footer')
-      .evaluate((el) => ({
-        background: getComputedStyle(el).backgroundColor,
-        columns: getComputedStyle(el.querySelector('.footer__grid')!)
-          .gridTemplateColumns,
-      })),
+    await page.locator('footer.footer').evaluate((el) => ({
+      background: getComputedStyle(el).backgroundColor,
+      columns: getComputedStyle(el.querySelector('.footer__grid')!)
+        .gridTemplateColumns,
+    })),
   ).toEqual(onlineStyle)
 })
 
@@ -540,4 +538,83 @@ test('detail body remains centered and chapter rail sticks only inside its secti
       '来源',
     )
   }
+})
+
+test('desktop reader fits landscape screens with side-by-side content and a scrollable material sheet', async ({
+  page,
+}) => {
+  test.setTimeout(90000)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const [width, height] of [
+    [1024, 600],
+    [1366, 768],
+    [1440, 900],
+    [1920, 1080],
+    [2560, 1440],
+  ]) {
+    await page.setViewportSize({ width: width!, height: height! })
+    for (const step of [1, 9]) {
+      await open(page, `/read/braised-pork/braised-pork-s${step}`)
+      await expect(page.locator('.k-reader__instruction')).toBeVisible()
+      const layout = await page.evaluate(() => {
+        const copy = document
+            .querySelector('.k-reader__copy')!
+            .getBoundingClientRect(),
+          side = document
+            .querySelector('.k-reader__companion')!
+            .getBoundingClientRect(),
+          footer = document
+            .querySelector('.k-reader__footer')!
+            .getBoundingClientRect()
+        const list = document.querySelector('.k-reader__reference ul')
+        return {
+          horizontal: side.left > copy.right,
+          inside: copy.bottom <= footer.top && side.bottom <= footer.top,
+          footer: footer.bottom <= innerHeight + 1,
+          fits:
+            document.documentElement.scrollWidth <= innerWidth &&
+            document.documentElement.scrollHeight <= innerHeight,
+          list: list && { height: list.clientHeight, total: list.scrollHeight },
+        }
+      })
+      expect(layout.horizontal, `${width}×${height}`).toBeTruthy()
+      expect(layout.inside).toBeTruthy()
+      expect(layout.footer).toBeTruthy()
+      expect(layout.fits).toBeTruthy()
+      if (step === 1 && height! <= 900)
+        expect(layout.list!.total).toBeGreaterThan(layout.list!.height)
+    }
+  }
+})
+
+test('long reader instructions scroll independently and reset when switching steps', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 })
+  const response = await page.request.get('/catalog/recipes.json')
+  const catalog = (await response.json()) as {
+    id: string
+    steps: { id: string; text: string }[]
+  }[]
+  const longest = catalog
+    .flatMap((recipe) => recipe.steps.map((step) => ({ recipe, step })))
+    .sort((a, b) => b.step.text.length - a.step.text.length)[0]!
+  await open(page, `/read/${longest.recipe.id}/${longest.step.id}`)
+  const copy = page.locator('.k-reader__copy')
+  expect(
+    await copy.evaluate((el) => el.scrollHeight > el.clientHeight),
+  ).toBeTruthy()
+  await copy.hover()
+  await page.mouse.wheel(0, 700)
+  await expect
+    .poll(() => copy.evaluate((el) => el.scrollTop))
+    .toBeGreaterThan(0)
+  await expect(page.locator('.k-reader__footer')).toBeInViewport()
+  await page.getByRole('button', { name: '步骤目录 ≡' }).click()
+  await page.locator('.k-directory button').first().click()
+  await expect.poll(() => copy.evaluate((el) => el.scrollTop)).toBe(0)
+  await expect(page.locator('.k-reader__progress')).toHaveAttribute(
+    'aria-valuenow',
+    '1',
+  )
 })
