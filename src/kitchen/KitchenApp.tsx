@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LetterLink } from '../components/LetterLink'
+import { Footer } from '../components/Footer'
 import { Cursor } from '../components/Cursor'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { Browse } from './Browse'
@@ -40,11 +41,10 @@ export default function KitchenApp() {
     [ready, setReady] = useState(false),
     [storageError, setStorageError] = useState('')
   const [message, setMessage] = useState<{
-      text: string
-      undo?: () => void
-      key: number
-    } | null>(null),
-    [online, setOnline] = useState(navigator.onLine)
+    text: string
+    undo?: () => void
+    key: number
+  } | null>(null)
   const guard = useRef<(() => boolean) | null>(null),
     activeRoute = useRef(route),
     authorized = useRef(false),
@@ -171,15 +171,6 @@ export default function KitchenApp() {
       delete document.documentElement.dataset.kitchenTheme
     }
   }, [user.preferences.theme])
-  useEffect(() => {
-    const update = () => setOnline(navigator.onLine)
-    window.addEventListener('online', update)
-    window.addEventListener('offline', update)
-    return () => {
-      window.removeEventListener('online', update)
-      window.removeEventListener('offline', update)
-    }
-  }, [])
   const favorite = useCallback(
     (recipe: Recipe) => {
       let removed: UserData['favorites'][number] | undefined
@@ -357,25 +348,7 @@ export default function KitchenApp() {
             {content}
           </div>
         </main>
-        {!reader && (
-          <footer className="k-footer">
-            <span className="k-footer__word">
-              COOK <em>deeper.</em>
-            </span>
-            <div>
-              <span className="label">
-                <i className={`k-dot ${online ? '' : 'is-offline'}`} />
-                {online ? 'YOUR KITCHEN IS OPEN' : 'OFFLINE · 已缓存内容可用'}
-              </span>
-              <span className="k-fine">
-                个人记录保存在当前浏览器 · DEEPCOOK © 2026
-              </span>
-              <button className="k-text-link" onClick={() => go('/settings')}>
-                内容来源与许可 ↗
-              </button>
-            </div>
-          </footer>
-        )}
+        {!reader && <Footer homeHref="../index.html" assetPrefix="../" />}
         {message && (
           <div key={message.key} className="k-toast" role="status">
             <span>{message.text}</span>

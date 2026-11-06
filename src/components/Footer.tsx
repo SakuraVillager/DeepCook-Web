@@ -2,8 +2,17 @@ import type { MouseEvent } from 'react'
 import { navItems } from '../data/recipes'
 import { scrollToSection, scrollToTop } from '../lib/scroll'
 
-export function Footer() {
+type FooterProps = {
+  homeHref?: string
+  assetPrefix?: string
+}
+
+export function Footer({
+  homeHref = '',
+  assetPrefix = './',
+}: FooterProps = {}) {
   const go = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (homeHref) return
     event.preventDefault()
     scrollToSection(href)
   }
@@ -31,7 +40,11 @@ export function Footer() {
           <div className="footer__col">
             <h4>探索 / EXPLORE</h4>
             {navItems.map((item) => (
-              <a key={item.href} href={item.href} onClick={(event) => go(event, item.href)}>
+              <a
+                key={item.href}
+                href={`${homeHref}${item.href}`}
+                onClick={(event) => go(event, item.href)}
+              >
                 {item.zh} · {item.en}
               </a>
             ))}
@@ -39,18 +52,27 @@ export function Footer() {
 
           <div className="footer__col">
             <h4>获取 / GET</h4>
-            <a href="./download/DeepCook-0.5.1-preview.apk" download>
+            <a
+              href={`${assetPrefix}download/DeepCook-0.5.1-preview.apk`}
+              download
+            >
               下载 Android 版
             </a>
-            <a href="./app/">在线使用</a>
-            <a href="#download" onClick={(event) => go(event, '#download')}>
+            <a href={`${assetPrefix}app/`}>在线使用</a>
+            <a
+              href={`${homeHref}#download`}
+              onClick={(event) => go(event, '#download')}
+            >
               版本 v0.5.1
             </a>
           </div>
 
           <div className="footer__col">
             <h4>关于 / ABOUT</h4>
-            <a href="#next" onClick={(event) => go(event, '#next')}>
+            <a
+              href={`${homeHref}#next`}
+              onClick={(event) => go(event, '#next')}
+            >
               AI 路线
             </a>
             <span className="footer__plain">内容来源：HowToCook</span>
@@ -61,8 +83,24 @@ export function Footer() {
 
         <div className="footer__bottom">
           <span>© 2026 DEEPCOOK · 好好吃饭</span>
-          <span>菜谱内容来自 HowToCook 与 Based Cooking；照片来自 App 内置素材。</span>
-          <button className="footer__top" type="button" onClick={scrollToTop}>
+          <span>
+            菜谱内容来自 HowToCook 与 Based Cooking；照片来自 App 内置素材。
+          </span>
+          <button
+            className="footer__top"
+            type="button"
+            onClick={() => {
+              if (homeHref)
+                window.scrollTo({
+                  top: 0,
+                  behavior: matchMedia('(prefers-reduced-motion: reduce)')
+                    .matches
+                    ? 'instant'
+                    : 'smooth',
+                })
+              else scrollToTop()
+            }}
+          >
             <span>回到顶部</span>
             <span aria-hidden="true">↑</span>
           </button>

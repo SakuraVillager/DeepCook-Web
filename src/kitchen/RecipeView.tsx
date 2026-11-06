@@ -7,6 +7,36 @@ import { Empty, Flip, Modal, Photo, Star } from './ui'
 export function RecipeView({ recipe }: { recipe?: Recipe }) {
   const { go, user, commit, favorite, ready, notify } = useKitchen()
   const recorded = useRef('')
+  const [activeSection, setActiveSection] = useState('ingredients')
+  useEffect(() => {
+    if (!recipe) return
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>('.k-detail-section'),
+      )
+      const current = sections
+        .reverse()
+        .find(
+          (section) =>
+            section.getBoundingClientRect().top <=
+            Math.min(innerHeight * 0.35, 240),
+        )
+      setActiveSection(current?.id ?? 'ingredients')
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [recipe?.id])
   useEffect(() => {
     if (!recipe || !ready || recorded.current === recipe.id) return
     const timer = setTimeout(() => {
@@ -46,10 +76,28 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
         </span>
       </div>
       <div className="k-detail-hero">
-        <Photo eager path={recipe.cover} alt={recipe.title} />
+        <figure className="k-recipe-visual">
+          <Photo eager path={recipe.cover} alt={recipe.title} />
+          <figcaption>
+            <span className="k-recipe-visual__caption">
+              A little care. A better meal.
+            </span>
+            <span className="label">DEEPCOOK / RECIPE BOOK</span>
+          </figcaption>
+        </figure>
         <div className="k-detail-intro">
-          <span className="label">A RECIPE TO KEEP / 好好做一道菜</span>
+          <div className="k-recipe-eyebrow">
+            <span className="label">THE RECIPE / 好好做一道菜</span>
+            <span className="k-recipe-region">
+              {visible(recipe.region) ? recipe.region : '厨房手记'}
+            </span>
+          </div>
           <h1>{recipe.title}</h1>
+          <div className="k-recipe-tags">
+            {recipe.categories.map((category) => (
+              <span key={category}>{category}</span>
+            ))}
+          </div>
           <p>{recipe.description}</p>
           <div className="k-metadata">
             <div>
@@ -92,32 +140,50 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
               {saved ? '已收藏' : '收藏这道菜'}
             </button>
           </div>
-          <p className="k-fine">
-            {recipe.categories.join(' · ')} · 未提供的参数显示「无」
-          </p>
+          <div className="k-recipe-summary">
+            <span>
+              <b>{String(recipe.ingredients.length).padStart(2, '0')}</b> 样材料
+            </span>
+            <span>
+              <b>{String(recipe.steps.length).padStart(2, '0')}</b> 个步骤
+            </span>
+            <span className="k-recipe-summary__note">备好食材，慢慢来。</span>
+          </div>
         </div>
       </div>
       <nav className="k-detail-nav" aria-label="菜谱分段">
-        {sections.map(([id, label]) => (
-          <a
-            key={id}
-            href={`#${id}`}
-            onClick={(e) => {
-              e.preventDefault()
-              document
-                .getElementById(id!)
-                ?.scrollIntoView({
+        <span className="k-detail-nav__title">{recipe.title}</span>
+        <div className="k-detail-nav__links">
+          {sections.map(([id, label]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              aria-current={activeSection === id ? 'location' : undefined}
+              onClick={(e) => {
+                e.preventDefault()
+                document.getElementById(id!)?.scrollIntoView({
                   behavior: matchMedia('(prefers-reduced-motion: reduce)')
                     .matches
                     ? 'instant'
                     : 'smooth',
                   block: 'start',
                 })
-            }}
-          >
-            {label}
-          </a>
-        ))}
+              }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+        <Flip
+          className="k-detail-nav__reader"
+          onClick={() =>
+            go(
+              `/read/${encodeURIComponent(recipe.id)}/${encodeURIComponent(recipe.steps[0]!.id)}`,
+            )
+          }
+        >
+          分步阅读 ↗
+        </Flip>
       </nav>
       <div
         className={`k-detail-content k-reading-${user.preferences.readingSize}`}
@@ -128,14 +194,23 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
             <h2>先备好，这些。</h2>
             <p>材料用量按原文保留 · {recipe.servings}</p>
           </div>
-          <ul className="k-ingredients">
-            {recipe.ingredients.map((i) => (
-              <li key={i.id}>
-                <span>{i.name}</span>
-                <span>{i.amount || '无'}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="k-ingredient-sheet">
+            <div className="k-ingredient-sheet__head">
+              <span className="label">WHAT YOU’LL NEED</span>
+              <span>原始用量</span>
+            </div>
+            <ul className="k-ingredients">
+              {recipe.ingredients.map((i) => (
+                <li key={i.id}>
+                  <span>{i.name}</span>
+                  <span>{i.amount || '无'}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="k-ingredient-sheet__note">
+              用量与份量保留原文，未提供的参数显示「无」。
+            </p>
+          </div>
         </section>
         {lines(recipe.preparation).length > 0 && (
           <section id="preparation" className="k-detail-section">
@@ -167,7 +242,18 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
-                  <h3>{s.title}</h3>
+                  <div className="k-method__heading">
+                    <h3>{s.title}</h3>
+                    <Flip
+                      onClick={() =>
+                        go(
+                          `/read/${encodeURIComponent(recipe.id)}/${encodeURIComponent(s.id)}`,
+                        )
+                      }
+                    >
+                      放大阅读 ↗
+                    </Flip>
+                  </div>
                   <p>{s.text}</p>
                   {user.preferences.showStepImages && s.image && (
                     <Photo path={s.image} alt={`${recipe.title}，${s.title}`} />
@@ -178,15 +264,6 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
                       <p>{s.cue}</p>
                     </aside>
                   )}
-                  <Flip
-                    onClick={() =>
-                      go(
-                        `/read/${encodeURIComponent(recipe.id)}/${encodeURIComponent(s.id)}`,
-                      )
-                    }
-                  >
-                    放大阅读这一步 ↗
-                  </Flip>
                 </div>
               </li>
             ))}
@@ -210,7 +287,8 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
             <span className="label">SOURCE & CREDITS</span>
             <h2>每一道，都有来处。</h2>
           </div>
-          <div>
+          <div className="k-recipe-source-card">
+            <span className="label">FROM THE ORIGINAL / 保留每一份来处</span>
             <h3>{recipe.source.author}</h3>
             <p>{recipe.source.license}</p>
             {sourceUrl && (

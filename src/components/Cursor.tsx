@@ -17,27 +17,19 @@ export function Cursor({ reduced }: CursorProps) {
 
     document.documentElement.classList.add('has-cursor')
 
-    const dot = el.querySelector<HTMLElement>('.cursor__dot')
-    const ring = el.querySelector<HTMLElement>('.cursor__ring')
-    if (!dot || !ring) return
-
-    const dotX = gsap.quickTo(dot, 'x', { duration: 0.12, ease: 'power2.out' })
-    const dotY = gsap.quickTo(dot, 'y', { duration: 0.12, ease: 'power2.out' })
-    const ringX = gsap.quickTo(ring, 'x', { duration: 0.5, ease: 'power3.out' })
-    const ringY = gsap.quickTo(ring, 'y', { duration: 0.5, ease: 'power3.out' })
+    const moveX = gsap.quickTo(el, 'x', { duration: 0.18, ease: 'power3.out' })
+    const moveY = gsap.quickTo(el, 'y', { duration: 0.18, ease: 'power3.out' })
 
     let visible = false
 
     const onMove = (event: PointerEvent) => {
       if (!visible) {
         visible = true
-        gsap.set([dot, ring], { x: event.clientX, y: event.clientY })
+        gsap.set(el, { x: event.clientX, y: event.clientY })
         gsap.to(el, { opacity: 1, duration: 0.3 })
       }
-      dotX(event.clientX)
-      dotY(event.clientY)
-      ringX(event.clientX)
-      ringY(event.clientY)
+      moveX(event.clientX)
+      moveY(event.clientY)
 
       const target = event.target as HTMLElement | null
       const interactive = target?.closest('a, button, [data-cursor="hover"]')
@@ -55,6 +47,9 @@ export function Cursor({ reduced }: CursorProps) {
     return () => {
       window.removeEventListener('pointermove', onMove)
       document.removeEventListener('pointerleave', onLeave)
+      moveX.tween.kill()
+      moveY.tween.kill()
+      gsap.killTweensOf(el)
       document.documentElement.classList.remove('has-cursor')
     }
   }, [reduced])

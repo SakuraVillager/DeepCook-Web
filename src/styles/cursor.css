@@ -1,0 +1,56 @@
+/* Both marks share a single animated anchor; only their size changes on hover. */
+.cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  z-index: 9998;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  opacity: 0;
+}
+.cursor__dot,
+.cursor__ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.cursor__dot {
+  width: 5px;
+  height: 5px;
+  background: #fff;
+}
+.cursor__ring {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  transition:
+    width 0.35s var(--ease),
+    height 0.35s var(--ease);
+}
+.cursor.is-active .cursor__ring {
+  width: 64px;
+  height: 64px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .has-cursor,
+  .has-cursor a,
+  .has-cursor button {
+    cursor: none;
+  }
+  .has-cursor input,
+  .has-cursor textarea {
+    cursor: text;
+  }
+  .has-cursor select {
+    cursor: auto;
+  }
+}
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cursor {
+    display: none;
+  }
+}

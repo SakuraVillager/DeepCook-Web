@@ -114,4 +114,4 @@ npm run test:e2e
 
 使用已安装的 Chrome 可省略浏览器下载，例如 Linux 下运行 `CHROME_PATH=/usr/bin/google-chrome npm run test:e2e`。浏览器测试自动启动生产预览，覆盖组合搜索、收藏与撤销、阅读位置、个人菜谱编辑/删除、补全不覆盖手写资料、存储失败与草稿恢复、资料/设置、320–1440 宽度及 reduced-motion、离线重开、损坏存储保留。测试使用独立浏览器上下文。
 
-主要实现位于 `src/kitchen/`，样式位于 `src/styles/kitchen.css`；官网样式仍独立加载。`src/OnlineEdition.tsx` 是应用入口导出。
+主要实现位于 `src/kitchen/`，应用样式位于 `src/styles/kitchen.css`，详情样式位于 `src/styles/recipe.css`。详情使用左右等宽留白的三栏网格，材料、步骤、来源始终位于中央；左侧章节说明在各自区域内吸附，滚到区域末端时自然退出，窄屏改放正文上方。首页与在线版共用 `Footer`、`footer.css` 和 `cursor.css`；圆点、圆环共享同一个动画锚点，移动和悬停缩放时保持同心，其余官网样式独立加载。`src/OnlineEdition.tsx` 是应用入口导出。

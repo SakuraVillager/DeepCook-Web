@@ -295,7 +295,10 @@ test('remote prefill uses the pinned source when local content has no match', as
   browser,
 }) => {
   // Request interception must run without a service worker consuming the index.
-  const context = await browser.newContext({ serviceWorkers: 'block', baseURL: 'http://127.0.0.1:4173' })
+  const context = await browser.newContext({
+    serviceWorkers: 'block',
+    baseURL: 'http://127.0.0.1:4173',
+  })
   const page = await context.newPage()
   let requested = ''
   await page.route('**/catalog/howtocook_index.json', (route) =>
@@ -383,4 +386,158 @@ test('uploaded cover and cropped avatar survive a browser reload', async ({
     'src',
     /^data:image\/jpeg/,
   )
+})
+
+test('online footer reuses the homepage footer and keeps app navigation intact', async ({
+  page,
+}) => {
+  await open(page, '/recipe/braised-pork')
+  const footer = page.locator('footer.footer')
+  await expect(footer.locator('.footer__word')).toHaveText('DEEPCOOK')
+  await expect(
+    footer.getByRole('link', { name: '下载 Android 版' }),
+  ).toHaveAttribute('href', '../download/DeepCook-0.5.1-preview.apk')
+  await expect(
+    footer.getByRole('link', { name: '在线使用', exact: true }),
+  ).toHaveAttribute('href', '../app/')
+  await expect(footer.getByRole('link', { name: 'AI 路线' })).toHaveAttribute(
+    'href',
+    '../index.html#next',
+  )
+  const expectedRoute = page.url()
+  await footer.getByRole('button', { name: '回到顶部' }).click()
+  await expect(page).toHaveURL(expectedRoute)
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0)
+  const onlineStyle = await footer.evaluate((el) => ({
+    background: getComputedStyle(el).backgroundColor,
+    columns: getComputedStyle(el.querySelector('.footer__grid')!)
+      .gridTemplateColumns,
+  }))
+  await page.evaluate(() => sessionStorage.setItem('deepcook-intro', '1'))
+  await page.goto('/')
+  await expect(page.locator('footer.footer .footer__word')).toHaveText(
+    'DEEPCOOK',
+  )
+  expect(
+    await page
+      .locator('footer.footer')
+      .evaluate((el) => ({
+        background: getComputedStyle(el).backgroundColor,
+        columns: getComputedStyle(el.querySelector('.footer__grid')!)
+          .gridTemplateColumns,
+      })),
+  ).toEqual(onlineStyle)
+})
+
+test('cursor dot and ring stay concentric while moving and resizing on both entries', async ({
+  page,
+}) => {
+  await page.addInitScript(() => sessionStorage.setItem('deepcook-intro', '1'))
+  for (const path of ['/app/', '/']) {
+    await page.goto(path)
+    await page.mouse.move(120, 260)
+    await expect(page.locator('.cursor')).toHaveCSS('opacity', '1')
+    for (const [x, y] of [
+      [700, 420],
+      [330, 220],
+      [850, 510],
+    ]) {
+      await page.mouse.move(x!, y!)
+      const distances = await page.evaluate(async () => {
+        const values: number[] = []
+        for (let i = 0; i < 6; i++) {
+          await new Promise(requestAnimationFrame)
+          const dot = document
+              .querySelector('.cursor__dot')!
+              .getBoundingClientRect(),
+            ring = document
+              .querySelector('.cursor__ring')!
+              .getBoundingClientRect()
+          values.push(
+            Math.hypot(
+              dot.x + dot.width / 2 - ring.x - ring.width / 2,
+              dot.y + dot.height / 2 - ring.y - ring.height / 2,
+            ),
+          )
+        }
+        return values
+      })
+      expect(Math.max(...distances)).toBeLessThan(0.1)
+    }
+    await page.locator('header a').first().hover()
+    await expect(page.locator('.cursor')).toHaveClass(/is-active/)
+    await expect
+      .poll(() =>
+        page
+          .locator('.cursor__ring')
+          .evaluate((el) => el.getBoundingClientRect().width),
+      )
+      .toBe(64)
+    const distance = await page.evaluate(() => {
+      const d = document.querySelector('.cursor__dot')!.getBoundingClientRect(),
+        r = document.querySelector('.cursor__ring')!.getBoundingClientRect()
+      return Math.hypot(
+        d.x + d.width / 2 - r.x - r.width / 2,
+        d.y + d.height / 2 - r.y - r.height / 2,
+      )
+    })
+    expect(distance).toBeLessThan(0.1)
+  }
+})
+
+test('detail body remains centered and chapter rail sticks only inside its section', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const width of [1024, 1440]) {
+    await page.setViewportSize({ width, height: 1000 })
+    await open(page, '/recipe/braised-pork')
+    await expect(page.locator('.k-method')).toBeVisible()
+    const centers = await page.evaluate(() =>
+      [
+        ...document.querySelectorAll(
+          '.k-detail-section > :not(.k-section-title)',
+        ),
+      ].map((el) => {
+        const rect = el.getBoundingClientRect()
+        return Math.abs(
+          rect.x + rect.width / 2 - document.documentElement.clientWidth / 2,
+        )
+      }),
+    )
+    expect(Math.max(...centers)).toBeLessThan(1)
+    await page.evaluate(() =>
+      scrollTo(
+        0,
+        document.getElementById('steps')!.getBoundingClientRect().top +
+          scrollY +
+          200,
+      ),
+    )
+    const rail = page.locator('#steps .k-section-title')
+    await expect
+      .poll(() =>
+        rail.evaluate((el) => Math.round(el.getBoundingClientRect().top)),
+      )
+      .toBe(102)
+    await page.evaluate(() => scrollBy(0, 450))
+    await expect
+      .poll(() =>
+        rail.evaluate((el) => Math.round(el.getBoundingClientRect().top)),
+      )
+      .toBe(102)
+    await page.evaluate(() =>
+      scrollTo(
+        0,
+        document.getElementById('source')!.getBoundingClientRect().top +
+          scrollY,
+      ),
+    )
+    await expect
+      .poll(() => rail.evaluate((el) => el.getBoundingClientRect().bottom))
+      .toBeLessThan(102)
+    await expect(page.locator('.k-detail-nav a[aria-current]')).toHaveText(
+      '来源',
+    )
+  }
 })
