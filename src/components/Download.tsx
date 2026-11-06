@@ -62,8 +62,8 @@ export function Download() {
             <div>
               <h3>不装，也能用。</h3>
               <p>
-                在线版正在准备中。入口已经留好，厨房收拾完就开火。
-                现在打开可以先看到我们的准备进度。
+                494 道菜谱，打开浏览器就能翻阅、搜索和分步阅读。
+                收藏好菜，也写下自己的拿手菜。
               </p>
               <span className="btn btn--ghost">
                 在线使用
@@ -72,7 +72,7 @@ export function Download() {
             </div>
             <div className="download-card__bottom">
               <div className="download-card__meta">
-                ONLINE · BETA PREP
+                ONLINE · BETA
                 <br />
                 无需安装 · 浏览器直接打开
               </div>

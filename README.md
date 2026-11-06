@@ -1,17 +1,19 @@
 # DeepCook Web
 
-DeepCook 的官方网站首页。以「火候」为叙事线索，介绍 DeepCook Android 菜谱 App，提供 APK 下载与在线版入口。
+DeepCook 官网与浏览器版。首页以「火候」为叙事线索；`/app/` 提供找菜、收藏、分步阅读与个人菜谱。
 
 - 设计参考：`rerise.co` 的编辑式排版、逐字动画、翻字导航、全屏滚动叙事与慢速缓动
 - 色彩与结构为 DeepCook 重做：暖米纸、灶火黄、墨黑与橄榄绿；6 个「火候」章节
-- 内容以当前 Android 0.5.1 为准：494 道离线菜谱、搜索、烹饪模式、计时、营养/评分、收藏与自建菜谱
+- 官网保留原有介绍与 APK（0.5.1）；网页版以本地 Android 0.3.0 源码及当前工作区菜谱为功能基线，未实现的计时、营养、评分评论和 AI 不在网页版提供
 
 ## 本地运行
 
 ```powershell
-npm install
+npm ci
 npm run dev
 ```
+
+需要 Node.js 24+（测试使用原生 TypeScript 类型擦除）。
 
 开发服务器默认 `http://localhost:5173/`。首页与 `/app/` 是独立的 Vite 多页面入口，在线版复用首页字体、设计变量和逐字翻转链接，样式单独加载。
 
@@ -27,7 +29,8 @@ npm run preview
 产物在 `dist/`。部署时站点根目录即 `dist/`：
 
 - `/` → 首页
-- `/app/` → 在线版占位页
+- `/app/` → 浏览器版，内部通过 hash 路由导航，可直接刷新任意功能页
+- `/catalog/` → Android 菜谱、引用图片及来源/许可清单
 - `/download/DeepCook-0.5.1-preview.apk` → 下载文件
 - `/photos/*.jpg` → 首页使用的菜谱图
 
@@ -64,7 +67,7 @@ npm run preview
 
 ## 内容与素材
 
-- 菜谱数据与照片来自 `E:\yhz\Projects\DeepCook` 的 App 内置素材（`app/src/main/assets/photos`）。
+- 网页版菜谱数据与图片从 `~/DeepCook/app/src/main/assets` 当前工作区只读复制，包含本地尚未提交的菜谱及图片；不执行 fetch/pull，不修改 Android 工程。
 - 菜谱内容来源：HowToCook（Unlicense）、Based Cooking（Unlicense）；部分图片来自 FoodiesFeed（CC0 等效）。
 - 首页营养数值、评分、评论均为 App 中的**示例数据**，页面已明确标注。
 - APK 为 `artifacts/DeepCook-0.5.1-preview.apk` 的副本，使用本机 Debug 签名，仅用于体验。
@@ -72,9 +75,43 @@ npm run preview
 ## 更新下载版本
 
 1. 用新的 Preview APK 替换 `public/download/DeepCook-0.5.1-preview.apk`（或改名）。
-2. 同步修改首页 Hero、下载卡片、Footer 与 `src/OnlineEdition.tsx` 中的版本号、大小与链接。
+2. 同步修改首页 Hero、下载卡片与 Footer 中的版本号、大小与链接。
 3. 如需更新菜谱截图，从 App assets 复制到 `public/photos/`，并在 `src/data/recipes.ts` 中更新封面路径。
 
-## 范围说明
+## 浏览器版
 
-本轮只实现**官网首页**。在线版本身尚未实现，`/app/` 是设计好的占位入口；AI 功能也尚未在 App 中提供，首页第 06 段仅为路线说明。
+沿用首页设计变量、Archivo / Instrument Serif / Noto Sans SC 字体、米纸/墨黑/暖黄/橄榄绿、大字、细线、图片卡轨和逐字翻转。应用内容采用响应式网格和自然滚动，长菜谱不放进固定高度缩放画布；分步阅读使用全屏布局、固定顶部进度和底部翻步，中间独立滚动。应用不启用 Lenis，确保长列表、表单和键盘滚动正常。
+
+- 找菜：494 道内置菜谱、6 道精选；多词全部匹配，搜索菜名/地域/分类/原名别名/材料；250 ms 防抖，分类/用时/难度组合筛选；恢复搜索条件与列表展开数量。
+- 详情：封面、原文份量、材料、准备、步骤图片与观察提示、注意事项、分段跳转和来源。缺失参数显示「无」，不推测。
+- 阅读：任意步骤进入、目录跳转、前后翻步、刷新恢复；返回详情定位当前步骤；设置中可启用浏览器 Screen Wake Lock（支持时）。
+- 收藏：倒序、取消和撤销；最近浏览去重，最多 50 条，可逐条删除或清空。
+- 个人菜谱：新建、编辑、删除，封面上传；材料、步骤增删与步骤排序；保留编辑 ID；保存完成后退出。IndexedDB 事务失败保留输入，损坏记录保留原数据并提示重试；编辑草稿通过 sessionStorage 在当前标签页恢复。
+- 资料补全：复用本地菜谱优先，未命中时才查询随包索引对应的固定 HowToCook commit；失败可重试或手填。只填空白字段，保留手写内容和来源。远程原文请求依赖访问 GitHub 的网络与 CORS。
+- 我的厨房：昵称、相册头像与方形内容裁剪，喜欢/忌口互斥标签。偏好仅记录，尚不参与搜索推荐。
+- 设置：跟随系统/明暗模式、三档阅读字号、步骤图、阅读常亮；分项清理收藏、历史或显示/阅读设置；来源和许可。网页使用固定品牌色，不映射 Android 动态色。
+
+个人数据保存在当前浏览器 IndexedDB，不提供账号、云同步或跨设备共享；清理站点数据会移除个人记录。多个标签页的写入通过读写事务串行处理，用 BroadcastChannel 刷新其他标签页状态。
+
+生产构建在 `/app/` 范围注册 Service Worker：首次联网访问后缓存应用入口、加载过的脚本/样式/字体和菜谱 JSON；图片按需缓存，最多 160 个资源。再次离线打开可浏览完整文本目录，未缓存或被淘汰的图片显示占位。需要 HTTPS 或 localhost；开发模式不注册。官网首页不在 Service Worker 控制范围内。
+
+### 同步 Android 内容
+
+```bash
+python3 tools/sync-catalog.py ~/DeepCook
+```
+
+脚本复制原始 recipes.json、806 个当前引用图片（494 张封面 + 312 张步骤图），以及来源索引、图片清单、许可文件。保留原始目录（含嵌套路径）、ID 和内容，不下载或重建菜谱。数据和图片原样复制，因此完整静态产物约 200 MB；图片在页面中延迟加载。修改源内容后重新同步并运行测试。
+
+### 验证
+
+```bash
+npm test
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+
+使用已安装的 Chrome 可省略浏览器下载，例如 Linux 下运行 `CHROME_PATH=/usr/bin/google-chrome npm run test:e2e`。浏览器测试自动启动生产预览，覆盖组合搜索、收藏与撤销、阅读位置、个人菜谱编辑/删除、补全不覆盖手写资料、存储失败与草稿恢复、资料/设置、320–1440 宽度及 reduced-motion、离线重开、损坏存储保留。测试使用独立浏览器上下文。
+
+主要实现位于 `src/kitchen/`，样式位于 `src/styles/kitchen.css`；官网样式仍独立加载。`src/OnlineEdition.tsx` 是应用入口导出。
