@@ -4,6 +4,7 @@ import { Footer } from '../components/Footer'
 import { Cursor } from '../components/Cursor'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { Browse } from './Browse'
+import { CatalogLoader } from './CatalogLoader'
 import { Kitchen } from './context'
 import { emptyUser, publicUrl, validRecipe } from './domain'
 import { Editor } from './Editor'
@@ -52,6 +53,8 @@ export default function KitchenApp() {
     positions = useRef(new Map<string, number>()),
     main = useRef<HTMLElement>(null)
   const reduced = useReducedMotion()
+  const [introDone, setIntroDone] = useState(false)
+  const finishIntro = useCallback(() => setIntroDone(true), [])
   const pendingWrites = useRef(0)
   useEffect(() => {
     const beforeUnload = (event: BeforeUnloadEvent) => {
@@ -75,6 +78,7 @@ export default function KitchenApp() {
   }, [message])
   const loadCatalog = useCallback(async () => {
     setLoading(true)
+    setIntroDone(false)
     setCatalogError('')
     try {
       const response = await fetch(publicUrl('catalog/recipes.json'))
@@ -229,14 +233,7 @@ export default function KitchenApp() {
   }, [page, recipe?.title])
   let content
   if (loading)
-    content = (
-      <div className="k-loading" role="status">
-        <span className="label">PREPARING YOUR KITCHEN</span>
-        <p>
-          正在翻开菜谱<span>…</span>
-        </p>
-      </div>
-    )
+    content = <div className="k-loading-placeholder" aria-hidden="true" />
   else if (catalogError)
     content = (
       <Empty title="厨房还在准备中。" text={catalogError}>
@@ -279,59 +276,71 @@ export default function KitchenApp() {
     <Kitchen.Provider
       value={{ catalog, user, ready, commit, go, notify, favorite, guard }}
     >
-      <div className={`kitchen ${reader ? 'kitchen--reader' : ''}`}>
-        <a
-          className="skip-link"
-          href="#kitchen-main"
-          onClick={(e) => {
-            e.preventDefault()
-            main.current?.focus()
-          }}
+      <>
+        <div
+          className={`kitchen ${reader ? 'kitchen--reader' : ''}`}
+          inert={!introDone}
         >
-          跳到主要内容
-        </a>
-        <Cursor reduced={reduced} variant="online" />
-        {!reader && (
-          <Header
-            edition={{
-              items: navItems,
-              activeHref: selectedNav,
-              onNavigate: go,
+          <a
+            className="skip-link"
+            href="#kitchen-main"
+            onClick={(e) => {
+              e.preventDefault()
+              main.current?.focus()
             }}
+          >
+            跳到主要内容
+          </a>
+          <Cursor reduced={reduced} />
+          {!reader && (
+            <Header
+              edition={{
+                items: navItems,
+                activeHref: selectedNav,
+                onNavigate: go,
+              }}
+            />
+          )}
+          {storageError && (
+            <div className="k-storage-alert" role="alert">
+              <span>{storageError} 仍可浏览内置菜谱。</span>
+              <Flip onClick={() => void loadUser()}>重试 ↗</Flip>
+            </div>
+          )}
+          <main className="k-main" id="kitchen-main" tabIndex={-1} ref={main}>
+            <div key={reader ? 'reader' : route} className="k-page">
+              {content}
+            </div>
+          </main>
+          {!reader && <Footer homeHref="../index.html" assetPrefix="../" />}
+          {message && (
+            <div key={message.key} className="k-toast" role="status">
+              <span>{message.text}</span>
+              {message.undo && (
+                <button
+                  onClick={() => {
+                    message.undo?.()
+                    setMessage(null)
+                  }}
+                >
+                  撤销
+                </button>
+              )}
+              <button aria-label="关闭提示" onClick={() => setMessage(null)}>
+                ×
+              </button>
+            </div>
+          )}
+          <div className="grain" aria-hidden="true" />
+        </div>
+        {!introDone && (
+          <CatalogLoader
+            ready={!loading}
+            reduced={reduced}
+            onDone={finishIntro}
           />
         )}
-        {storageError && (
-          <div className="k-storage-alert" role="alert">
-            <span>{storageError} 仍可浏览内置菜谱。</span>
-            <Flip onClick={() => void loadUser()}>重试 ↗</Flip>
-          </div>
-        )}
-        <main className="k-main" id="kitchen-main" tabIndex={-1} ref={main}>
-          <div key={reader ? 'reader' : route} className="k-page">
-            {content}
-          </div>
-        </main>
-        {!reader && <Footer homeHref="../index.html" assetPrefix="../" />}
-        {message && (
-          <div key={message.key} className="k-toast" role="status">
-            <span>{message.text}</span>
-            {message.undo && (
-              <button
-                onClick={() => {
-                  message.undo?.()
-                  setMessage(null)
-                }}
-              >
-                撤销
-              </button>
-            )}
-            <button aria-label="关闭提示" onClick={() => setMessage(null)}>
-              ×
-            </button>
-          </div>
-        )}
-        <div className="grain" aria-hidden="true" />
-      </div>
+      </>
     </Kitchen.Provider>
   )
 }

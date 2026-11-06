@@ -708,23 +708,6 @@
   justify-content: center;
   gap: 24px;
 }
-.k-loading {
-  padding: 120px 0;
-}
-.k-loading > p {
-  font-size: clamp(32px, 5vw, 64px);
-  margin-top: 32px;
-  font-weight: 700;
-  letter-spacing: -0.05em;
-}
-.k-loading > p > span {
-  animation: kitchen-pulse 1s infinite alternate;
-}
-@keyframes kitchen-pulse {
-  to {
-    opacity: 0.15;
-  }
-}
 .k-editor .k-editor-section:first-child {
   padding-top: 28px;
 }

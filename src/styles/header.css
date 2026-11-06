@@ -234,13 +234,6 @@
 .site-header--online .site-nav a[aria-current] {
   color: var(--chili);
 }
-.site-header--online .site-nav a[aria-current]::after {
-  content: '';
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: currentColor;
-}
 @media (max-width: 899px) {
   :root {
     --header-h: 64px;

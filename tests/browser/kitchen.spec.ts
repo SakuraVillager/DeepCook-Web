@@ -496,7 +496,8 @@ test('cursor ring trails the dot while moving and centers on the pointer at rest
           .locator('.cursor__ring')
           .evaluate((el) => el.getBoundingClientRect().width),
       )
-      .toBe(path === '/app/' ? 50 : 64)
+      .toBe(64)
+    await expect(page.locator('.cursor__dot')).toHaveCSS('opacity', '0')
     const distance = () =>
       page.evaluate(() => {
         const d = document
@@ -509,6 +510,8 @@ test('cursor ring trails the dot while moving and centers on the pointer at rest
         )
       })
     await expect.poll(distance).toBeLessThan(0.1)
+    await page.locator('h1').first().hover()
+    await expect(page.locator('.cursor__dot')).toHaveCSS('opacity', '1')
   }
 })
 
@@ -674,6 +677,11 @@ test('online header uses the slim homepage design with a solid background and fu
   await expect(page.locator('.site-nav a[aria-current]')).toHaveAccessibleName(
     '收藏',
   )
+  expect(
+    await page
+      .locator('.site-nav a[aria-current]')
+      .evaluate((el) => getComputedStyle(el, '::after').content),
+  ).toBe('none')
   await page.setViewportSize({ width: 390, height: 844 })
   await expect(header).toHaveCSS('height', '64px')
   await expect(page.locator('.site-nav')).not.toBeVisible()
@@ -720,5 +728,95 @@ test('mobile reader places the step above its image and never shows preparation 
       expect(positions.photo).toBeGreaterThan(positions.copy)
     }
     await expect(page.locator('.k-reader__footer')).toBeInViewport()
+  }
+})
+
+test('catalog opening animation stays readable and does not replay on internal navigation', async ({
+  page,
+}) => {
+  const started = Date.now()
+  await page.goto('/app/', { waitUntil: 'domcontentloaded' })
+  const loader = page.locator('.k-loading')
+  await expect(loader).toBeVisible()
+  await expect(loader.locator('.k-loading__title')).toHaveText('正在翻开菜谱。')
+  await expect(page.locator('.kitchen')).toHaveAttribute('inert', '')
+  await page.waitForTimeout(650)
+  await expect(loader).toBeVisible()
+  await expect(loader).toHaveCount(0, { timeout: 10000 })
+  expect(Date.now() - started).toBeGreaterThanOrEqual(1600)
+  await expect(page.locator('.k-count')).toHaveText('494')
+  await page
+    .locator('.site-nav')
+    .getByRole('link', { name: '收藏', exact: true })
+    .click()
+  await expect(page).toHaveURL(/#\/favorites$/)
+  await expect(loader).toHaveCount(0)
+})
+
+test('catalog opening waits for actual data and reduced motion skips the timed transition', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    baseURL: 'http://127.0.0.1:4173',
+    serviceWorkers: 'block',
+  })
+  const page = await context.newPage()
+  let release!: () => void
+  let gate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  await page.route('**/catalog/recipes.json', async (route) => {
+    await gate
+    await route.continue()
+  })
+  await page.goto('/app/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.k-loading')).toBeVisible()
+  await page.waitForTimeout(1750)
+  await expect(page.locator('.k-loading')).toBeVisible()
+  expect(
+    Number(await page.locator('.k-loading__counter > span').innerText()),
+  ).toBeLessThan(100)
+  release()
+  await expect(page.locator('.k-loading')).toHaveCount(0, { timeout: 10000 })
+  await expect(page.locator('.k-count')).toHaveText('494')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  gate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.k-loading')).toBeVisible()
+  await expect(page.locator('.k-loading__counter')).not.toBeVisible()
+  release()
+  await expect(page.locator('.k-loading')).toHaveCount(0, { timeout: 2000 })
+  await context.close()
+})
+
+test('detail navigation has no vertical scrollbar at any breakpoint', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const response = await page.request.get('/catalog/recipes.json')
+  const catalog = (await response.json()) as {
+    id: string
+    preparation: string[]
+    notes: string[]
+  }[]
+  const visible = (value: string) => value.trim() && value.trim() !== '无'
+  const recipe = catalog.find(
+    (r) => r.preparation.some(visible) && r.notes.some(visible),
+  )!
+  for (const width of [320, 390, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 844 })
+    await open(page, `/recipe/${recipe.id}`)
+    const nav = page.locator('.k-detail-nav')
+    const box = await nav.evaluate((el) => ({
+      vertical: el.scrollHeight - el.clientHeight,
+      scrollbar: el.getBoundingClientRect().width - el.clientWidth,
+      overflow: getComputedStyle(el).overflowY,
+    }))
+    expect(box.vertical).toBeLessThanOrEqual(1)
+    expect(box.scrollbar).toBeLessThanOrEqual(2)
+    expect(box.overflow).toBe('visible')
+    await expect(page.locator('.site-nav a[aria-current]')).toHaveCount(0)
   }
 })

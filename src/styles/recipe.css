@@ -100,6 +100,7 @@
   margin-left: auto;
 }
 .k-detail-nav {
+  overflow: visible;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   --recipe-nav-height: 74px;
@@ -433,7 +434,14 @@
   }
   .k-detail-nav__links {
     gap: 26px;
-    justify-content: center;
+    justify-content: safe center;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .k-detail-nav__links::-webkit-scrollbar {
+    display: none;
   }
   .k-detail-nav a {
     font-size: 12px;

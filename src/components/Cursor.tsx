@@ -3,10 +3,9 @@ import gsap from 'gsap'
 
 type CursorProps = {
   reduced: boolean
-  variant?: 'home' | 'online'
 }
 
-export function Cursor({ reduced, variant = 'home' }: CursorProps) {
+export function Cursor({ reduced }: CursorProps) {
   const root = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -68,7 +67,7 @@ export function Cursor({ reduced, variant = 'home' }: CursorProps) {
   if (reduced) return null
 
   return (
-    <div className={`cursor cursor--${variant}`} ref={root} aria-hidden="true">
+    <div className="cursor" ref={root} aria-hidden="true">
       <span className="cursor__anchor cursor__anchor--ring">
         <span className="cursor__ring" />
       </span>
