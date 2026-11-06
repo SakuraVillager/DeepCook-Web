@@ -1,29 +1,18 @@
 import type { CSSProperties } from 'react'
+import { ChapterLabel } from './ChapterLabel'
+import { DesignCanvas } from './DesignCanvas'
 
 export function Manifesto() {
   return (
-    <section className="section manifesto" id="manifesto" data-theme="light">
-      <div className="container">
-        <div className="manifesto__top">
-          <div>
-            <div className="manifesto__index" aria-hidden="true">
-              01
-            </div>
-            <div style={{ marginTop: 26 }}>
-              <span className="heat-tag">文火 · SIMMER</span>
-            </div>
-          </div>
-
+    <section className="section chapter canvas-page manifesto" id="manifesto" data-theme="light">
+      <DesignCanvas className="container chapter__canvas" label="产品理念画布">
+        <ChapterLabel index="01" title="MANIFESTO" heat="文火 · SIMMER" />
+        <div className="manifesto__editorial">
           <h2 className="manifesto__title" data-reveal>
             菜谱不该只是
             <br />
             一张<span className="mark">说明书</span>。
           </h2>
-        </div>
-
-        <div className="manifesto__body">
-          <div />
-
           <div className="manifesto__copy">
             <p data-reveal style={{ '--reveal-delay': '60ms' } as CSSProperties}>
               大多数菜谱只告诉你放多少盐，却不说为什么要等水开、为什么要大火收汁。
@@ -34,7 +23,6 @@ export function Manifesto() {
               也只留在你自己的手机里。
             </p>
           </div>
-
           <aside className="manifesto__aside" data-reveal>
             <strong>KITCHEN NOTE 01</strong>
             会做一道菜，不是背下一张配方，而是看懂它的火候。等水开、把肉煎透、让糖色刚好——
@@ -70,7 +58,7 @@ export function Manifesto() {
             </div>
           </div>
         </div>
-      </div>
+      </DesignCanvas>
     </section>
   )
 }

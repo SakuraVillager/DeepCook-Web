@@ -1,21 +1,35 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { cookSteps } from '../data/recipes'
+import { ChapterLabel } from './ChapterLabel'
+import { DesignCanvas } from './DesignCanvas'
 
 export function Cook() {
   const [active, setActive] = useState(0)
-  const panel = useRef<HTMLDivElement>(null)
-  const steps = useRef<Array<HTMLDivElement | null>>([])
+  const reader = useRef<HTMLDivElement>(null)
+  const steps = useRef<Array<HTMLButtonElement | null>>([])
 
   useEffect(() => {
+    const viewport = reader.current
+    if (!viewport) return
     let frame = 0
 
     const update = () => {
       frame = 0
-      if (!panel.current) return
-      const bounds = panel.current.getBoundingClientRect()
-      if (bounds.bottom < window.innerHeight * 0.15 || bounds.top > window.innerHeight) return
+      const bounds = viewport.getBoundingClientRect()
+      if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return
 
-      const focus = window.innerHeight * 0.52
+      if (viewport.scrollTop <= 1) {
+        setActive(0)
+        return
+      }
+      if (viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 1) {
+        setActive(cookSteps.length - 1)
+        return
+      }
+
+      const visibleTop = Math.max(0, bounds.top)
+      const visibleBottom = Math.min(window.innerHeight, bounds.bottom)
+      const focus = (visibleTop + visibleBottom) / 2
       let best = 0
       let distance = Number.POSITIVE_INFINITY
 
@@ -39,10 +53,15 @@ export function Cook() {
     }
 
     update()
+    const observer = new ResizeObserver(onScroll)
+    observer.observe(viewport)
+    viewport.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
 
     return () => {
+      observer.disconnect()
+      viewport.removeEventListener('scroll', onScroll)
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
       if (frame) window.cancelAnimationFrame(frame)
@@ -50,22 +69,18 @@ export function Cook() {
   }, [])
 
   return (
-    <section className="section cook" id="cook" data-theme="light">
-      <div className="container">
+    <section className="section chapter canvas-page cook" id="cook" data-theme="light">
+      <DesignCanvas className="container chapter__canvas" label="烹饪模式画布">
+        <ChapterLabel index="03" title="COOK" heat="大火 · HIGH HEAT" />
         <div className="cook__grid">
           <div className="cook__left">
-            <div className="sec-head__label">
-              <span className="heat-tag">大火 · HIGH HEAT</span>
-              <span className="label">03 / COOK</span>
-            </div>
-
-            <h2 className="h2" style={{ marginTop: 28 }} data-reveal>
+            <h2 className="h2" data-reveal>
               一步一步，
               <br />
               不慌不忙。
             </h2>
 
-            <p className="body-lg" style={{ marginTop: 26, maxWidth: 440 }} data-reveal>
+            <p className="body-lg cook__description" data-reveal>
               烹饪模式把一步铺满一屏。翻步只看当前一步，步骤目录随时跳转；返回详情时，
               还会回到你刚才读到的那一步。
             </p>
@@ -95,9 +110,12 @@ export function Cook() {
             </div>
           </div>
 
-          <div className="cook__panel" ref={panel} data-reveal>
+          <div className="cook__panel" data-reveal>
             <div className="cook__panel-head">
-              <span className="label">烹饪模式 / 步骤节选</span>
+              <div>
+                <span className="label">烹饪模式 / 步骤节选</span>
+                <h3 className="cook__recipe-title">红烧肉</h3>
+              </div>
               <span className="cook__counter">
                 <b>0{active + 1}</b> / 06
               </span>
@@ -126,35 +144,46 @@ export function Cook() {
               <div className="timer__time">42:18</div>
             </div>
 
-            <div aria-label="红烧肉步骤节选">
+            <div
+              className="cook__steps"
+              ref={reader}
+              role="region"
+              aria-label="红烧肉步骤节选，可纵向滚动"
+              tabIndex={0}
+              data-lenis-prevent
+            >
               {cookSteps.map((step, index) => (
-                <div
+                <button
+                  type="button"
                   className={`step${index === active ? ' is-active' : ''}`}
                   key={step.num}
                   ref={(node) => {
                     steps.current[index] = node
                   }}
+                  onMouseEnter={() => setActive(index)}
+                  onFocus={() => setActive(index)}
+                  onClick={() => setActive(index)}
                   aria-current={index === active ? 'step' : undefined}
                 >
-                  <div className="step__num">{step.num}</div>
-                  <div>
-                    <div className="step__title">{step.title}</div>
-                    <p className="step__text">{step.text}</p>
+                  <span className="step__num">{step.num}</span>
+                  <span className="step__copy">
+                    <span className="step__title">{step.title}</span>
+                    <span className="step__text">{step.text}</span>
                     {step.timer && (
                       <span className="step__timer">识别到 {step.timer} · 点按计时</span>
                     )}
-                  </div>
-                </div>
+                  </span>
+                </button>
               ))}
             </div>
 
             <div className="cook__foot">
-              <span>共 15 步 · 此处节选 6 步</span>
+              <span>共 15 步 · 此处节选 6 步 · 区域内滚动 ↓</span>
               <span>返回详情后定位到当前步骤</span>
             </div>
           </div>
         </div>
-      </div>
+      </DesignCanvas>
     </section>
   )
 }

@@ -13,7 +13,9 @@ npm install
 npm run dev
 ```
 
-开发服务器默认 `http://localhost:5173/`。`/app/` 由 Vite 中间件重写到 `public/app/index.html`。
+开发服务器默认 `http://localhost:5173/`。首页与 `/app/` 是独立的 Vite 多页面入口，在线版复用首页字体、设计变量和逐字翻转链接，样式单独加载。
+
+首屏 Hero 和页脚保持原始布局，不受画布约束。中间六个章节使用固定比例画布：横向 `1280 × 800`，手机竖向 `420 × 900`，短屏手机 `420 × 720`，中等宽度竖向 `800 × 900`。区域内部以百分比网格组织组件，由 `DesignCanvas` 使用 `min(可用宽度 / 设计宽度, 可用高度 / 设计高度)` 统一缩放，字体、间距和组件同步变化；窄窗口优先占满可用宽度，将多余空间留在上下。第三章烹饪模式允许在步骤阅读区内纵向滚动，标题与计时器固定，滚动到边缘不会带动外层页面；其他章节无内部纵向滚动，精选菜谱保留原有的横向浏览。画布样式在 `src/styles/canvas.css`，`useCanvasPages` 根据章节实际位置保持窗口缩放时的阅读位置。
 
 ## 构建与预览
 
@@ -70,7 +72,7 @@ npm run preview
 ## 更新下载版本
 
 1. 用新的 Preview APK 替换 `public/download/DeepCook-0.5.1-preview.apk`（或改名）。
-2. 同步修改首页 Hero、下载卡片、Footer 与 `public/app/index.html` 中的版本号、大小与链接。
+2. 同步修改首页 Hero、下载卡片、Footer 与 `src/OnlineEdition.tsx` 中的版本号、大小与链接。
 3. 如需更新菜谱截图，从 App assets 复制到 `public/photos/`，并在 `src/data/recipes.ts` 中更新封面路径。
 
 ## 范围说明

@@ -14,6 +14,7 @@ import { Footer } from './components/Footer'
 import { useReducedMotion } from './hooks/useReducedMotion'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
 import { useReveal } from './hooks/useReveal'
+import { useCanvasPages } from './hooks/useCanvasPages'
 
 function hasSeenIntro() {
   try {
@@ -31,6 +32,7 @@ export default function App() {
 
   useSmoothScroll(!reduced)
   useReveal(introDone)
+  useCanvasPages(introDone)
 
   const finishIntro = () => {
     setLoaderDone(true)

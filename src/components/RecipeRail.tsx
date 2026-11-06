@@ -139,7 +139,7 @@ export function RecipeRail() {
                       难度 <b>{recipe.difficulty}</b>
                     </span>
                   ) : null}
-                  <span style={{ marginLeft: 'auto' }}>{recipe.titleEn}</span>
+                  <span className="recipe-card__english">{recipe.titleEn}</span>
                 </div>
               </div>
             </a>

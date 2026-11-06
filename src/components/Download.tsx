@@ -1,20 +1,20 @@
+import { ChapterLabel } from './ChapterLabel'
+import { DesignCanvas } from './DesignCanvas'
+
 export function Download() {
   return (
-    <section className="section download" id="download" data-theme="light">
-      <div className="container">
+    <section className="section chapter canvas-page download" id="download" data-theme="light">
+      <DesignCanvas className="container chapter__canvas" label="下载画布">
+        <ChapterLabel index="06" title="GET IT" heat="上桌 · SERVE" />
         <div className="download__head">
           <div>
-            <div className="sec-head__label" style={{ paddingTop: 0, marginBottom: 20 }}>
-              <span className="heat-tag">上桌 · SERVE</span>
-              <span className="label">06 / GET IT</span>
-            </div>
             <h2 className="download__title" data-reveal>
               把厨房，
               <br />
               <span className="serif">装进口袋。</span>
             </h2>
           </div>
-          <p className="body-lg" style={{ maxWidth: 340 }} data-reveal>
+          <p className="body-lg download__description" data-reveal>
             装进手机，或者直接在浏览器里打开。
             两种方式，同一间厨房。
           </p>
@@ -87,7 +87,7 @@ export function Download() {
           <span>首次安装需在系统设置中允许「安装未知来源应用」。</span>
           <span>APK 使用本机 Debug 签名，仅用于体验；正式发布签名另行配置。</span>
         </div>
-      </div>
+      </DesignCanvas>
     </section>
   )
 }

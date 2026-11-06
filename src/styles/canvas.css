@@ -1,0 +1,601 @@
+/* The page is a solid-color surround. Only the complete design canvas scales. */
+.canvas-page.canvas-page {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: calc(var(--header-h) + 16px) 40px 24px;
+  display: grid;
+  place-items: center;
+  overflow: clip;
+  overflow-anchor: none;
+}
+
+.canvas-page.canvas-page--online { display: grid; padding: 24px; background: var(--paper); }
+
+.design-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.design-canvas__content {
+  --gutter: 48px;
+  --radius-card: 16px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(var(--canvas-scale));
+  transform-origin: center;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.design-canvas__content *, .design-canvas__content *::before, .design-canvas__content *::after {
+  min-width: 0;
+}
+
+.design-canvas__content .h2, .design-canvas__content .manifesto__title {
+  font-size: 64px;
+  font-weight: 750;
+  line-height: 1.14;
+  letter-spacing: -0.045em;
+}
+
+.design-canvas__content .body-lg { font-size: 17px; line-height: 1.8; }
+.design-canvas__content .label { font-size: 11px; line-height: 1.4; }
+.design-canvas__content .letter-link { font-size: 14px; }
+.design-canvas__content .btn { min-height: 54px; padding: 0 24px; font-size: 14px; }
+.design-canvas__content .arrow { width: 18px; height: 18px; }
+
+.chapter__canvas.container {
+  --chapter-line: var(--line);
+  --chapter-muted: #716958;
+  max-width: none;
+  margin: 0;
+  padding: 36px 48px;
+  display: grid;
+  grid-template-rows: 5% 92%;
+  gap: 3%;
+}
+
+.on-dark .chapter__canvas { --chapter-line: var(--line-light); --chapter-muted: rgba(243,237,224,.66); }
+.chapter__canvas > * { min-height: 0; }
+
+.chapter-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--chapter-line);
+}
+
+.chapter-label__title { color: var(--chapter-muted); }
+.chapter-label__title > span { margin-right: 12px; color: var(--ink); }
+.on-dark .chapter-label__title > span { color: var(--yolk); }
+.chapter-label .heat-tag { font-size: 11px; line-height: 1.4; }
+.chapter-heading { display: grid; grid-template-columns: 60% 35%; gap: 5%; align-items: center; }
+
+/* Keep the closing text close to the evidence, with breathing room below its rule. */
+.manifesto .chapter__canvas { grid-template-rows: 5% 61% 25%; }
+.manifesto__editorial { display: grid; grid-template-columns: 56% 39%; grid-template-rows: 52% 44%; gap: 4% 5%; }
+.chapter__canvas .manifesto__copy { grid-column: 2; grid-row: 1 / 3; max-width: none; align-self: end; }
+.chapter__canvas .manifesto__copy p { font-size: 18px; line-height: 1.9; }
+.chapter__canvas .manifesto__copy p + p { margin-top: 24px; }
+.chapter__canvas .manifesto__aside { grid-column: 1; max-width: 440px; align-self: end; padding-top: 18px; font-size: 14px; line-height: 1.85; color: var(--chapter-muted); }
+.chapter__canvas .manifesto__aside strong { font-size: 11px; margin-bottom: 12px; }
+.chapter__canvas .stats { grid-template-columns: repeat(4, minmax(0,1fr)); margin: 0; }
+.chapter__canvas .stat { margin: 0; padding: 28px 24px 0; border-top: 0; border-right: 1px solid var(--line); }
+.chapter__canvas .stat:first-child { padding-left: 0; }
+.chapter__canvas .stat:last-child { border-right: 0; }
+.chapter__canvas .stat:nth-child(n+3) { margin-top: 0; }
+.chapter__canvas .stat__num { font-size: 56px; font-weight: 650; }
+.chapter__canvas .stat__label { margin-top: 10px; font-size: 10px; line-height: 1.65; }
+.chapter__canvas .stat__label b { font-size: 14px; }
+
+/* 02: the existing horizontal recipe rail remains a real browsing control. */
+.find .chapter__canvas { grid-template-rows: 5% 18% 71%; }
+.chapter__canvas .find__heading { grid-template-columns: 50% 46%; gap: 4%; }
+.chapter__canvas .find__heading .h2 br { display: none; }
+.chapter__canvas .find__intro { display: grid; grid-template-columns: 49% 47%; gap: 4%; padding: 0; align-items: center; }
+.find__collection { display: flex; align-items: center; gap: 18px; }
+.chapter__canvas .find__count { margin: 0; font-size: 52px; line-height: .95; }
+.chapter__canvas .find__count span { display: block; margin: 10px 0 0; font-size: 10px; letter-spacing: .18em; }
+.find__collection > p { font-size: 14px; line-height: 1.8; }
+.chapter__canvas .find__copy { max-width: none; font-size: 14px; line-height: 1.8; }
+.chapter__canvas .showcase { display: grid; grid-template-rows: 22% 72% 4%; gap: 1%; padding: 0; border: 0; }
+.chapter__canvas .showcase__head { display: flex; flex-wrap: nowrap; align-items: center; gap: 24px; padding-bottom: 14px; }
+.chapter__canvas .showcase__kicker { font-size: 11px; }
+.chapter__canvas .showcase__title { margin-top: 6px; font-size: 28px; font-weight: 650; line-height: 1.25; }
+.chapter__canvas .showcase__sub { max-width: none; margin-top: 8px; font-size: 13px; line-height: 1.65; }
+.chapter__canvas .showcase__controls { margin: 0; padding: 0; }
+.chapter__canvas .showcase__btn { width: 44px; height: 44px; }
+.chapter__canvas .showcase__viewport { height: 100%; margin: 0; padding: 0; }
+.chapter__canvas .showcase__track { height: 100%; gap: 18px; padding: 4px 2px 6px; }
+.chapter__canvas .showcase__track .recipe-card { width: 340px; height: 100%; flex: none; }
+.chapter__canvas .recipe-card { display: grid; grid-template-rows: 55% 45%; padding: 10px; }
+.chapter__canvas .recipe-card__media { aspect-ratio: auto; height: 100%; }
+.chapter__canvas .recipe-card__badge { font-size: 10px; backdrop-filter: none; }
+.chapter__canvas .recipe-card__body { padding: 12px 6px 0; }
+.chapter__canvas .recipe-card__title { font-size: 22px; font-weight: 650; }
+.chapter__canvas .recipe-card__go { width: 34px; height: 34px; }
+.chapter__canvas .recipe-card__meta { min-height: 40px; margin-top: 6px; font-size: 12px; line-height: 1.7; }
+.chapter__canvas .recipe-card__foot { flex-wrap: wrap; gap: 6px 12px; padding-top: 10px; font-size: 11px; }
+.chapter__canvas .recipe-card__english { flex-basis: 100%; font-size: 10px; }
+.chapter__canvas .showcase-card-end { width: 280px; padding: 26px; flex: none; }
+.chapter__canvas .showcase-card-end__big { font-size: 76px; }
+.chapter__canvas .showcase-card-end__label { font-size: 14px; }
+.chapter__canvas .showcase__foot { margin: 0; }
+.chapter__canvas .showcase__foot .label { display: block; font-size: 10px; }
+
+/* 03 is the scrolling exception: only the reader scrolls, its frame stays put. */
+.chapter__canvas .cook__grid { height: 100%; grid-template-columns: 40% 56%; gap: 4%; align-items: stretch; }
+.chapter__canvas .cook__left { position: static; padding: 0; display: flex; flex-direction: column; }
+.chapter__canvas .cook__description { margin-top: 24px; font-size: 17px; line-height: 1.8; }
+.chapter__canvas .cook__points { max-width: none; margin-top: 24px; }
+.chapter__canvas .cook__point { grid-template-columns: 26px 1fr; gap: 12px; padding: 16px 0; font-size: 14px; line-height: 1.7; }
+.chapter__canvas .cook__point > span { font-size: 11px; }
+.chapter__canvas .cook__foot { padding-top: 14px; gap: 10px; font-size: 10px; line-height: 1.6; }
+.cook .chapter__canvas {
+  --reader-padding: 22px;
+  --reader-gap: 12px;
+  --reader-title: 24px;
+  --reader-text: 20px;
+  --reader-number: 28px;
+}
+.chapter__canvas .cook__panel { height: 100%; min-height: 0; padding: var(--reader-padding); border: 1px solid var(--line); border-radius: 16px; background: var(--paper-3); display: grid; grid-template-rows: auto 2px auto minmax(0,1fr) auto; gap: var(--reader-gap); }
+.chapter__canvas .cook__panel-head { align-items: center; padding: 0; }
+.chapter__canvas .cook__panel-head > div { display: grid; gap: 4px; }
+.chapter__canvas .cook__panel-head .label { display: block; line-height: 1.4; }
+.chapter__canvas .cook__recipe-title { margin: 0; font-size: 26px; font-weight: 650; line-height: 1.2; }
+.chapter__canvas .cook__counter { font-size: 14px; }
+.chapter__canvas .cook__progress { height: 2px; margin: 0; align-self: center; }
+.chapter__canvas .timer { margin: 0; padding: 12px 18px; border-radius: 10px; }
+.chapter__canvas .timer__label { font-size: 12px; }
+.chapter__canvas .timer__label small { font-size: 10px; }
+.chapter__canvas .timer__time { font-size: 38px; }
+.chapter__canvas .cook__steps { min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; overflow-anchor: none; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; padding-right: 12px; scroll-padding-block: 4px; }
+.chapter__canvas .step { width: 100%; min-height: 144px; grid-template-columns: 38px minmax(0,1fr); gap: 14px; padding: 18px 0; align-items: start; text-align: left; opacity: .68; }
+.chapter__canvas .step.is-active { opacity: 1; }
+.chapter__canvas .step__num { font-size: var(--reader-number); font-weight: 650; line-height: 1.3; }
+.chapter__canvas .step__copy { display: grid; grid-template-columns: minmax(0,1fr); align-content: start; gap: 8px; }
+.chapter__canvas .step__title { display: block; grid-column: 1; grid-row: 1; font-size: var(--reader-title); font-weight: 650; line-height: 1.3; }
+.chapter__canvas .step__text { display: block; grid-column: 1; grid-row: 2; max-width: none; margin: 0; font-size: var(--reader-text); line-height: 1.6; }
+.chapter__canvas .step__timer { grid-row: 3; grid-column: 1; justify-self: start; margin: 0; padding: 3px 7px; font-size: 10px; line-height: 1.4; letter-spacing: 0; white-space: nowrap; }
+.chapter__canvas .cook__panel > .cook__foot { padding: 0; align-items: center; }
+
+/* 04 */
+.understand .chapter__canvas { grid-template-rows: 5% 20% 69%; }
+.understand__lead { max-width: none; font-size: 16px; line-height: 1.85; }
+.understand__overview { display: grid; grid-template-rows: 10% 60% 26%; gap: 2%; }
+.chapter__canvas .understand__description { font-size: 16px; line-height: 1.7; }
+.chapter__canvas .understand__cards { display: grid; grid-template-columns: 53% 45%; gap: 2%; max-width: none; }
+.chapter__canvas .nutri { padding: 24px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: none; }
+.chapter__canvas .nutri__title { font-size: 16px; }
+.chapter__canvas .nutri__tag { font-size: 10px; }
+.chapter__canvas .nutri__grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; padding-top: 18px; }
+.chapter__canvas .nutri__item { padding: 0 10px; border-right: 1px solid var(--line); text-align: center; }
+.chapter__canvas .nutri__item:last-child { border-right: 0; }
+.chapter__canvas .nutri__num { font-size: 36px; font-weight: 650; }
+.chapter__canvas .nutri__label { font-size: 11px; }
+.chapter__canvas .nutri__foot { margin-top: 16px; padding-top: 12px; gap: 12px; font-size: 11px; line-height: 1.5; }
+.chapter__canvas .rating-card { margin: 0; padding: 24px; background: transparent; }
+.chapter__canvas .rating-card__top { flex-direction: row; gap: 16px; }
+.chapter__canvas .rating-card__score { font-size: 48px; font-weight: 650; }
+.chapter__canvas .stars { font-size: 14px; }
+.chapter__canvas .rating-card__count { font-size: 11px; line-height: 1.6; text-align: right; }
+.chapter__canvas .quote { margin-top: 16px; padding-top: 14px; font-size: 14px; line-height: 1.7; }
+.chapter__canvas .quote cite { font-size: 10px; }
+.chapter__canvas .fav-row { margin-top: 14px; padding-top: 12px; gap: 12px; font-size: 10px; }
+.chapter__canvas .understand__points { max-width: none; margin: 0; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+.chapter__canvas .understand__point { padding: 14px 0 0; border: 0; grid-template-columns: 22px minmax(0,1fr); gap: 10px; font-size: 14px; line-height: 1.7; }
+.chapter__canvas .understand__point b { margin-bottom: 8px; font-size: 17px; }
+.chapter__canvas .understand__point > span { font-size: 11px; }
+
+/* 05 */
+.next .chapter__canvas { grid-template-rows: 5% 18% 64% 4%; }
+.next__promise { margin-top: 18px; font-size: 20px; line-height: 1.6; }
+.next__status { max-width: none; }
+.chapter__canvas .next__badge { margin: 0; padding: 8px 12px; font-size: 10px; }
+.next__status > p { margin-top: 16px; font-size: 14px; line-height: 1.85; color: var(--chapter-muted); }
+.next__body { display: grid; grid-template-columns: 52% 44%; gap: 4%; }
+.chapter__canvas .next__cards { display: grid; grid-template-columns: 1fr; grid-template-rows: repeat(3,minmax(0,1fr)); margin: 0; border: 0; }
+.chapter__canvas .next-card, .chapter__canvas .next-card:not(:first-child) { display: grid; grid-template-columns: 100px minmax(0,1fr); align-content: center; gap: 10px 20px; padding: 18px 0; min-height: 0; border: 0; border-top: 1px solid var(--chapter-line); }
+.chapter__canvas .next-card:last-child { border-bottom: 1px solid var(--chapter-line); }
+.chapter__canvas .next-card__num { grid-column: 1; grid-row: 1 / 3; font-size: 10px; line-height: 1.7; }
+.chapter__canvas .next-card h3 { margin: 0; grid-column: 2; font-size: 25px; font-weight: 650; }
+.chapter__canvas .next-card p { max-width: none; margin: 0; grid-column: 2; font-size: 14px; line-height: 1.8; color: var(--chapter-muted); }
+.chapter__canvas .concept { display: flex; flex-direction: column; justify-content: center; gap: 24px; margin: 10px 0 0; padding: 26px; border-style: solid; background: transparent; }
+.chapter__canvas .concept__tag { left: 22px; font-size: 10px; }
+.chapter__canvas .concept__side h4 { font-size: 21px; }
+.chapter__canvas .concept__side p { margin-top: 12px; font-size: 13px; line-height: 1.8; }
+.chapter__canvas .concept__chat { gap: 14px; }
+.chapter__canvas .bubble { padding: 14px 16px; font-size: 14px; line-height: 1.8; }
+.chapter__canvas .bubble--user { margin-right: 24px; }
+.chapter__canvas .bubble--ai { margin-left: 24px; }
+.chapter__canvas .next__disclaimer { align-self: center; font-size: 10px; line-height: 1.6; color: var(--chapter-muted); }
+
+/* 06 */
+.download .chapter__canvas { grid-template-rows: 5% 24% 59% 3%; }
+.chapter__canvas .download__head { display: grid; grid-template-columns: 60% 35%; gap: 5%; align-items: center; }
+.chapter__canvas .download__title { font-size: 76px; line-height: 1.1; font-weight: 750; }
+.download__description { max-width: none; }
+.chapter__canvas .download__grid { grid-template-columns: 56% 42%; gap: 2%; margin: 0; }
+.chapter__canvas .download-card { padding: 28px; gap: 24px; min-height: 0; border-radius: 16px; }
+.chapter__canvas .download-card:hover { transform: none; }
+.chapter__canvas .download-card--web { background: transparent; border-color: var(--line-strong); }
+.chapter__canvas .download-card h3 { font-size: 34px; font-weight: 650; line-height: 1.25; }
+.chapter__canvas .download-card p { max-width: none; margin-top: 14px; font-size: 15px; line-height: 1.8; }
+.chapter__canvas .download-card .btn { margin-top: 22px; }
+.chapter__canvas .download-card__num { font-size: 11px; }
+.chapter__canvas .download-card__meta { font-size: 11px; line-height: 1.8; }
+.chapter__canvas .download-card__bottom { flex-direction: row; }
+.chapter__canvas .download__note { flex-direction: row; margin: 0; gap: 24px; font-size: 11px; line-height: 1.6; }
+.download.canvas-page::before { content: none; }
+
+/* Online edition: same fitting mechanism, independent from the landing page. */
+.online__canvas { display: grid; grid-template-rows: 7% 86% 3%; gap: 2%; padding: 20px 40px; }
+.online__canvas .online__header { min-height: 0; padding: 0 0 12px; gap: 24px; }
+.online__canvas .online__edition { display: inline; }
+.online__canvas .online__main { display: grid; grid-template-rows: 74% 22%; gap: 4%; flex: none; width: 100%; max-width: none; margin: 0; padding: 0; overflow: visible; }
+.online__canvas .online__intro { grid-template-columns: 54% 40%; grid-template-rows: 70% 26%; gap: 4% 6%; }
+.online__canvas .online__title { margin-top: 24px; font-size: 112px; line-height: 1.1; }
+.online__canvas .online__visual { grid-column: 2; grid-row: 1 / 3; align-self: stretch; display: grid; grid-template-rows: 92% 6%; gap: 2%; padding: 0; }
+.online__canvas .online__photo img { width: 100%; height: 100%; aspect-ratio: auto; }
+.online__canvas .online__visual figcaption { padding: 0; flex-wrap: nowrap; }
+.online__canvas .online__caption-title { font-size: 28px; }
+.online__canvas .online__story { grid-column: 1; grid-row: 2; grid-template-columns: 104px minmax(0,1fr); gap: 20px; padding-top: 18px; }
+.online__canvas .online__story-index { font-size: 9px; }
+.online__canvas .online__story p { font-size: 14px; line-height: 1.8; }
+.online__canvas .online__download { grid-template-columns: 16% 53% 27%; gap: 2%; margin: 0; padding-top: 20px; }
+.online__canvas .online__download-label { grid-column: auto; flex-direction: column; align-items: flex-start; }
+.online__canvas .online__download-copy h2 { font-size: 28px; }
+.online__canvas .online__download-copy p { font-size: 13px; }
+.online__canvas .online__actions { gap: 14px; }
+.online__canvas .online__download-button { min-width: 0; width: 100%; font-size: 13px; }
+.online__canvas .online__mobile-break { display: none; }
+.online__canvas .status { gap: 20px; padding: 8px 0 0; font-size: 9px; background: transparent; color: var(--online-muted); border-top-color: var(--line); }
+.online__canvas .foot { width: auto; margin-left: auto; }
+
+/* Portrait is a second fixed composition; browser width never reflows its internals. */
+.canvas-portrait.chapter__canvas { padding: 24px; }
+.canvas-portrait .h2, .canvas-portrait .manifesto__title { font-size: 38px; }
+.canvas-portrait .body-lg { font-size: 14px; line-height: 1.6; }
+.canvas-portrait .chapter-label__title { font-size: 10px; }
+.canvas-portrait .chapter-label .heat-tag { font-size: 10px; letter-spacing: .05em; }
+.canvas-portrait .chapter-label { gap: 12px; padding-bottom: 10px; }
+.canvas-portrait .chapter-label__title > span { margin-right: 6px; }
+.canvas-portrait .chapter-heading { grid-template-columns: 1fr; grid-template-rows: 65% 30%; gap: 5%; }
+
+.manifesto .canvas-portrait { grid-template-rows: 5% 62% 23%; }
+.canvas-portrait .manifesto__editorial { grid-template-columns: 1fr; grid-template-rows: 21% 48% 25%; gap: 3%; }
+.canvas-portrait .manifesto__copy { grid-column: 1; grid-row: 2; align-self: end; }
+.canvas-portrait .manifesto__copy p { font-size: 16px; line-height: 1.8; }
+.canvas-portrait .manifesto__copy p + p { margin-top: 18px; }
+.canvas-portrait .manifesto__aside { grid-column: 1; grid-row: 3; padding-top: 12px; font-size: 13px; line-height: 1.65; }
+.canvas-portrait .manifesto__aside strong { font-size: 10px; margin-bottom: 8px; }
+.canvas-portrait .stats { grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: repeat(2,minmax(0,1fr)); }
+.canvas-portrait .stat { padding: 24px 16px 0; }
+.canvas-portrait .stat:nth-child(2) { border-right: 0; }
+.canvas-portrait .stat:nth-child(3), .canvas-portrait .stat:nth-child(4) { border-top: 1px solid var(--line); padding-top: 24px; }
+.canvas-portrait .stat:nth-child(3) { padding-left: 0; }
+.canvas-portrait .stat__num { font-size: 34px; }
+.canvas-portrait .stat__label { margin-top: 5px; font-size: 8px; line-height: 1.5; }
+.canvas-portrait .stat__label b { font-size: 11px; line-height: 1.4; letter-spacing: 0; white-space: nowrap; }
+
+.canvas-portrait .find__heading { grid-template-columns: 58% 38%; grid-template-rows: 1fr; gap: 4%; }
+.canvas-portrait .find__heading .h2 br { display: inline; }
+.canvas-portrait .find__intro { height: 100%; grid-template-columns: 1fr; grid-template-rows: 52% 44%; gap: 4%; }
+.canvas-portrait .find__collection { gap: 12px; }
+.canvas-portrait .find__count { flex: none; font-size: 42px; }
+.canvas-portrait .find__count span { font-size: 8px; }
+.canvas-portrait .find__collection > p { font-size: 10px; }
+.canvas-portrait .find__copy { font-size: 11px; line-height: 1.55; }
+.canvas-portrait .showcase__head { gap: 14px; }
+.canvas-portrait .showcase__title { font-size: 24px; }
+.canvas-portrait .showcase__kicker { font-size: 10px; }
+.canvas-portrait .showcase__sub { font-size: 12px; }
+.canvas-portrait .showcase__btn { width: 54px; height: 54px; }
+.canvas-portrait .showcase__controls { gap: 8px; }
+.canvas-portrait .showcase__track .recipe-card { width: 350px; }
+.canvas-portrait .recipe-card__title { font-size: 24px; }
+.canvas-portrait .recipe-card__meta { font-size: 14px; }
+.canvas-portrait .recipe-card__foot { font-size: 12px; }
+.canvas-portrait .recipe-card__english { font-size: 11px; }
+
+.canvas-portrait .cook__grid { grid-template-columns: 1fr; grid-template-rows: 32% 65%; gap: 3%; }
+.cook .canvas-portrait { --reader-padding: 16px; --reader-gap: 10px; --reader-title: 22px; --reader-text: 18px; --reader-number: 24px; }
+.canvas-portrait .cook__left { display: grid; grid-template-columns: 46% 51%; grid-template-rows: 44% 45% 7%; gap: 2% 3%; }
+.canvas-portrait .cook__left .h2 { font-size: 34px; }
+.canvas-portrait .cook__description { margin: 0; font-size: 13px; line-height: 1.6; }
+.canvas-portrait .cook__points { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin: 0; }
+.canvas-portrait .cook__point { display: block; padding: 8px 0 0; border: 0; font-size: 12px; line-height: 1.5; }
+.canvas-portrait .cook__point > span { display: inline; font-size: 10px; padding: 0; margin-right: 6px; }
+.canvas-portrait .cook__point > div { display: inline; }
+.canvas-portrait .cook__point br { display: none; }
+.canvas-portrait .cook__left > .cook__foot { grid-column: 1 / -1; padding: 0; font-size: 9px; }
+.canvas-portrait .cook__panel-head { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; }
+.canvas-portrait .cook__panel-head .label { font-size: 9px; }
+.canvas-portrait .cook__recipe-title { font-size: 22px; }
+.canvas-portrait .cook__counter { font-size: 12px; }
+.canvas-portrait .timer { gap: 10px; padding: 8px 12px; }
+.canvas-portrait .timer__left { gap: 8px; }
+.canvas-portrait .timer__label { font-size: 10px; }
+.canvas-portrait .timer__label small { font-size: 8px; }
+.canvas-portrait .timer__time { font-size: 28px; }
+.canvas-portrait .cook__panel > .cook__foot { font-size: 8px; gap: 6px; }
+
+.canvas-portrait .understand__lead { font-size: 14px; line-height: 1.6; }
+.canvas-portrait .understand__overview { grid-template-rows: 8% 60% 28%; }
+.canvas-portrait .understand__description { font-size: 14px; line-height: 1.5; }
+.canvas-portrait .understand__cards { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.canvas-portrait .nutri, .canvas-portrait .rating-card { padding: 14px; border-radius: 12px; }
+.canvas-portrait .nutri__head { display: block; padding-bottom: 10px; }
+.canvas-portrait .nutri__title { font-size: 13px; }
+.canvas-portrait .nutri__tag { display: block; margin-top: 4px; font-size: 9px; }
+.canvas-portrait .nutri__grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px 0; padding-top: 12px; }
+.canvas-portrait .nutri__item { padding: 0 4px; }
+.canvas-portrait .nutri__item:nth-child(2) { border-right: 0; }
+.canvas-portrait .nutri__num { font-size: 28px; }
+.canvas-portrait .nutri__label { font-size: 10px; }
+.canvas-portrait .nutri__foot { display: block; font-size: 10px; line-height: 1.5; }
+.canvas-portrait .nutri__foot > span { display: block; margin-top: 6px; }
+.canvas-portrait .rating-card__top { display: block; }
+.canvas-portrait .rating-card__score { font-size: 38px; }
+.canvas-portrait .stars { font-size: 11px; letter-spacing: .1em; }
+.canvas-portrait .rating-card__count { margin-top: 10px; font-size: 10px; text-align: left; }
+.canvas-portrait .quote { margin-top: 12px; padding-top: 12px; font-size: 12px; }
+.canvas-portrait .quote cite { font-size: 9px; }
+.canvas-portrait .fav-row { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 9px; }
+.canvas-portrait .understand__points { gap: 12px; }
+.canvas-portrait .understand__point { grid-template-columns: 16px minmax(0,1fr); gap: 6px; padding-top: 12px; font-size: 12px; line-height: 1.5; }
+.canvas-portrait .understand__point b { font-size: 14px; line-height: 1.4; }
+.canvas-portrait .understand__point > span { font-size: 9px; }
+
+.canvas-portrait .next__heading { grid-template-rows: 60% 35%; }
+.canvas-portrait .next__heading .h2 { font-size: 36px; }
+.canvas-portrait .next__promise { margin-top: 8px; font-size: 13px; }
+.canvas-portrait .next__status { display: grid; grid-template-columns: 42% 54%; gap: 4%; align-items: center; }
+.canvas-portrait .next__badge { padding: 6px 8px; gap: 6px; font-size: 8px; letter-spacing: .1em; }
+.canvas-portrait .next__status > p { margin: 0; font-size: 11px; line-height: 1.6; }
+.canvas-portrait .next__body { grid-template-columns: 1fr; grid-template-rows: 55% 42%; gap: 3%; }
+.canvas-portrait .next-card, .canvas-portrait .next-card:not(:first-child) { grid-template-columns: 80px minmax(0,1fr); gap: 6px 12px; padding: 8px 0; }
+.canvas-portrait .next-card__num { font-size: 8px; }
+.canvas-portrait .next-card h3 { font-size: 18px; }
+.canvas-portrait .next-card p { font-size: 12px; line-height: 1.5; }
+.canvas-portrait .concept { display: grid; grid-template-columns: 28% 68%; gap: 4%; padding: 14px; margin: 0; border-radius: 12px; }
+.canvas-portrait .concept__tag { left: 12px; font-size: 8px; }
+.canvas-portrait .concept__side h4 { font-size: 15px; line-height: 1.4; }
+.canvas-portrait .concept__side p { margin-top: 8px; font-size: 11px; line-height: 1.5; }
+.canvas-portrait .concept__chat { gap: 8px; }
+.canvas-portrait .bubble { padding: 8px; font-size: 11px; line-height: 1.5; border-radius: 8px; }
+.canvas-portrait .bubble--user { margin-right: 6px; }
+.canvas-portrait .bubble--ai { margin-left: 6px; }
+.canvas-portrait .next__disclaimer { font-size: 8px; line-height: 1.6; }
+
+.download .canvas-portrait { grid-template-rows: 5% 24% 54% 8%; }
+.canvas-portrait .download__head { grid-template-columns: 1fr; grid-template-rows: 65% 30%; gap: 5%; }
+.canvas-portrait .download__title { font-size: 52px; }
+.canvas-portrait .download__description { font-size: 14px; line-height: 1.6; }
+.canvas-portrait .download__grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.canvas-portrait .download-card { padding: 16px; gap: 20px; border-radius: 12px; }
+.canvas-portrait .download-card__top { flex-direction: column; gap: 8px; }
+.canvas-portrait .download-card__num { font-size: 9px; }
+.canvas-portrait .download-card h3 { font-size: 24px; }
+.canvas-portrait .download-card p { font-size: 12px; line-height: 1.8; }
+.canvas-portrait .download-card .btn { padding: 0 12px; min-height: 46px; gap: 8px; font-size: 11px; }
+.canvas-portrait .download-card__bottom { align-items: flex-start; flex-direction: column; gap: 12px; }
+.canvas-portrait .download-card__meta { font-size: 9px; line-height: 1.8; }
+.canvas-portrait .download-card__arrow { font-size: 28px; }
+.canvas-portrait .download__note { flex-direction: column; gap: 6px; font-size: 10px; line-height: 1.4; }
+
+.canvas-portrait.online__canvas { grid-template-rows: 6% 80% 8%; gap: 3%; padding: 24px; }
+.canvas-portrait .online__edition { display: none; }
+.canvas-portrait .online__header { gap: 14px; }
+.canvas-portrait .online__back { font-size: 11px; }
+.canvas-portrait .online__main { grid-template-rows: 76% 20%; gap: 4%; }
+.canvas-portrait .online__intro { grid-template-columns: 1fr; grid-template-rows: 25% 50% 21%; gap: 2%; }
+.canvas-portrait .online__title { font-size: 56px; margin-top: 12px; }
+.canvas-portrait .online__title > span { display: inline; }
+.canvas-portrait .online__eyebrow { gap: 12px; }
+.canvas-portrait .online__eyebrow .label { font-size: 10px; }
+.canvas-portrait .online__state { font-size: 11px; }
+.canvas-portrait .online__visual { grid-column: 1; grid-row: 2; grid-template-rows: 88% 10%; }
+.canvas-portrait .online__caption-title { font-size: 20px; }
+.canvas-portrait .online__story { grid-column: 1; grid-row: 3; grid-template-columns: 1fr; grid-template-rows: 14px 1fr; gap: 8px; padding-top: 8px; }
+.canvas-portrait .online__story-index { font-size: 9px; line-height: 1.4; }
+.canvas-portrait .online__story-index br { display: none; }
+.canvas-portrait .online__story p { font-size: 14px; line-height: 1.5; }
+.canvas-portrait .online__download { grid-template-columns: minmax(0,1fr) 126px; grid-template-rows: 16px 1fr; gap: 8px 16px; padding-top: 12px; }
+.canvas-portrait .online__download-label { grid-column: 1 / -1; flex-direction: row; align-items: center; padding: 0; }
+.canvas-portrait .online__download-label > .label:first-child { font-size: 9px; }
+.canvas-portrait .online__platform { font-size: 9px; }
+.canvas-portrait .online__download-copy h2 { font-size: 20px; line-height: 1.35; }
+.canvas-portrait .online__download-copy p { font-size: 11px; line-height: 1.5; margin-top: 6px; }
+.canvas-portrait .online__actions { gap: 8px; }
+.canvas-portrait .online__download-button { padding: 0 10px; min-height: 44px; font-size: 11px; gap: 8px; }
+.canvas-portrait .online__home-link { font-size: 10px; min-height: 24px; }
+.canvas-portrait .status { gap: 4px; flex-direction: column; align-items: flex-start; justify-content: center; font-size: 9px; }
+.canvas-portrait .foot { margin: 0; }
+
+/* Short phones need a shorter composition, not a miniature tablet composition. */
+.canvas-compact .h2, .canvas-compact .manifesto__title { font-size: 32px; }
+.canvas-compact .manifesto__copy p { font-size: 13.5px; line-height: 1.6; }
+.canvas-compact .manifesto__copy p + p { margin-top: 12px; }
+.canvas-compact .manifesto__aside { padding-top: 8px; font-size: 12px; line-height: 1.6; }
+.manifesto .canvas-compact { grid-template-rows: 5% 65% 24%; }
+.canvas-compact .stat, .canvas-compact .stat:nth-child(3), .canvas-compact .stat:nth-child(4) { padding-top: 20px; }
+.canvas-compact .stat__num { font-size: 28px; }
+.canvas-compact .stat__label { margin-top: 3px; }
+.canvas-compact .stat__label b { font-size: 10px; }
+.canvas-compact .find__intro { grid-template-rows: 48% 48%; }
+.canvas-compact .find__count { font-size: 36px; }
+.canvas-compact .find__count span { margin-top: 6px; }
+.canvas-compact .find__copy { font-size: 10px; line-height: 1.45; }
+.canvas-compact .showcase__head { padding-bottom: 10px; }
+.canvas-compact .showcase__title { font-size: 21px; }
+.canvas-compact .showcase__sub { font-size: 11px; line-height: 1.5; }
+.canvas-compact .recipe-card__title { font-size: 21px; }
+.canvas-compact .recipe-card__meta { font-size: 12px; }
+.canvas-compact .recipe-card__foot { font-size: 10px; }
+
+.canvas-compact .cook__left .h2 { font-size: 30px; }
+.cook .canvas-compact { --reader-padding: 12px; --reader-gap: 8px; --reader-title: 20px; --reader-text: 17px; --reader-number: 23px; }
+.canvas-compact .cook__description { font-size: 11.5px; line-height: 1.5; }
+.canvas-compact .cook__point { padding-top: 4px; font-size: 10.5px; line-height: 1.4; }
+.canvas-compact .cook__point > span { font-size: 9px; margin-right: 4px; }
+.canvas-compact .cook__left > .cook__foot { font-size: 8px; }
+.canvas-compact .cook__panel-head > div { gap: 3px; }
+.canvas-compact .cook__panel-head .label { font-size: 8px; }
+.canvas-compact .cook__recipe-title { font-size: 20px; }
+.canvas-compact .cook__counter { font-size: 11px; }
+.canvas-compact .timer { padding: 6px 10px; }
+.canvas-compact .timer__time { font-size: 26px; }
+.canvas-compact .timer__label { font-size: 9px; }
+.canvas-compact .timer__label small { font-size: 7px; }
+.canvas-compact .cook__panel > .cook__foot { font-size: 7px; }
+
+.canvas-compact .understand__lead { font-size: 11.5px; line-height: 1.45; }
+.canvas-compact .understand__description { font-size: 12px; line-height: 1.45; }
+.canvas-compact .nutri, .canvas-compact .rating-card { padding: 12px; }
+.canvas-compact .nutri__head { padding-bottom: 8px; }
+.canvas-compact .nutri__title { font-size: 11px; }
+.canvas-compact .nutri__tag { font-size: 8px; }
+.canvas-compact .nutri__grid { padding-top: 8px; gap: 12px 0; }
+.canvas-compact .nutri__num { font-size: 26px; }
+.canvas-compact .nutri__label { font-size: 9px; }
+.canvas-compact .nutri__foot { font-size: 9px; margin-top: 10px; padding-top: 8px; }
+.canvas-compact .rating-card__score { font-size: 32px; }
+.canvas-compact .rating-card__count { font-size: 9px; margin-top: 8px; }
+.canvas-compact .stars { font-size: 10px; }
+.canvas-compact .quote { font-size: 11px; line-height: 1.5; margin-top: 8px; padding-top: 8px; }
+.canvas-compact .fav-row { margin-top: 8px; padding-top: 8px; font-size: 8px; }
+.canvas-compact .understand__point { padding-top: 8px; font-size: 10px; line-height: 1.4; }
+.canvas-compact .understand__point b { font-size: 11.5px; line-height: 1.3; }
+
+.canvas-compact .next__heading .h2 { font-size: 31px; }
+.canvas-compact .next__promise { margin-top: 6px; font-size: 11px; }
+.canvas-compact .next__badge { font-size: 7px; }
+.canvas-compact .next__status > p { font-size: 9.5px; line-height: 1.4; }
+.canvas-compact .next-card, .canvas-compact .next-card:not(:first-child) { grid-template-columns: 65px minmax(0,1fr); gap: 4px 10px; padding: 4px 0; }
+.canvas-compact .next-card h3 { font-size: 16px; line-height: 1.3; }
+.canvas-compact .next-card p { font-size: 10.5px; line-height: 1.45; }
+.canvas-compact .concept { padding: 10px; }
+.canvas-compact .concept__side h4 { font-size: 13px; }
+.canvas-compact .concept__side p { font-size: 10px; line-height: 1.4; margin-top: 6px; }
+.canvas-compact .bubble { padding: 6px; font-size: 10px; line-height: 1.4; }
+.canvas-compact .concept__chat { gap: 6px; }
+.canvas-compact .next__disclaimer { font-size: 7px; }
+
+.canvas-compact .download__title { font-size: 44px; }
+.canvas-compact .download__description { font-size: 12px; }
+.canvas-compact .download-card { padding: 12px; gap: 12px; }
+.canvas-compact .download-card__top { gap: 6px; }
+.canvas-compact .download-card__num { font-size: 8px; }
+.canvas-compact .download-card h3 { font-size: 18px; }
+.canvas-compact .download-card p { font-size: 10.5px; line-height: 1.6; margin-top: 8px; }
+.canvas-compact .download-card .btn { min-height: 40px; padding-inline: 8px; margin-top: 14px; font-size: 10px; }
+.canvas-compact .download-card__bottom { gap: 8px; }
+.canvas-compact .download-card__meta { font-size: 8px; line-height: 1.6; }
+.canvas-compact .download-card__arrow { font-size: 24px; }
+.canvas-compact .download__note { font-size: 9px; }
+
+.canvas-compact .online__title { font-size: 46px; margin-top: 8px; }
+.canvas-compact .online__story p { font-size: 11.5px; }
+.canvas-compact .online__caption-title { font-size: 18px; }
+.canvas-compact .online__download-copy h2 { font-size: 17px; }
+.canvas-compact .online__download-copy p { font-size: 10px; }
+.canvas-compact .online__download-button { font-size: 10px; min-height: 38px; }
+.canvas-compact .online__actions { gap: 4px; }
+
+/* A wider portrait composition fills tablet and narrow desktop windows by width.
+   Its type and columns are designed together, rather than stretching phone cards. */
+.canvas-narrow .h2, .canvas-narrow .manifesto__title { font-size: 48px; }
+.canvas-narrow .chapter-label__title, .canvas-narrow .chapter-label .heat-tag { font-size: 12px; }
+.canvas-narrow .manifesto__copy p { font-size: 20px; line-height: 1.65; }
+.canvas-narrow .manifesto__aside { font-size: 16px; line-height: 1.55; }
+.canvas-narrow .manifesto__aside strong { font-size: 11px; }
+.canvas-narrow .stats { grid-template-columns: repeat(4,minmax(0,1fr)); grid-template-rows: 1fr; align-items: start; }
+.canvas-narrow .stat, .canvas-narrow .stat:nth-child(3), .canvas-narrow .stat:nth-child(4) { padding: 28px 16px 0; border-top: 0; }
+.canvas-narrow .stat:first-child { padding-left: 0; }
+.canvas-narrow .stat:nth-child(2) { border-right: 1px solid var(--line); }
+.canvas-narrow .stat__num { font-size: 48px; }
+.canvas-narrow .stat__label { font-size: 10px; }
+.canvas-narrow .stat__label b { font-size: 12px; }
+
+.canvas-narrow .find__count { font-size: 52px; }
+.canvas-narrow .find__collection > p, .canvas-narrow .find__copy { font-size: 14px; line-height: 1.5; }
+.canvas-narrow .showcase__title { font-size: 28px; }
+.canvas-narrow .showcase__sub { font-size: 14px; }
+.canvas-narrow .showcase__track .recipe-card { width: 530px; }
+
+.canvas-narrow .cook__grid { grid-template-rows: 30% 67%; }
+.cook .canvas-narrow { --reader-padding: 18px; --reader-gap: 10px; --reader-title: 24px; --reader-text: 20px; --reader-number: 28px; }
+.canvas-narrow .cook__left { grid-template-rows: 50% 43% 5%; row-gap: 1%; }
+.canvas-narrow .cook__left .h2 { font-size: 50px; }
+.canvas-narrow .cook__description { font-size: 18px; line-height: 1.5; }
+.canvas-narrow .cook__point { padding-top: 4px; font-size: 16px; line-height: 1.4; }
+.canvas-narrow .cook__point > span { font-size: 11px; }
+.canvas-narrow .cook__left > .cook__foot { font-size: 10px; line-height: 1.2; }
+.canvas-narrow .cook__panel-head .label { font-size: 10px; }
+.canvas-narrow .cook__recipe-title { font-size: 24px; }
+.canvas-narrow .cook__counter { font-size: 15px; }
+.canvas-narrow .timer { padding: 8px 14px; }
+.canvas-narrow .timer__label { font-size: 12px; }
+.canvas-narrow .timer__label small { font-size: 10px; }
+.canvas-narrow .timer__time { font-size: 34px; }
+.canvas-narrow .cook__panel > .cook__foot { font-size: 9px; line-height: 1.3; }
+
+.canvas-narrow .understand__heading { grid-template-columns: 58% 38%; grid-template-rows: 1fr; gap: 4%; }
+.canvas-narrow .understand__lead { font-size: 16px; line-height: 1.6; }
+.canvas-narrow .understand__overview { grid-template-rows: 10% 60% 26%; }
+.canvas-narrow .understand__description { font-size: 15px; line-height: 1.6; }
+.canvas-narrow .nutri, .canvas-narrow .rating-card { padding: 18px; }
+.canvas-narrow .nutri__title { font-size: 16px; }
+.canvas-narrow .nutri__num { font-size: 36px; }
+.canvas-narrow .rating-card__score { font-size: 44px; }
+.canvas-narrow .rating-card__count { font-size: 11px; }
+.canvas-narrow .quote { font-size: 14px; line-height: 1.6; }
+.canvas-narrow .understand__point { font-size: 14px; line-height: 1.5; }
+.canvas-narrow .understand__point b { font-size: 16px; }
+
+.canvas-narrow .next__heading .h2 { font-size: 46px; }
+.canvas-narrow .next__promise { margin-top: 6px; font-size: 14px; line-height: 1.5; }
+.canvas-narrow .next__badge { font-size: 10px; }
+.canvas-narrow .next__status > p { font-size: 13px; line-height: 1.5; }
+.canvas-narrow .next-card, .canvas-narrow .next-card:not(:first-child) { grid-template-columns: 100px minmax(0,1fr); padding: 6px 0; gap: 4px 12px; }
+.canvas-narrow .next-card h3 { font-size: 20px; line-height: 1.3; }
+.canvas-narrow .next-card p { font-size: 14px; line-height: 1.5; }
+.canvas-narrow .next-card__num { font-size: 10px; }
+.canvas-narrow .concept__side h4 { font-size: 18px; }
+.canvas-narrow .concept__side p, .canvas-narrow .bubble { font-size: 13px; line-height: 1.5; }
+.canvas-narrow .next__disclaimer { font-size: 10px; }
+
+.canvas-narrow .download__head { grid-template-columns: 53% 43%; grid-template-rows: 1fr; gap: 4%; }
+.canvas-narrow .download__title { font-size: 56px; }
+.canvas-narrow .download__description { font-size: 16px; line-height: 1.6; }
+.canvas-narrow .download-card { padding: 20px; }
+.canvas-narrow .download-card h3 { font-size: 26px; }
+.canvas-narrow .download-card p { font-size: 14px; }
+.canvas-narrow .download-card .btn { font-size: 13px; min-height: 50px; }
+.canvas-narrow .download-card__meta { font-size: 11px; }
+.canvas-narrow .download__note { font-size: 12px; }
+
+.canvas-narrow .online__word { font-size: 16px; }
+.canvas-narrow .online__back { font-size: 14px; }
+.canvas-narrow .online__title { font-size: 76px; }
+.canvas-narrow .online__story p { max-width: none; font-size: 17px; }
+.canvas-narrow .online__caption-title { font-size: 26px; }
+.canvas-narrow .online__download { grid-template-columns: minmax(0,1fr) 180px; }
+.canvas-narrow .online__download-copy h2 { font-size: 26px; }
+.canvas-narrow .online__download-copy p { font-size: 14px; }
+.canvas-narrow .online__download-button { font-size: 13px; }
+.canvas-narrow .online__home-link, .canvas-narrow .status { font-size: 11px; }
+
+@media (max-width: 600px) {
+  .canvas-page.canvas-page { padding: calc(var(--header-h) + 12px) 12px 12px; }
+  .canvas-page.canvas-page--online { padding: 12px; }
+}

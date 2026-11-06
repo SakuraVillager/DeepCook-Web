@@ -1,56 +1,28 @@
 import type { CSSProperties } from 'react'
+import { ChapterLabel } from './ChapterLabel'
+import { DesignCanvas } from './DesignCanvas'
 
 export function Understand() {
   return (
-    <section className="section understand on-dark" id="understand" data-theme="dark">
-      <div className="container">
-        <div className="sec-head">
-          <div className="sec-head__label">
-            <span className="heat-tag">余温 · REST</span>
-            <span className="label">04 / UNDERSTAND</span>
-          </div>
+    <section className="section chapter canvas-page understand on-dark" id="understand" data-theme="dark">
+      <DesignCanvas className="container chapter__canvas" label="营养与评分画布">
+        <ChapterLabel index="04" title="UNDERSTAND" heat="余温 · REST" />
+        <div className="chapter-heading understand__heading">
           <h2 className="h2" data-reveal>
             吃得明白，
             <br />
             才吃得踏实。
           </h2>
-          <p className="sec-head__note" data-reveal style={{ '--reveal-delay': '80ms' } as CSSProperties}>
+          <p className="understand__lead" data-reveal style={{ '--reveal-delay': '80ms' } as CSSProperties}>
             营养、评分、交流与收藏都留在菜谱下面。不联网，也能把一顿饭记得清清楚楚。
           </p>
         </div>
 
-        <div className="understand__grid">
-          <div>
-            <p className="body-lg" data-reveal>
-              每份营养四列摘要，完整营养表随时展开；评分按 10 分制记录，
-              评分分布和厨房交流都留在一道菜下面。
-            </p>
-
-            <div className="understand__points" data-reveal>
-              <div className="understand__point">
-                <span>01</span>
-                <div>
-                  <b>营养摘要</b>
-                  每份热量、脂肪、蛋白质、碳水四列并排，完整表含纤维与钠。
-                </div>
-              </div>
-              <div className="understand__point">
-                <span>02</span>
-                <div>
-                  <b>评分 · 作业 · 评论</b>
-                  10 分制评分、分布与本机厨房交流，示例内容明确标注。
-                </div>
-              </div>
-              <div className="understand__point">
-                <span>03</span>
-                <div>
-                  <b>收藏与最近浏览</b>
-                  收藏按时间倒序；最近浏览去重，最多保留 50 条。
-                </div>
-              </div>
-            </div>
-          </div>
-
+        <div className="understand__overview">
+          <p className="body-lg understand__description" data-reveal>
+            每份营养四列摘要，完整营养表随时展开；评分按 10 分制记录，
+            评分分布和厨房交流都留在一道菜下面。
+          </p>
           <div className="understand__cards">
             <div className="nutri" data-reveal>
               <div className="nutri__head">
@@ -117,8 +89,31 @@ export function Understand() {
               </div>
             </div>
           </div>
+          <div className="understand__points" data-reveal>
+            <div className="understand__point">
+              <span>01</span>
+              <div>
+                <b>营养摘要</b>
+                每份热量、脂肪、蛋白质、碳水四列并排，完整表含纤维与钠。
+              </div>
+            </div>
+            <div className="understand__point">
+              <span>02</span>
+              <div>
+                <b>评分 · 作业 · 评论</b>
+                10 分制评分、分布与本机厨房交流，示例内容明确标注。
+              </div>
+            </div>
+            <div className="understand__point">
+              <span>03</span>
+              <div>
+                <b>收藏与最近浏览</b>
+                收藏按时间倒序；最近浏览去重，最多保留 50 条。
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </DesignCanvas>
     </section>
   )
 }
