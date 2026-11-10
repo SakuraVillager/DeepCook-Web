@@ -19,10 +19,28 @@ test('App seed rules preserve the three ratings and two identifiable example pos
   assert.equal(content.posts.length, 2)
   assert.ok(content.posts.every((p) => p.sample))
   assert.equal(content.posts[0].author, '阿米')
+  assert.deepEqual(content.nutrition, {
+    calories: 480,
+    fat: 22,
+    protein: 26,
+    carbs: 44,
+    fiber: 3.5,
+    sodium: 650,
+  })
   const other = catalog.find((r, i) => i >= 12 && !r.featured)
   assert.deepEqual(
     communityWithSamples(emptyCommunity(other.id), other, catalog).ratings,
     [],
+  )
+  assert.equal(
+    communityWithSamples(emptyCommunity(other.id), other, catalog).nutrition,
+    null,
+  )
+  const personal = { ...first, id: 'user-test', featured: true }
+  assert.equal(
+    communityWithSamples(emptyCommunity(personal.id), personal, catalog)
+      .nutrition,
+    null,
   )
 })
 test('rating summary uses the App 8–10 / 6–7 / 1–5 breakdown', () => {

@@ -65,7 +65,13 @@ export function useCommunity(recipe?: Recipe) {
     () =>
       recipe
         ? communityWithSamples(record, recipe, catalog)
-        : { ownRating: null, ratings: [], posts: [], sampleRatings: 0 },
+        : {
+            nutrition: null,
+            ownRating: null,
+            ratings: [],
+            posts: [],
+            sampleRatings: 0,
+          },
     [record, recipe, catalog],
   )
   return { content, loading, error, reload }

@@ -372,3 +372,83 @@ test('local ratings propagate between tabs and community layout fits narrow and 
     ),
   ).toBeTruthy()
 })
+
+test('compact rating and nutrition stay beside the cover and the full table shows all six App fields', async ({
+  page,
+}) => {
+  await open(page)
+  await expect(page.locator('.k-detail-intro .k-rating')).toHaveCount(1)
+  await expect(page.locator('.k-detail-intro .k-nutrition')).toHaveCount(1)
+  await expect(page.locator('.k-nutrition__summary b')).toHaveText([
+    '480',
+    '22',
+    '26',
+    '44',
+  ])
+  await expect(page.locator('.k-nutrition > .k-fine')).toContainText(
+    'App 内置示例',
+  )
+  for (const width of [1024, 1440]) {
+    await page.setViewportSize({ width, height: 1000 })
+    const cover = (await page.locator('.k-recipe-visual').boundingBox())!
+    const rating = (await page.locator('.k-rating').boundingBox())!
+    const nutrition = (await page.locator('.k-nutrition').boundingBox())!
+    expect(rating.x).toBeGreaterThan(cover.x + cover.width)
+    expect(nutrition.x).toBe(rating.x)
+    expect(rating.height).toBeLessThan(150)
+    expect(nutrition.y + nutrition.height).toBeLessThanOrEqual(
+      cover.y + cover.height,
+    )
+  }
+  await page.getByRole('button', { name: '查看全部 ↗' }).click()
+  const modal = page.getByRole('dialog', { name: '完整营养表' })
+  await expect(modal.getByRole('row')).toHaveCount(7)
+  await expect(
+    modal.getByRole('row', { name: '热量 480 kcal', exact: true }),
+  ).toBeVisible()
+  await expect(
+    modal.getByRole('row', { name: '膳食纤维 3.5 g', exact: true }),
+  ).toBeVisible()
+  await expect(
+    modal.getByRole('row', { name: '钠 650 mg', exact: true }),
+  ).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(modal).toHaveCount(0)
+  await page.getByRole('button', { name: '评价一下 ↗' }).click()
+  await expect(page.getByRole('dialog', { name: '给这道菜评分' })).toBeVisible()
+  await page.getByRole('button', { name: '取消', exact: true }).click()
+})
+
+test('missing nutrition is never inferred and its full table fits a narrow phone', async ({
+  page,
+}) => {
+  await open(page, 'world-danish-pancake')
+  await page.setViewportSize({ width: 320, height: 844 })
+  await expect(page.locator('.k-nutrition__summary b')).toHaveText([
+    '无',
+    '无',
+    '无',
+    '无',
+  ])
+  await expect(page.locator('.k-nutrition > .k-fine')).toContainText(
+    '暂无营养数据',
+  )
+  const cover = (await page.locator('.k-recipe-visual').boundingBox())!
+  const rating = (await page.locator('.k-rating').boundingBox())!
+  expect(rating.y).toBeGreaterThan(cover.y + cover.height)
+  await page.getByRole('button', { name: '查看全部 ↗' }).click()
+  const modal = page.getByRole('dialog')
+  await expect(modal.getByRole('cell')).toHaveText([
+    '无',
+    '无',
+    '无',
+    '无',
+    '无',
+    '无',
+  ])
+  const box = (await modal.boundingBox())!
+  expect(box.x).toBeGreaterThanOrEqual(0)
+  expect(box.x + box.width).toBeLessThanOrEqual(320)
+  await modal.getByRole('button', { name: '收起营养表 ↗' }).click()
+  await expect(modal).toHaveCount(0)
+})

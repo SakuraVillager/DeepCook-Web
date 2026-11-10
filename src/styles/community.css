@@ -1,8 +1,7 @@
 .k-rating {
-  width: min(100%, clamp(500px, 52vw, 740px));
-  margin: 0 auto 48px;
-  padding-top: 26px;
-  border-top: 1px solid var(--line-strong);
+  min-width: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
 }
 .k-rating > header,
 .k-community-card > header {
@@ -11,51 +10,50 @@
   justify-content: space-between;
   gap: 20px;
 }
-.k-rating header .label {
-  color: var(--muted);
-  font-size: 9px;
-}
 .k-rating h2 {
-  font-size: clamp(20px, 2vw, 28px);
+  font-size: 12px;
   font-weight: 550;
-  letter-spacing: -0.04em;
-  line-height: 1.45;
-  margin-top: 9px;
+  line-height: 1.5;
+}
+.k-rating h2 > span {
+  color: var(--muted);
+  font: 400 9px var(--font-display);
 }
 .k-rating header .k-flip {
-  font-size: 11px;
+  font-size: 10px;
+  min-height: 28px;
   white-space: nowrap;
 }
 .k-rating__body {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr);
+  grid-template-columns: 76px minmax(0, 1fr);
   align-items: center;
-  gap: 36px;
-  padding: 28px 0 22px;
+  gap: 24px;
+  padding: 4px 0 5px;
 }
 .k-rating__score {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
 }
 .k-rating__score b {
-  font: italic 400 64px/0.9 var(--font-serif);
+  font: italic 400 38px/1 var(--font-serif);
   letter-spacing: -0.06em;
 }
 .k-rating__score > span {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--muted);
 }
 .k-rating__distribution {
   display: grid;
-  gap: 14px;
+  gap: 4px;
 }
 .k-rating__distribution > div {
   display: grid;
-  grid-template-columns: 45px minmax(0, 1fr) 24px;
-  gap: 12px;
+  grid-template-columns: 36px minmax(0, 1fr) 18px;
+  gap: 8px;
   align-items: center;
-  font-size: 11px;
+  font-size: 9px;
 }
 .k-rating__distribution > div > span:last-child {
   color: var(--muted);
@@ -63,7 +61,7 @@
   font-family: var(--font-display);
 }
 .k-rating__distribution [role='meter'] {
-  height: 5px;
+  height: 3px;
   background: var(--paper-2);
   overflow: hidden;
 }
@@ -76,7 +74,8 @@
   background: var(--yolk);
 }
 .k-rating > .k-fine {
-  font-size: 10px;
+  font-size: 9px;
+  line-height: 1.5;
 }
 .k-community__groups {
   display: flex;
@@ -276,41 +275,9 @@
 .k-community-form .k-modal-actions {
   margin-top: 4px;
 }
-@media (max-width: 899px) {
-  .k-rating {
-    width: min(100%, 740px);
-  }
-}
 @media (max-width: 760px) {
-  .k-rating {
-    margin-bottom: 32px;
-    padding-top: 22px;
-  }
-  .k-rating > header {
-    align-items: start;
-    gap: 12px;
-  }
-  .k-rating h2 {
-    font-size: 21px;
-  }
   .k-rating header .k-flip {
-    font-size: 10px;
-  }
-  .k-rating__body {
-    grid-template-columns: 76px minmax(0, 1fr);
-    gap: 22px;
-    padding-block: 24px 18px;
-  }
-  .k-rating__score b {
-    font-size: 53px;
-  }
-  .k-rating__distribution > div {
-    grid-template-columns: 36px minmax(0, 1fr) 18px;
-    gap: 8px;
-    font-size: 10px;
-  }
-  .k-rating > .k-fine {
-    font-size: 9px;
+    min-height: 44px;
   }
   .k-community-card {
     padding: 20px 18px;

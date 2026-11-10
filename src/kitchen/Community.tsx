@@ -243,10 +243,9 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
     rating: (
       <section className="k-rating" aria-labelledby="recipe-rating-title">
         <header>
-          <div>
-            <span className="label">A LITTLE FEEDBACK / 菜谱评分</span>
-            <h2 id="recipe-rating-title">做过的味道，你说了算。</h2>
-          </div>
+          <h2 id="recipe-rating-title">
+            菜谱评分 <span> / 10</span>
+          </h2>
           <Flip onClick={() => open('rating')} disabled={!enabled}>
             {community.content.ownRating === null
               ? '评价一下 ↗'
@@ -300,9 +299,9 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
           </div>
         )}
         <p className="k-fine">
-          10 分制 · 每道菜保留一条本地评分，再次评价会更新。
           {community.content.sampleRatings > 0 &&
-            `当前含 ${community.content.sampleRatings} 条 App 内置示例评分。`}
+            `含 ${community.content.sampleRatings} 条 App 示例 · `}
+          我的评分仅存本地，可修改。
         </p>
         {(community.error || draftError) && (
           <div className="k-community-error" role="alert">

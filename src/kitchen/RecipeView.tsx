@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useCommunity } from './useCommunity'
 import { useRecipeInteractions } from './Community'
 import { removeRecipeCommunity } from './community-storage'
+import { RecipeNutrition } from './Nutrition'
 import { useKitchen } from './context'
 import { isMine, lines, recordVisit, safeUrl, visible } from './domain'
 import type { Recipe } from './types'
@@ -128,6 +129,8 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
               <b className="k-servings">{recipe.servings}</b>
             </div>
           </div>
+          {interactions.rating}
+          <RecipeNutrition nutrition={community.content.nutrition} />
           <div className="k-detail-actions">
             <Flip
               className="btn"
@@ -160,7 +163,6 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
           </div>
         </div>
       </div>
-      {interactions.rating}
       <nav className="k-detail-nav" aria-label="菜谱分段">
         <span className="k-detail-nav__title">{recipe.title}</span>
         <div className="k-detail-nav__links">

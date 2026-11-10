@@ -24,10 +24,19 @@ export interface CommunityDraft {
   photo: Blob | null
 }
 export interface RecipeCommunity {
+  nutrition: Nutrition | null
   ownRating: number | null
   ratings: number[]
   posts: KitchenPost[]
   sampleRatings: number
+}
+export interface Nutrition {
+  calories: number | null
+  fat: number | null
+  protein: number | null
+  carbs: number | null
+  fiber: number | null
+  sodium: number | null
 }
 export const emptyCommunity = (recipeId: string): CommunityRecord => ({
   schema: 1,
@@ -116,6 +125,16 @@ export function communityWithSamples(
       ]
     : []
   return {
+    nutrition: seeded
+      ? {
+          calories: 480,
+          fat: 22,
+          protein: 26,
+          carbs: 44,
+          fiber: 3.5,
+          sodium: 650,
+        }
+      : null,
     ownRating: record.ownRating,
     ratings: [
       ...(seeded ? [8, 9, 6] : []),
