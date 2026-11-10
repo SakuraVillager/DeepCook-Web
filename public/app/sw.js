@@ -47,6 +47,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url)
   if (
     event.request.method !== 'GET' ||
+    url.pathname.includes('/deepcook-api/') ||
     url.origin !== root.origin ||
     !url.pathname.startsWith(root.pathname)
   )

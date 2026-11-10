@@ -18,6 +18,7 @@ import {
 import { useKitchen } from './context'
 import { Flip, Modal, Photo } from './ui'
 import type { CommunityState } from './useCommunity'
+import { deleteCloudPost, publishPost, publishRating } from './community-api'
 
 function useBlobUrl(blob: Blob | null) {
   const [url, setUrl] = useState('')
@@ -101,7 +102,11 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
     try {
       const restored = await readCommunityDraft(key)
       if (mounted.current && version === restoreVersion.current) {
-        setDraft(restored)
+        setDraft(
+          restored && restored.kind !== 'rating' && !restored.postId
+            ? { ...restored, postId: `post-${crypto.randomUUID()}` }
+            : restored,
+        )
         setDraftReady(true)
         setDraftError('')
       }
@@ -175,7 +180,8 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
       kind,
       text: '',
       photo: null,
-      score: community.content.ownRating ?? 8,
+      score: community.content.ownRating ?? community.content.localRating ?? 8,
+      postId: `post-${crypto.randomUUID()}`,
     })
   }
   const close = async () => {
@@ -203,7 +209,12 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
     setError('')
     try {
       await writes.current
-      if (draft.kind === 'rating') await rateRecipe(recipeId, draft.score, key)
+      if (community.shared) {
+        if (draft.kind === 'rating')
+          await publishRating(recipeId, draft.score, key)
+        else await publishPost(recipeId, draft, key)
+      } else if (draft.kind === 'rating')
+        await rateRecipe(recipeId, draft.score, key)
       else
         await addCommunityPost(
           recipeId,
@@ -217,9 +228,11 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
       unstored.current = false
       await community.reload()
       notify(
-        draft.kind === 'rating'
-          ? '评分已保存在当前浏览器。'
-          : '这次下厨的记录，保存好了。',
+        community.shared
+          ? '已发布，其他访客也能看到了。'
+          : draft.kind === 'rating'
+            ? '评分已保存在当前浏览器。'
+            : '这次下厨的记录，保存好了。',
       )
     } catch (e) {
       setError(
@@ -230,7 +243,10 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
       saving.current = false
     }
   }
-  const summary = ratingSummary(community.content.ratings)
+  const summary = ratingSummary(
+    community.content.ratings,
+    community.content.ratingCounts,
+  )
   const enabled =
     ready &&
     draftReady &&
@@ -265,7 +281,7 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
               <span>
                 {summary.average === null
                   ? '暂无评分'
-                  : `${community.content.ratings.length} 条评分`}
+                  : `${summary.count} 条评分`}
               </span>
             </div>
             <div className="k-rating__distribution">
@@ -278,17 +294,14 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={
-                      community.content.ratings.length
-                        ? Math.round(
-                            (group.count / community.content.ratings.length) *
-                              100,
-                          )
+                      summary.count
+                        ? Math.round((group.count / summary.count) * 100)
                         : 0
                     }
                   >
                     <i
                       style={{
-                        width: `${community.content.ratings.length ? (group.count / community.content.ratings.length) * 100 : 0}%`,
+                        width: `${summary.count ? (group.count / summary.count) * 100 : 0}%`,
                       }}
                     />
                   </div>
@@ -301,7 +314,13 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
         <p className="k-fine">
           {community.content.sampleRatings > 0 &&
             `含 ${community.content.sampleRatings} 条 App 示例 · `}
-          我的评分仅存本地，可修改。
+          {community.shared
+            ? '公开评分，可修改。'
+            : '我的评分仅存本地，可修改。'}
+          {community.shared &&
+            community.content.ownRating === null &&
+            community.content.localRating != null &&
+            ` 本机旧评分 ${community.content.localRating} 分，重新评价可发布。`}
         </p>
         {(community.error || draftError) && (
           <div className="k-community-error" role="alert">
@@ -331,19 +350,29 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
           <p>
             你的下厨记录，保存在这里。
             <br />
-            当前仅限此浏览器。
+            {community.shared ? '与其他下厨的人分享。' : '当前仅限此浏览器。'}
           </p>
         </div>
         <div className="k-community__groups">
           <div className="k-community__intro">
             <span className="label">GOOD FOOD, GOOD NOTES.</span>
             <p>记录这次的火候、成品和一点自己的发现。</p>
+            {community.shared && (
+              <Flip
+                disabled={community.loading}
+                onClick={() => void community.reload()}
+              >
+                刷新交流 ↻
+              </Flip>
+            )}
           </div>
           {([true, false] as const).map((submission) => {
             const posts = community.content.posts.filter(
                 (p) => p.submission === submission,
               ),
               limit = submission ? workLimit : commentLimit
+            const kind = submission ? 'submission' : 'comment'
+            const total = community.content.postCounts?.[kind] ?? posts.length
             return (
               <section
                 className="k-community-card"
@@ -352,7 +381,7 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
               >
                 <header>
                   <h3>
-                    {submission ? '交作业' : '评论'} <span>{posts.length}</span>
+                    {submission ? '交作业' : '评论'} <span>{total}</span>
                   </h3>
                   <Flip
                     disabled={!enabled}
@@ -389,6 +418,9 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                           {post.sample && (
                             <span className="k-community-sample">App 示例</span>
                           )}
+                          {post.localOnly && (
+                            <span className="k-community-sample">仅本机</span>
+                          )}
                           <time
                             dateTime={new Date(post.createdAt).toISOString()}
                           >
@@ -401,7 +433,7 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                             }).format(post.createdAt)}
                           </time>
                         </div>
-                        {!post.sample && (
+                        {!post.sample && post.mine !== false && (
                           <button
                             className="k-community-delete"
                             disabled={busy}
@@ -423,13 +455,16 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                     </div>
                   </article>
                 ))}
-                {posts.length > limit && (
+                {(posts.length > limit || community.hasMore?.[kind]) && (
                   <Flip
-                    onClick={() =>
+                    disabled={community.paging}
+                    onClick={async () => {
+                      if (community.hasMore?.[kind])
+                        await community.loadMore(submission)
                       submission
                         ? setWorkLimit((n) => n + 5)
                         : setCommentLimit((n) => n + 5)
-                    }
+                    }}
                   >
                     {submission ? '查看更多作业 ↓' : '查看更多评论 ↓'}
                   </Flip>
@@ -437,8 +472,15 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
               </section>
             )
           })}
+          {community.pagingError && (
+            <p className="k-community-error" role="alert">
+              {community.pagingError}
+            </p>
+          )}
           <p className="k-fine">
-            评分、评论和作业仅保存在当前浏览器，不会发布到服务器。清除站点数据会删除个人记录与照片；标记为
+            {community.shared
+              ? '新评分、评论及作业文字会公开保存到服务器；旧本地记录与照片仍仅在此浏览器。清除站点数据会失去访客身份及本地照片，已发布文字仍会保留。标记为 '
+              : '评分、评论和作业仅保存在当前浏览器，不会发布到服务器。清除站点数据会删除个人记录与照片；标记为 '}
             App 示例的内容不代表真实线上互动。
           </p>
         </div>
@@ -486,6 +528,7 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                   </label>
                   <p className="k-fine">
                     每道菜只保留一条自己的评分，再次保存会覆盖原评分。
+                    {community.shared && '评分会公开保存。'}
                   </p>
                 </>
               ) : (
@@ -503,6 +546,11 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                       }
                     />
                   </label>
+                  {community.shared && (
+                    <p className="k-fine">
+                      文字会向其他访客公开。照片仅保存在当前浏览器，其他访客看不到本地附图。
+                    </p>
+                  )}
                   <p className="k-community-counter">
                     {draft.text.length}/2000
                   </p>
@@ -580,10 +628,16 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                   {busy
                     ? '正在保存…'
                     : draft.kind === 'rating'
-                      ? '保存评分'
+                      ? community.shared
+                        ? '发布评分'
+                        : '保存评分'
                       : draft.kind === 'submission'
-                        ? '保存作业'
-                        : '保存评论'}
+                        ? community.shared
+                          ? '发布作业'
+                          : '保存作业'
+                        : community.shared
+                          ? '发布评论'
+                          : '保存评论'}
                 </button>
               </div>
             </form>
@@ -615,7 +669,9 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                   setBusy(true)
                   saving.current = true
                   try {
-                    await deleteCommunityPost(recipeId, pendingDelete.id)
+                    if (pendingDelete.cloud)
+                      await deleteCloudPost(recipeId, pendingDelete.id)
+                    else await deleteCommunityPost(recipeId, pendingDelete.id)
                     setPendingDelete(null)
                     await community.reload()
                     notify('已删除这条下厨记录及附图。')

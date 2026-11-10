@@ -1,0 +1,9 @@
+[Unit]
+Description=Back up DeepCook community records
+[Service]
+Type=oneshot
+User=deepcook
+Group=deepcook
+EnvironmentFile=/etc/deepcook-community.env
+ExecStart=/usr/bin/python3 /opt/deepcook-community/backup.py
+UMask=0077

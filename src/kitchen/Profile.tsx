@@ -4,6 +4,7 @@ import { DEFAULT_PREFERENCES, publicUrl } from './domain'
 import { imageData } from './storage'
 import { AVOIDS, LIKES, type Preferences } from './types'
 import { Flip, Heading, Modal } from './ui'
+import { isCloudCommunity } from './community-api'
 
 function AvatarCrop({
   source,
@@ -463,9 +464,11 @@ export function Settings() {
             ))}
           </div>
           <p className="k-fine">
-            资料补全优先复用内置资料，未命中时仅请求固定版本 HowToCook
-            原文。评分、评论、作业与附图仅保存在此浏览器，清除站点数据后无法恢复。当前没有计时、营养计算或
-            AI 功能。
+            资料补全优先复用内置资料，未命中时仅请求固定版本 HowToCook 原文。
+            {isCloudCommunity('braised-pork')
+              ? '内置菜谱的新评分、评论和作业文字公开保存在服务器；附图、旧记录及个人菜谱仍保存在此浏览器。清除站点数据会失去访客身份和本地照片。'
+              : '评分、评论、作业与附图仅保存在此浏览器，清除站点数据后无法恢复。'}
+            当前没有计时、营养计算或 AI 功能。
           </p>
         </section>
       </div>

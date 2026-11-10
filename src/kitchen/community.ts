@@ -10,6 +10,9 @@ export interface KitchenPost {
   author: string
   sample: boolean
   createdAt: number
+  mine?: boolean
+  cloud?: boolean
+  localOnly?: boolean
 }
 export interface CommunityRecord {
   schema: 1
@@ -22,6 +25,7 @@ export interface CommunityDraft {
   text: string
   score: number
   photo: Blob | null
+  postId?: string
 }
 export interface RecipeCommunity {
   nutrition: Nutrition | null
@@ -29,6 +33,9 @@ export interface RecipeCommunity {
   ratings: number[]
   posts: KitchenPost[]
   sampleRatings: number
+  ratingCounts?: number[]
+  postCounts?: { comment: number; submission: number }
+  localRating?: number | null
 }
 export interface Nutrition {
   calories: number | null
@@ -146,10 +153,14 @@ export function communityWithSamples(
     ),
   }
 }
-export function ratingSummary(ratings: number[]) {
+export function ratingSummary(ratings: number[], remoteCounts: number[] = []) {
+  const count = ratings.length + remoteCounts.reduce((a, b) => a + b, 0)
   return {
-    average: ratings.length
-      ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+    count,
+    average: count
+      ? (ratings.reduce((a, b) => a + b, 0) +
+          remoteCounts.reduce((sum, n, i) => sum + n * (i + 1), 0)) /
+        count
       : null,
     groups: [
       { name: '好极了', min: 8, max: 10 },
@@ -157,7 +168,12 @@ export function ratingSummary(ratings: number[]) {
       { name: '一般', min: 1, max: 5 },
     ].map((g) => ({
       ...g,
-      count: ratings.filter((s) => s >= g.min && s <= g.max).length,
+      count:
+        ratings.filter((s) => s >= g.min && s <= g.max).length +
+        remoteCounts.reduce(
+          (sum, n, i) => sum + (i + 1 >= g.min && i + 1 <= g.max ? n : 0),
+          0,
+        ),
     })),
   }
 }

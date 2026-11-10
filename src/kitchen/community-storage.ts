@@ -49,6 +49,48 @@ function announce(recipeId: string) {
     // Notification failure must not hide a committed write.
   }
 }
+export const announceCommunityUpdate = announce
+export async function saveCommunityPhoto(id: string, photo: Blob | null) {
+  const db = await open()
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction('photos', 'readwrite')
+    if (photo) tx.objectStore('photos').put(photo, id)
+    else tx.objectStore('photos').delete(id)
+    tx.oncomplete = () => resolve()
+    tx.onabort = tx.onerror = () => reject(storageError(tx.error))
+  })
+}
+export async function localCommunityPhotos(ids: string[]) {
+  const db = await open()
+  return new Promise<Set<string>>((resolve, reject) => {
+    const tx = db.transaction('photos'),
+      found = new Set<string>()
+    for (const id of ids) {
+      const req = tx.objectStore('photos').getKey(id)
+      req.onsuccess = () => {
+        if (req.result !== undefined) found.add(id)
+      }
+    }
+    tx.oncomplete = () => resolve(found)
+    tx.onabort = tx.onerror = () => reject(tx.error)
+  })
+}
+export async function communityCache(recipeId: string, value?: unknown) {
+  const db = await open()
+  return new Promise<unknown>((resolve, reject) => {
+    const tx = db.transaction(
+      'recipes',
+      value === undefined ? 'readonly' : 'readwrite',
+    )
+    const store = tx.objectStore('recipes')
+    const request =
+      value === undefined
+        ? store.get(`cloud-cache/${recipeId}`)
+        : store.put(value, `cloud-cache/${recipeId}`)
+    tx.oncomplete = () => resolve(request.result)
+    tx.onabort = tx.onerror = () => reject(tx.error)
+  })
+}
 function storageError(problem?: unknown) {
   if (problem instanceof Error && !(problem instanceof DOMException))
     return problem

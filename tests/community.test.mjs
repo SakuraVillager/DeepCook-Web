@@ -51,6 +51,13 @@ test('rating summary uses the App 8–10 / 6–7 / 1–5 breakdown', () => {
     [3, 1, 0],
   )
   assert.equal(ratingSummary([]).average, null)
+  const shared = ratingSummary([8, 9, 6], [0, 0, 0, 0, 0, 0, 1, 0, 0, 1])
+  assert.equal(shared.count, 5)
+  assert.equal(shared.average, 8)
+  assert.deepEqual(
+    shared.groups.map((g) => g.count),
+    [3, 2, 0],
+  )
   assert.equal(validScore(0), false)
   assert.equal(validScore(10), true)
   assert.equal(validScore(8.5), false)

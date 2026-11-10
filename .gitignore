@@ -26,3 +26,11 @@ dist-ssr
 # Browser verification artifacts
 test-results/
 playwright-report/
+
+# Python service runtime
+__pycache__/
+*.pyc
+server/venv/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm

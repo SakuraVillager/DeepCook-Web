@@ -1,0 +1,26 @@
+[Unit]
+Description=DeepCook lightweight community API
+After=network.target
+
+[Service]
+User=deepcook
+Group=deepcook
+WorkingDirectory=/opt/deepcook-community
+EnvironmentFile=/etc/deepcook-community.env
+ExecStart=/opt/deepcook-community/venv/bin/gunicorn -c gunicorn.conf.py 'community:create_app()'
+Restart=on-failure
+RestartSec=3
+StateDirectory=deepcook-community
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+MemoryMax=160M
+CPUQuota=100%
+TasksMax=32
+LimitNOFILE=1024
+
+[Install]
+WantedBy=multi-user.target
