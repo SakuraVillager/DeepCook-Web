@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useKitchen } from './context'
 import { visible } from './domain'
 import type { Recipe } from './types'
 import { Empty, Flip, Modal, Photo } from './ui'
+import { useReaderSwipe } from './useReaderSwipe'
 
 export function Reader({
   recipe,
@@ -13,6 +14,7 @@ export function Reader({
 }) {
   const { user, go, notify } = useKitchen()
   const [directory, setDirectory] = useState(false)
+  const [direction, setDirection] = useState<'next' | 'previous'>('next')
   const index = Math.max(
     0,
     recipe?.steps.findIndex((s) => s.id === stepId) ?? 0,
@@ -20,6 +22,22 @@ export function Reader({
   const step = recipe?.steps[index]
   const content = useRef<HTMLDivElement>(null)
   const copy = useRef<HTMLElement>(null)
+  const move = useCallback(
+    (n: number) => {
+      const next = recipe?.steps[n]
+      if (!recipe || !next || n === index) return
+      setDirection(n > index ? 'next' : 'previous')
+      go(
+        `/read/${encodeURIComponent(recipe.id)}/${encodeURIComponent(next.id)}`,
+      )
+    },
+    [recipe, index, go],
+  )
+  const swipe = useCallback(
+    (delta: -1 | 1) => move(index + delta),
+    [index, move],
+  )
+  useReaderSwipe(content, Boolean(step) && !directory, swipe)
 
   useEffect(() => {
     content.current?.scrollTo(0, 0)
@@ -58,10 +76,6 @@ export function Reader({
       <Empty title="没有找到阅读内容。">
         <Flip onClick={() => go('/discover')}>回到找菜 ↗</Flip>
       </Empty>
-    )
-  const move = (n: number) =>
-    go(
-      `/read/${encodeURIComponent(recipe.id)}/${encodeURIComponent(recipe.steps[n]!.id)}`,
     )
   const hasImage = Boolean(user.preferences.showStepImages && step.image)
   const stepNumber = String(index + 1).padStart(2, '0')
@@ -104,7 +118,7 @@ export function Reader({
 
       <div className="k-reader__content" ref={content}>
         <div
-          className={`k-reader__stage ${hasImage ? 'k-reader__stage--photo' : 'k-reader__stage--text'}`}
+          className={`k-reader__stage k-reader__stage--${direction} ${hasImage ? 'k-reader__stage--photo' : 'k-reader__stage--text'}`}
           key={step.id}
         >
           <article
@@ -159,11 +173,12 @@ export function Reader({
           ← 上一步
         </Flip>
         <div className="k-reader__position">
-          <span>
+          <span aria-live="polite" aria-atomic="true">
             <b>{stepNumber}</b>
             <span>/ {total}</span>
           </span>
           <span className="label">一步一步，不慌不忙。</span>
+          <span className="k-reader__swipe-hint">左右滑动切换步骤</span>
         </div>
         <Flip
           className="btn"

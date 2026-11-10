@@ -81,6 +81,7 @@
   transition: width 0.65s var(--ease);
 }
 .k-reader__content {
+  touch-action: pan-y pinch-zoom;
   overflow: hidden;
   min-height: 0;
   display: grid;
@@ -88,6 +89,7 @@
   padding: clamp(24px, 4.2vh, 58px) clamp(24px, 5.6vw, 112px);
 }
 .k-reader__stage {
+  animation: reader-step-enter 0.32s var(--ease) both;
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
   align-items: center;
@@ -95,6 +97,22 @@
   width: min(100%, 1440px);
   height: 100%;
   min-height: 0;
+}
+.k-reader__stage--next {
+  --reader-step-offset: 24px;
+}
+.k-reader__stage--previous {
+  --reader-step-offset: -24px;
+}
+@keyframes reader-step-enter {
+  from {
+    opacity: 0;
+    transform: translateX(var(--reader-step-offset));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 .k-reader__copy {
   max-height: 100%;
@@ -230,6 +248,9 @@
   color: var(--muted);
   font-size: 9px;
   letter-spacing: 0.1em;
+}
+.k-reader__swipe-hint {
+  display: none;
 }
 .k-reader__footer > .btn {
   min-height: 52px;
@@ -420,7 +441,26 @@
     font-size: 8px;
   }
 }
+@media (any-pointer: coarse) {
+  .k-reader__position {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .k-reader__position > .label {
+    display: none;
+  }
+  .k-reader__swipe-hint {
+    display: block;
+    font-size: 9px;
+    line-height: 1.4;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .k-reader__stage {
+    animation: none;
+  }
   .k-reader__progress i {
     transition: none;
   }
