@@ -5,6 +5,7 @@ export interface KitchenContext {
   catalog: Recipe[]
   user: UserData
   ready: boolean
+  interactive: boolean
   go: Go
   commit: (transform: (data: UserData) => UserData) => Promise<void>
   notify: (text: string, undo?: () => void) => void

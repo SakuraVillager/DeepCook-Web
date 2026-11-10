@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { useCommunity } from './useCommunity'
+import { useRecipeInteractions } from './Community'
+import { removeRecipeCommunity } from './community-storage'
 import { useKitchen } from './context'
 import { isMine, lines, recordVisit, safeUrl, visible } from './domain'
 import type { Recipe } from './types'
@@ -6,6 +9,11 @@ import { Empty, Flip, Modal, Photo, Star } from './ui'
 
 export function RecipeView({ recipe }: { recipe?: Recipe }) {
   const { go, user, commit, favorite, ready, notify } = useKitchen()
+  const community = useCommunity(recipe)
+  const interactions = useRecipeInteractions({
+    recipeId: recipe?.id ?? '',
+    community,
+  })
   const recorded = useRef('')
   const [activeSection, setActiveSection] = useState('ingredients')
   useEffect(() => {
@@ -65,6 +73,7 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
     ['steps', '步骤'],
     ...(lines(recipe.notes).length ? [['notes', '注意事项']] : []),
     ['source', '来源'],
+    ['community', '交流'],
   ]
   const sourceUrl = safeUrl(recipe.source.url)
   return (
@@ -151,6 +160,7 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
           </div>
         </div>
       </div>
+      {interactions.rating}
       <nav className="k-detail-nav" aria-label="菜谱分段">
         <span className="k-detail-nav__title">{recipe.title}</span>
         <div className="k-detail-nav__links">
@@ -315,7 +325,9 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
             )}
           </div>
         </section>
+        {interactions.section}
       </div>
+      {interactions.dialogs}
       {deleting && (
         <Modal
           title="删除这道菜谱？"
@@ -323,7 +335,9 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
             if (!busy) setDeleting(false)
           }}
         >
-          <p>这道菜谱、封面及对应的收藏和浏览记录会一并移除。</p>
+          <p>
+            这道菜谱、封面、评分、评论、作业及对应的收藏和浏览记录会一并移除。
+          </p>
           <div className="k-modal-actions">
             <Flip onClick={() => setDeleting(false)} disabled={busy}>
               先留着
@@ -342,8 +356,18 @@ export function RecipeView({ recipe }: { recipe?: Recipe }) {
                     ),
                     recent: d.recent.filter((r) => r.recipeId !== recipe.id),
                   }))
+                  let cleaned = true
+                  try {
+                    await removeRecipeCommunity(recipe.id)
+                  } catch {
+                    cleaned = false
+                  }
                   go('/mine')
-                  notify('已删除这道菜谱及对应记录。')
+                  notify(
+                    cleaned
+                      ? '已删除这道菜谱及对应记录。'
+                      : '菜谱已删除，互动记录清理失败，原记录已保留。',
+                  )
                 } catch {
                   setBusy(false)
                 }

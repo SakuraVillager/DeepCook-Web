@@ -464,7 +464,8 @@ export function Settings() {
           </div>
           <p className="k-fine">
             资料补全优先复用内置资料，未命中时仅请求固定版本 HowToCook
-            原文。当前没有计时、营养计算、评分评论或 AI 功能。
+            原文。评分、评论、作业与附图仅保存在此浏览器，清除站点数据后无法恢复。当前没有计时、营养计算或
+            AI 功能。
           </p>
         </section>
       </div>

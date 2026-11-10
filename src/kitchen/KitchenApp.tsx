@@ -274,7 +274,17 @@ export default function KitchenApp() {
     )
   return (
     <Kitchen.Provider
-      value={{ catalog, user, ready, commit, go, notify, favorite, guard }}
+      value={{
+        catalog,
+        user,
+        ready,
+        interactive: introDone,
+        commit,
+        go,
+        notify,
+        favorite,
+        guard,
+      }}
     >
       <>
         <div
