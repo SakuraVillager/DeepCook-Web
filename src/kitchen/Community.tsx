@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ratingSummary,
+  isCloudPhoto,
   type CommunityDraft,
   type ComposerKind,
   type KitchenPost,
@@ -18,7 +19,13 @@ import {
 import { useKitchen } from './context'
 import { Flip, Modal, Photo } from './ui'
 import type { CommunityState } from './useCommunity'
-import { deleteCloudPost, publishPost, publishRating } from './community-api'
+import {
+  cloudPhotoUrl,
+  deleteCloudPost,
+  discardCloudUpload,
+  publishPost,
+  publishRating,
+} from './community-api'
 
 function useBlobUrl(blob: Blob | null) {
   const [url, setUrl] = useState('')
@@ -38,7 +45,7 @@ function PostPhoto({ post }: { post: KitchenPost }) {
     [error, setError] = useState('')
   const url = useBlobUrl(blob)
   useEffect(() => {
-    if (post.sample || !post.photo) return
+    if (post.sample || !post.photo || isCloudPhoto(post.photo)) return
     let active = true
     void readCommunityPhoto(post.photo)
       .then((photo) => {
@@ -59,6 +66,16 @@ function PostPhoto({ post }: { post: KitchenPost }) {
         path={post.photo}
         alt={`${post.author}的作业示例，配图借用菜谱封面`}
       />
+    )
+  if (isCloudPhoto(post.photo))
+    return (
+      <div className="k-community-photo">
+        <img
+          src={cloudPhotoUrl(post.photo)}
+          alt="下厨作业成品照片"
+          loading="lazy"
+        />
+      </div>
     )
   return (
     <div className="k-community-photo">
@@ -191,6 +208,8 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
     try {
       await writes.current
       await saveCommunityDraft(key, null)
+      if (community.shared && draft?.postId)
+        void discardCloudUpload(recipeId, draft.postId).catch(() => {})
       setDraft(null)
       setError('')
       setDraftError('')
@@ -449,6 +468,11 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                       </header>
                       <p>{post.text}</p>
                       {post.photo && <PostPhoto post={post} />}
+                      {post.photoPending && (
+                        <p className="k-fine">
+                          这张旧附图尚未同步，当前仅本机可见；联网后刷新交流会重试。
+                        </p>
+                      )}
                       {post.sample && post.photo && (
                         <p className="k-fine">示例配图借用菜谱封面。</p>
                       )}
@@ -479,7 +503,7 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
           )}
           <p className="k-fine">
             {community.shared
-              ? '新评分、评论及作业文字会公开保存到服务器；旧本地记录与照片仍仅在此浏览器。清除站点数据会失去访客身份及本地照片，已发布文字仍会保留。标记为 '
+              ? '新评分、评论及作业图文会公开保存到服务器；旧本地记录仍标为“仅本机”。清除站点数据会失去访客身份，已发布图文仍会保留。标记为 '
               : '评分、评论和作业仅保存在当前浏览器，不会发布到服务器。清除站点数据会删除个人记录与照片；标记为 '}
             App 示例的内容不代表真实线上互动。
           </p>
@@ -548,7 +572,9 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                   </label>
                   {community.shared && (
                     <p className="k-fine">
-                      文字会向其他访客公开。照片仅保存在当前浏览器，其他访客看不到本地附图。
+                      {draft.kind === 'submission'
+                        ? '作业文字和附图会公开保存，其他访客和其他设备也能查看。'
+                        : '评论会公开保存，其他访客也能查看。'}
                     </p>
                   )}
                   <p className="k-community-counter">
@@ -601,7 +627,10 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                       )}
                       <p className="k-fine">
                         照片会按 App 的 4:3 比例压缩，输出 1200×900，单张不超过
-                        1 MB，仅保存在此浏览器。
+                        1 MB。
+                        {community.shared
+                          ? '发布后与作业一起保存到云端。'
+                          : '仅保存在此浏览器。'}
                       </p>
                     </div>
                   )}

@@ -50,7 +50,7 @@ export function useCommunity(recipe?: Recipe) {
           setLoading(false)
         }
         const current = await readCloudCommunity(recipeId)
-        const posts = await cloudPostsWithPhotos(current.posts)
+        const posts = await cloudPostsWithPhotos(current.posts, true)
         if (request === generation.current) setCloud({ ...current, posts })
       }
     } catch (e) {
@@ -98,7 +98,7 @@ export function useCommunity(recipe?: Recipe) {
     setPagingError('')
     try {
       const next = await moreCloudPosts(recipeId, submission, cursor)
-      const posts = await cloudPostsWithPhotos(next.posts)
+      const posts = await cloudPostsWithPhotos(next.posts, true)
       if (version === generation.current)
         setCloud((current) =>
           current

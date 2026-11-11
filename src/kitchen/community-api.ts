@@ -2,6 +2,7 @@ import {
   validateCommunity,
   validScore,
   validatePostText,
+  isCloudPhoto,
   type CommunityDraft,
   type CommunityRecord,
   type KitchenPost,
@@ -10,6 +11,7 @@ import {
   announceCommunityUpdate,
   communityCache,
   localCommunityPhotos,
+  readCommunityPhoto,
   saveCommunityDraft,
   saveCommunityPhoto,
 } from './community-storage'
@@ -47,7 +49,10 @@ class RequestError extends Error {
 async function request(path: string, method = 'GET', body?: unknown) {
   const token = visitorToken()
   const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 10000)
+  const timeout = window.setTimeout(
+    () => controller.abort(),
+    body instanceof Blob ? 60000 : 10000,
+  )
   let response: Response
   try {
     response = await fetch(`${endpoint}${path}`, {
@@ -56,9 +61,19 @@ async function request(path: string, method = 'GET', body?: unknown) {
       cache: 'no-cache',
       headers: {
         Authorization: `Bearer ${token}`,
-        ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...(body === undefined
+          ? {}
+          : {
+              'Content-Type':
+                body instanceof Blob ? body.type : 'application/json',
+            }),
       },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body:
+        body === undefined
+          ? undefined
+          : body instanceof Blob
+            ? body
+            : JSON.stringify(body),
       signal: controller.signal,
     })
   } catch {
@@ -93,16 +108,19 @@ function validatePosts(value: unknown, recipeId: string): KitchenPost[] {
   if (
     posts.some(
       (p) =>
-        typeof p.mine !== 'boolean' || p.cloud !== true || p.photo !== null,
+        typeof p.mine !== 'boolean' ||
+        p.cloud !== true ||
+        !(p.photoUrl == null || (p.submission && isCloudPhoto(p.photoUrl))) ||
+        !(p.photo === null || p.photo === p.photoUrl),
     )
   )
     throw new Error('交流记录格式异常，请重试。')
-  return posts
+  return posts.map((p) => ({ ...p, photo: p.photoUrl ?? null }))
 }
 function validateCloud(value: unknown, recipeId: string): CloudCommunity {
   const r = value as CloudCommunity
   validateCommunity(value, recipeId)
-  validatePosts(r.posts, recipeId)
+  const posts = validatePosts(r.posts, recipeId)
   if (
     !Array.isArray(r.ratingCounts) ||
     r.ratingCounts.length !== 10 ||
@@ -119,7 +137,7 @@ function validateCloud(value: unknown, recipeId: string): CloudCommunity {
     })
   )
     throw new Error('交流统计格式异常，请重试。')
-  return r
+  return { ...r, posts }
 }
 export async function cachedCloudCommunity(recipeId: string) {
   try {
@@ -144,11 +162,53 @@ export async function readCloudCommunity(recipeId: string) {
   }
   return data
 }
-export async function cloudPostsWithPhotos(posts: KitchenPost[]) {
+export function cloudPhotoUrl(path: string) {
+  if (!isCloudPhoto(path)) throw new Error('图片地址无效。')
+  return new URL(path, new URL(endpoint, location.href).origin).href
+}
+export async function cloudPostsWithPhotos(
+  posts: KitchenPost[],
+  migrate = false,
+) {
   const photos = await localCommunityPhotos(
     posts.filter((p) => p.mine && p.submission).map((p) => p.id),
   )
-  return posts.map((p) => ({ ...p, photo: photos.has(p.id) ? p.id : null }))
+  const result: KitchenPost[] = []
+  let migratedAny = false
+  for (const post of posts) {
+    if (post.photo || !photos.has(post.id)) {
+      if (post.photo && photos.has(post.id))
+        await saveCommunityPhoto(post.id, null).catch(() => {})
+      result.push(post)
+      continue
+    }
+    if (migrate) {
+      try {
+        const photo = await readCommunityPhoto(post.id)
+        const uploaded = await request(
+          `${route(post.recipeId)}/posts/${post.id}/photo`,
+          'PUT',
+          photo,
+        )
+        if (isCloudPhoto(uploaded.photoUrl)) {
+          await saveCommunityPhoto(post.id, null).catch(() => {})
+          result.push({
+            ...post,
+            photo: uploaded.photoUrl,
+            photoUrl: uploaded.photoUrl,
+          })
+          migratedAny = true
+          continue
+        }
+      } catch {
+        /* Preserve the legacy local copy and retry on the next online read. */
+      }
+    }
+    result.push({ ...post, photo: post.id, photoPending: true })
+  }
+  if (migratedAny && posts[0])
+    await readCloudCommunity(posts[0].recipeId).catch(() => {})
+  return result
 }
 export async function moreCloudPosts(
   recipeId: string,
@@ -182,11 +242,17 @@ export async function publishPost(
   if (!draft.postId) throw new Error('草稿标识缺失，请重新打开编辑框。')
   // Persist the id before sending: a lost response can be retried without duplicate posts.
   await saveCommunityDraft(draftKey, draft)
-  if (draft.photo) await saveCommunityPhoto(draft.postId, draft.photo)
+  if (draft.photo)
+    await request(
+      `${route(recipeId)}/uploads/${draft.postId}`,
+      'PUT',
+      draft.photo,
+    )
   await request(`${route(recipeId)}/posts`, 'POST', {
     id: draft.postId,
     submission: draft.kind === 'submission',
     text,
+    photo: Boolean(draft.photo),
   })
   await saveCommunityDraft(draftKey, null)
   announceCommunityUpdate(recipeId)
@@ -198,4 +264,10 @@ export async function deleteCloudPost(recipeId: string, postId: string) {
   )
   await saveCommunityPhoto(postId, null)
   announceCommunityUpdate(recipeId)
+}
+export async function discardCloudUpload(recipeId: string, postId: string) {
+  await request(
+    `${route(recipeId)}/uploads/${encodeURIComponent(postId)}`,
+    'DELETE',
+  )
 }

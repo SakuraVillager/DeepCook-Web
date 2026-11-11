@@ -13,6 +13,8 @@ export interface KitchenPost {
   mine?: boolean
   cloud?: boolean
   localOnly?: boolean
+  photoUrl?: string | null
+  photoPending?: boolean
 }
 export interface CommunityRecord {
   schema: 1
@@ -92,13 +94,23 @@ export function validateCommunity(
         !Number.isSafeInteger(p.createdAt) ||
         p.createdAt < 0 ||
         p.createdAt > 8640000000000000 ||
-        !(p.photo === null || (p.submission && p.photo === p.id)),
+        !(
+          p.photo === null ||
+          (p.submission &&
+            (p.photo === p.id || (p.cloud === true && isCloudPhoto(p.photo))))
+        ),
     ) ||
     new Set(r.posts.map((p) => p.id)).size !== r.posts.length
   ) {
     throw new Error('本地互动记录暂时无法读取，原数据已保留。')
   }
   return r
+}
+export function isCloudPhoto(path: unknown): path is string {
+  return (
+    typeof path === 'string' &&
+    /^\/deepcook-api\/v1\/photos\/[a-f0-9]{64}\.jpg$/.test(path)
+  )
 }
 export function communityWithSamples(
   record: CommunityRecord,
