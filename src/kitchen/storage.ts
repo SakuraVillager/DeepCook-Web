@@ -17,7 +17,7 @@ function open() {
     }
   }))
 }
-function validate(value: unknown): UserData {
+export function validateUser(value: unknown): UserData {
   if (value == null) return emptyUser()
   const d = value as UserData
   if (
@@ -47,14 +47,14 @@ function validate(value: unknown): UserData {
     throw new Error('本地数据暂时无法读取，原数据已保留。')
   return d
 }
-export async function readUser(): Promise<UserData> {
+export async function readUser(scope = 'user'): Promise<UserData> {
   const db = await open()
   return new Promise((resolve, reject) => {
     const tx = db.transaction('data', 'readonly'),
-      req = tx.objectStore('data').get('user')
+      req = tx.objectStore('data').get(scope)
     req.onsuccess = () => {
       try {
-        resolve(validate(req.result))
+        resolve(validateUser(req.result))
       } catch (e) {
         reject(e)
       }
@@ -65,17 +65,19 @@ export async function readUser(): Promise<UserData> {
 /** Read-modify-write in one transaction, also serializing writes from different tabs. */
 export async function updateUser(
   transform: (user: UserData) => UserData,
+  scope = 'user',
+  broadcast = true,
 ): Promise<UserData> {
   const db = await open()
   return new Promise((resolve, reject) => {
     const tx = db.transaction('data', 'readwrite'),
       store = tx.objectStore('data'),
-      req = store.get('user')
+      req = store.get(scope)
     let next: UserData, problem: unknown
     req.onsuccess = () => {
       try {
-        next = transform(validate(req.result))
-        store.put(next, 'user')
+        next = transform(validateUser(req.result))
+        store.put(next, scope)
       } catch (e) {
         problem = e
         tx.abort()
@@ -83,9 +85,9 @@ export async function updateUser(
     }
     tx.oncomplete = () => {
       resolve(next)
-      if ('BroadcastChannel' in globalThis) {
+      if (broadcast && 'BroadcastChannel' in globalThis) {
         const channel = new BroadcastChannel('deepcook-updates')
-        channel.postMessage('updated')
+        channel.postMessage(scope)
         channel.close()
       }
     }

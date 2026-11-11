@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useKitchen } from './context'
-import { DEFAULT_PREFERENCES, publicUrl } from './domain'
+import { DEFAULT_PREFERENCES, publicUrl, assetUrl } from './domain'
 import { imageData } from './storage'
 import { AVOIDS, LIKES, type Preferences } from './types'
 import { Flip, Heading, Modal } from './ui'
 import { isCloudCommunity } from './community-api'
+import { AccountCard } from './AccountCard'
 
 function AvatarCrop({
   source,
@@ -127,16 +128,16 @@ export function Profile() {
     setName(user.profile.name)
   }, [user.profile.name])
   const toggle = async (kind: 'likes' | 'avoids', tag: string) => {
+    const on = !user.profile[kind].includes(tag)
     try {
       await commit((d) => {
-        const other = kind === 'likes' ? 'avoids' : 'likes',
-          on = !d.profile[kind].includes(tag)
+        const other = kind === 'likes' ? 'avoids' : 'likes'
         return {
           ...d,
           profile: {
             ...d.profile,
             [kind]: on
-              ? [...d.profile[kind], tag]
+              ? [...d.profile[kind].filter((t) => t !== tag), tag]
               : d.profile[kind].filter((t) => t !== tag),
             [other]: on
               ? d.profile[other].filter((t) => t !== tag)
@@ -155,12 +156,13 @@ export function Profile() {
         en="A KITCHEN OF YOUR OWN"
         title="好好吃饭，从这里开始。"
       />
+      <AccountCard />
       <div className="k-profile">
         <section className="k-profile-card">
           <div className="k-profile-card__top">
             <div className="k-avatar">
               {user.profile.avatar ? (
-                <img src={user.profile.avatar} alt="我的头像" />
+                <img src={assetUrl(user.profile.avatar)} alt="我的头像" />
               ) : (
                 <span aria-hidden="true">炊</span>
               )}
@@ -319,7 +321,7 @@ export function Profile() {
   )
 }
 export function Settings() {
-  const { user, commit, ready, go, notify } = useKitchen(),
+  const { user, commit, ready, go, notify, account } = useKitchen(),
     [confirmation, setConfirmation] = useState(''),
     [busy, setBusy] = useState(false)
   const [p, setPreferences] = useState(user.preferences)
@@ -416,7 +418,9 @@ export function Settings() {
           <span className="label">LOCAL RECORDS</span>
           <h2>整理一下厨房。</h2>
           <p className="k-fine">
-            个人菜谱、照片、收藏与设置保存在当前浏览器，尚无账号和跨设备同步。
+            {account.account
+              ? '昵称、头像、口味、显示与阅读设置、收藏、最近浏览和个人菜谱已随账号同步；本机保留阅读缓存。'
+              : '游客资料保存在当前浏览器。注册或登录厨房账号后，可以同步资料、偏好、收藏与个人菜谱。'}
           </p>
           {[
             ['favorites', `清空收藏 · ${user.favorites.length}`],
@@ -466,7 +470,7 @@ export function Settings() {
           <p className="k-fine">
             资料补全优先复用内置资料，未命中时仅请求固定版本 HowToCook 原文。
             {isCloudCommunity('braised-pork')
-              ? '内置菜谱的新评分、评论和作业图文公开保存在服务器；旧本地记录及个人菜谱仍保存在此浏览器。清除站点数据会失去访客身份，已发布图文仍会保留。'
+              ? '内置菜谱的评分、评论和作业图文公开保存在服务器。登录后可跨设备管理自己的互动；个人菜谱及其图片只对自己的账号开放。'
               : '评分、评论、作业与附图仅保存在此浏览器，清除站点数据后无法恢复。'}
             当前没有计时、营养计算或 AI 功能。
           </p>
@@ -487,6 +491,9 @@ export function Settings() {
                 : '最近浏览记录会被清除。'}
             个人菜谱和头像会保留。
           </p>
+          {account.account && (
+            <p className="k-fine">这次整理会同步到此账号的其他设备。</p>
+          )}
           <div className="k-modal-actions">
             <Flip disabled={busy} onClick={() => setConfirmation('')}>
               先留着

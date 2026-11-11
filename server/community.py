@@ -16,6 +16,8 @@ from pathlib import Path
 from urllib.parse import parse_qs
 from datetime import datetime, timezone
 from PIL import Image, UnidentifiedImageError
+from errors import ApiError
+from accounts import Accounts
 
 PREFIX = "/deepcook-api/v1"
 POST_ID = re.compile(r"post-[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}\Z")
@@ -24,13 +26,8 @@ PHOTO_FILE = re.compile(r"[a-f0-9]{64}\.jpg\Z")
 PHOTO_LIMIT = 1024 * 1024
 
 
-class ApiError(Exception):
-    def __init__(self, status, message):
-        self.status, self.message = status, message
-
-
 class CommunityApp:
-    def __init__(self, database, recipe_ids, origins, rate_limits=True, media_limit=5 * 1024**3, reserve_bytes=2 * 1024**3, backup_token=None):
+    def __init__(self, database, recipe_ids, origins, rate_limits=True, media_limit=5 * 1024**3, reserve_bytes=2 * 1024**3, backup_token=None, secure_cookies=True):
         self.recipes = frozenset(recipe_ids)
         self.origins = frozenset(origins)
         self.rate_limits = rate_limits
@@ -79,6 +76,7 @@ class CommunityApp:
             CREATE INDEX IF NOT EXISTS photos_pending ON photos(published, created_at);
             CREATE TABLE IF NOT EXISTS photo_garbage(file TEXT PRIMARY KEY);
         """)
+        self.accounts = Accounts(self, secure_cookies=secure_cookies)
         with self.lock: self.prune(orphan_scan=True)
 
     def prune(self, orphan_scan=False):
@@ -101,6 +99,7 @@ class CommunityApp:
             for path in self.media.iterdir():
                 if path.name not in referenced and (PHOTO_FILE.fullmatch(path.name) or path.name.startswith('.upload-')):
                     path.unlink(missing_ok=True)
+            self.accounts.prune(orphan_scan=True)
 
     def upload(self, environ, recipe, post_id, owner, attach=False):
         if not POST_ID.fullmatch(post_id): raise ApiError(400, '图片标识无效。')
@@ -194,6 +193,9 @@ class CommunityApp:
                     (target / 'media').mkdir(mode=0o700)
                     for row in backup.execute('SELECT DISTINCT file FROM photos'):
                         os.link(self.media / row[0], target / 'media' / row[0])
+                    (target / 'account-media').mkdir(mode=0o700)
+                    for row in backup.execute('SELECT DISTINCT file FROM account_media'):
+                        os.link(self.accounts.media / row[0], target / 'account-media' / row[0])
                 (target / 'complete').write_text('ok\n')
             except Exception:
                 shutil.rmtree(target)
@@ -227,9 +229,9 @@ class CommunityApp:
         return chunks()
 
     def allowed_origin(self, origin):
-        # Public anonymous community, not a credentialed-cookie API. Other sites
-        # cannot read this site's local visitor token; ownership never uses Origin.
-        return origin in self.origins or ('*' in self.origins and bool(re.fullmatch(r'https?://[^/\s]+', origin)))
+        # Cookie-authenticated requests require an exact source allowlist.
+        # Ownership is checked independently through the session or visitor token.
+        return bool(origin) and origin != '*' and origin in self.origins
 
     def limit(self, key, limit, period):
         if not self.rate_limits:
@@ -246,6 +248,11 @@ class CommunityApp:
                 raise ApiError(429, "操作太频繁，请稍后再试。")
 
     def identity(self, environ, required=False):
+        account = self.accounts.current(environ)
+        if account: return account['owner']
+        return self.guest_identity(environ, required)
+
+    def guest_identity(self, environ, required=False):
         header = environ.get("HTTP_AUTHORIZATION", "")
         match = TOKEN.fullmatch(header)
         if match:
@@ -254,10 +261,10 @@ class CommunityApp:
             raise ApiError(401, "浏览器身份无效，请刷新页面后重试。")
         return ""
 
-    def body(self, environ, fields, optional=frozenset()):
+    def body(self, environ, fields, optional=frozenset(), maximum=12288):
         try:
             length = int(environ.get("CONTENT_LENGTH", "0"))
-            if length <= 0 or length > 12288:
+            if length <= 0 or length > maximum:
                 raise ValueError()
             if environ.get("CONTENT_TYPE", "").split(";")[0] != "application/json":
                 raise ValueError()
@@ -266,7 +273,7 @@ class CommunityApp:
                 raise ValueError()
             return body
         except (ValueError, UnicodeError):
-            raise ApiError(400, "请求格式不正确，仅支持评分和文字记录。") from None
+            raise ApiError(400, "请求格式不正确，请检查输入后重试。") from None
 
     def page(self, recipe, submission, owner, cursor=""):
         params = [recipe, int(submission)]
@@ -300,7 +307,9 @@ class CommunityApp:
     def dispatch(self, environ):
         method, path = environ["REQUEST_METHOD"], environ["PATH_INFO"]
         if method == "GET" and path == PREFIX + "/health":
-            return {"ok": True, "storage": "sqlite", "uploads": True}
+            return {"ok": True, "storage": "sqlite", "uploads": True, "accounts": True}
+        if path.startswith(PREFIX+'/auth/') or path.startswith(PREFIX+'/account/'):
+            return self.accounts.dispatch(environ)
         if path == '/internal/backup' and method == 'POST' and environ.get('REMOTE_ADDR') == '127.0.0.1' and not environ.get('HTTP_X_REAL_IP') and hmac.compare_digest(environ.get('HTTP_AUTHORIZATION', ''), 'Bearer '+self.backup_token):
             return self.backup()
         match = re.fullmatch(re.escape(PREFIX) + r"/recipes/([a-z0-9-]{1,128})(?:/(rating|posts|uploads)(?:/(post-[a-f0-9-]+))?(?:/(photo))?)?", path)
@@ -422,13 +431,17 @@ class CommunityApp:
     def __call__(self, environ, start_response):
         origin = environ.get("HTTP_ORIGIN", "")
         headers = [("Content-Type", "application/json; charset=utf-8"), ("Cache-Control", "private, no-cache"),
-                   ("X-Content-Type-Options", "nosniff"), ("Vary", "Origin, Authorization")]
+                   ("X-Content-Type-Options", "nosniff"), ("Vary", "Origin, Authorization, Cookie, X-DeepCook-Account")]
+        if environ['PATH_INFO'].startswith((PREFIX+'/auth/', PREFIX+'/account/')):
+            headers = [(key, 'private, no-store' if key == 'Cache-Control' else value) for key,value in headers]
         if self.allowed_origin(origin):
-            headers += [("Access-Control-Allow-Origin", '*' if '*' in self.origins else origin), ("Access-Control-Allow-Headers", "Authorization, Content-Type"),
+            headers += [("Access-Control-Allow-Origin", origin), ("Access-Control-Allow-Credentials", "true"), ("Access-Control-Allow-Headers", "Authorization, Content-Type, X-DeepCook-Account"),
                         ("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS"), ("Access-Control-Max-Age", "600")]
         try:
             if origin and not self.allowed_origin(origin):
                 raise ApiError(403, "请求来源未获允许。")
+            if environ['PATH_INFO'].startswith(PREFIX+'/account/media/'):
+                return self.accounts.image_response(environ, start_response, headers)
             if environ['PATH_INFO'].startswith(PREFIX+'/photos/'):
                 return self.image_response(environ, start_response, headers)
             if environ["REQUEST_METHOD"] == "OPTIONS":
@@ -446,6 +459,7 @@ class CommunityApp:
         except (sqlite3.Error, OSError):
             status, payload = 503, b'{"error":"Storage temporarily unavailable"}'
         labels = {200: "OK", 204: "No Content", 304: "Not Modified", 400: "Bad Request", 401: "Unauthorized", 403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed", 409: "Conflict", 429: "Too Many Requests", 503: "Service Unavailable", 507: 'Insufficient Storage'}
+        headers += environ.get('deepcook.response_headers', [])
         if status != 304:
             headers.append(("Content-Length", str(len(payload))))
         start_response(f"{status} {labels[status]}", headers)

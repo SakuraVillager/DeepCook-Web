@@ -4,7 +4,7 @@ import base from './playwright.config'
 export default defineConfig({
   ...base,
   testIgnore: [],
-  testMatch: 'community-cloud.spec.ts',
+  testMatch: ['community-cloud.spec.ts', 'account-cloud.spec.ts'],
   webServer: [
     {
       command: 'python3 server/dev.py',

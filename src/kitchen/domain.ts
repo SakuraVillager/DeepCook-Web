@@ -1,4 +1,5 @@
 import type { Filter, Recipe, UserData } from './types'
+import { privateImageUrl } from './api.ts'
 
 export const DEFAULT_PREFERENCES: UserData['preferences'] = {
   theme: 'system',
@@ -21,6 +22,7 @@ export const publicUrl = (path: string) =>
   new URL(`../${path}`, document.baseURI).href
 export const assetUrl = (path?: string | null): string | undefined => {
   if (!path) return undefined
+  if (path.startsWith('/deepcook-api/')) return privateImageUrl(path)
   if (/^data:image\/(jpeg|png|webp);base64,/.test(path)) return path
   if (
     !/^photos\/(?:[\w-]+\/)*[\w.-]+\.(jpg|jpeg|png|webp)$/.test(path) ||

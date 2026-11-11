@@ -16,88 +16,19 @@ import {
   saveCommunityPhoto,
 } from './community-storage'
 
-const endpoint = (import.meta.env.VITE_COMMUNITY_API ?? '').replace(/\/$/, '')
+import {
+  endpoint,
+  visitorToken,
+  accountHint,
+  apiRequest as request,
+} from './api'
+export { visitorToken } from './api'
 export const isCloudCommunity = (id: string) =>
   Boolean(id && endpoint) && !id.startsWith('user-')
 export interface CloudCommunity extends CommunityRecord {
   ratingCounts: number[]
   postCounts: { comment: number; submission: number }
   cursors: { comment: string | null; submission: string | null }
-}
-export function visitorToken() {
-  const key = 'deepcook-community-visitor-v1'
-  try {
-    let token = localStorage.getItem(key)
-    if (!token || !/^[a-f0-9]{64}$/.test(token)) {
-      token = Array.from(crypto.getRandomValues(new Uint8Array(32)), (n) =>
-        n.toString(16).padStart(2, '0'),
-      ).join('')
-      localStorage.setItem(key, token)
-    }
-    return token
-  } catch {
-    throw new Error('无法保存此浏览器的访客身份，请检查浏览器存储设置后重试。')
-  }
-}
-class RequestError extends Error {
-  readonly status: number
-  constructor(message: string, status: number) {
-    super(message)
-    this.status = status
-  }
-}
-async function request(path: string, method = 'GET', body?: unknown) {
-  const token = visitorToken()
-  const controller = new AbortController()
-  const timeout = window.setTimeout(
-    () => controller.abort(),
-    body instanceof Blob ? 60000 : 10000,
-  )
-  let response: Response
-  try {
-    response = await fetch(`${endpoint}${path}`, {
-      method,
-      credentials: 'omit',
-      cache: 'no-cache',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(body === undefined
-          ? {}
-          : {
-              'Content-Type':
-                body instanceof Blob ? body.type : 'application/json',
-            }),
-      },
-      body:
-        body === undefined
-          ? undefined
-          : body instanceof Blob
-            ? body
-            : JSON.stringify(body),
-      signal: controller.signal,
-    })
-  } catch {
-    throw new RequestError(
-      '交流服务暂时无法连接，缓存、文字和照片已保留，请重试。',
-      0,
-    )
-  } finally {
-    window.clearTimeout(timeout)
-  }
-  let data
-  try {
-    data = await response.json()
-  } catch {
-    throw new Error('交流服务返回异常，请稍后重试。')
-  }
-  if (!response.ok)
-    throw new RequestError(
-      typeof data.error === 'string'
-        ? data.error
-        : '交流服务暂时不可用，请重试。',
-      response.status,
-    )
-  return data
 }
 const route = (recipeId: string) => `/recipes/${encodeURIComponent(recipeId)}`
 function validatePosts(value: unknown, recipeId: string): KitchenPost[] {
@@ -143,7 +74,7 @@ export async function cachedCloudCommunity(recipeId: string) {
   try {
     const cached = (await communityCache(recipeId)) as
       { identity: string; data: unknown } | undefined
-    if (cached?.identity === visitorToken().slice(0, 16))
+    if (cached?.identity === (accountHint()?.id ?? visitorToken().slice(0, 16)))
       return validateCloud(cached.data, recipeId)
   } catch {
     /* Keep old or damaged cache; the server remains authoritative. */
@@ -154,7 +85,7 @@ export async function readCloudCommunity(recipeId: string) {
   const data = validateCloud(await request(route(recipeId)), recipeId)
   try {
     await communityCache(recipeId, {
-      identity: visitorToken().slice(0, 16),
+      identity: accountHint()?.id ?? visitorToken().slice(0, 16),
       data,
     })
   } catch {

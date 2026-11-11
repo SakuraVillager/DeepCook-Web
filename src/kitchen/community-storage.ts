@@ -7,6 +7,10 @@ import {
   type CommunityRecord,
   type KitchenPost,
 } from './community'
+import { accountHint } from './api'
+
+const scopePrefix = () =>
+  accountHint()?.id ? `account/${accountHint()!.id}/` : ''
 
 export const COMMUNITY_DATABASE = 'deepcook-community'
 const CHANNEL = 'deepcook-community-updates'
@@ -51,22 +55,24 @@ function announce(recipeId: string) {
 }
 export const announceCommunityUpdate = announce
 export async function saveCommunityPhoto(id: string, photo: Blob | null) {
+  const key = scopePrefix() + id
   const db = await open()
   return new Promise<void>((resolve, reject) => {
     const tx = db.transaction('photos', 'readwrite')
-    if (photo) tx.objectStore('photos').put(photo, id)
-    else tx.objectStore('photos').delete(id)
+    if (photo) tx.objectStore('photos').put(photo, key)
+    else tx.objectStore('photos').delete(key)
     tx.oncomplete = () => resolve()
     tx.onabort = tx.onerror = () => reject(storageError(tx.error))
   })
 }
 export async function localCommunityPhotos(ids: string[]) {
+  const prefix = scopePrefix()
   const db = await open()
   return new Promise<Set<string>>((resolve, reject) => {
     const tx = db.transaction('photos'),
       found = new Set<string>()
     for (const id of ids) {
-      const req = tx.objectStore('photos').getKey(id)
+      const req = tx.objectStore('photos').getKey(prefix + id)
       req.onsuccess = () => {
         if (req.result !== undefined) found.add(id)
       }
@@ -76,6 +82,7 @@ export async function localCommunityPhotos(ids: string[]) {
   })
 }
 export async function communityCache(recipeId: string, value?: unknown) {
+  const key = scopePrefix() + `cloud-cache/${recipeId}`
   const db = await open()
   return new Promise<unknown>((resolve, reject) => {
     const tx = db.transaction(
@@ -83,10 +90,7 @@ export async function communityCache(recipeId: string, value?: unknown) {
       value === undefined ? 'readonly' : 'readwrite',
     )
     const store = tx.objectStore('recipes')
-    const request =
-      value === undefined
-        ? store.get(`cloud-cache/${recipeId}`)
-        : store.put(value, `cloud-cache/${recipeId}`)
+    const request = value === undefined ? store.get(key) : store.put(value, key)
     tx.oncomplete = () => resolve(request.result)
     tx.onabort = tx.onerror = () => reject(tx.error)
   })
@@ -103,10 +107,11 @@ function storageError(problem?: unknown) {
 export async function readCommunity(
   recipeId: string,
 ): Promise<CommunityRecord> {
+  const key = scopePrefix() + recipeId
   const db = await open()
   return new Promise((resolve, reject) => {
     const tx = db.transaction('recipes'),
-      req = tx.objectStore('recipes').get(recipeId)
+      req = tx.objectStore('recipes').get(key)
     req.onsuccess = () => {
       try {
         resolve(validateCommunity(req.result, recipeId))
@@ -120,18 +125,28 @@ export async function readCommunity(
 }
 async function mutate(
   recipeId: string,
-  action: (record: CommunityRecord, tx: IDBTransaction) => CommunityRecord,
+  action: (
+    record: CommunityRecord,
+    tx: IDBTransaction,
+    keyFor: (id: string) => string,
+  ) => CommunityRecord,
 ) {
+  const prefix = scopePrefix(),
+    key = prefix + recipeId
   const db = await open()
   return new Promise<void>((resolve, reject) => {
     const tx = db.transaction(['recipes', 'photos', 'drafts'], 'readwrite'),
       store = tx.objectStore('recipes'),
-      req = store.get(recipeId)
+      req = store.get(key)
     let problem: unknown
     req.onsuccess = () => {
       try {
-        const next = action(validateCommunity(req.result, recipeId), tx)
-        store.put(next, recipeId)
+        const next = action(
+          validateCommunity(req.result, recipeId),
+          tx,
+          (id) => prefix + id,
+        )
+        store.put(next, key)
       } catch (e) {
         problem = e
         tx.abort()
@@ -166,8 +181,8 @@ export function addCommunityPost(
   )
     return Promise.reject(new Error('请重新选择成品照片。'))
   const id = `post-${crypto.randomUUID()}`
-  return mutate(recipeId, (record, tx) => {
-    if (photo) tx.objectStore('photos').put(photo, id)
+  return mutate(recipeId, (record, tx, keyFor) => {
+    if (photo) tx.objectStore('photos').put(photo, keyFor(id))
     tx.objectStore('drafts').delete(draftKey)
     const post: KitchenPost = {
       id,
@@ -183,17 +198,18 @@ export function addCommunityPost(
   })
 }
 export function deleteCommunityPost(recipeId: string, postId: string) {
-  return mutate(recipeId, (record, tx) => {
+  return mutate(recipeId, (record, tx, keyFor) => {
     const post = record.posts.find((p) => p.id === postId)
     if (!post || post.sample) throw new Error('只能删除自己的评论或作业。')
-    if (post.photo) tx.objectStore('photos').delete(post.photo)
+    if (post.photo) tx.objectStore('photos').delete(keyFor(post.photo))
     return { ...record, posts: record.posts.filter((p) => p.id !== postId) }
   })
 }
 export async function readCommunityPhoto(id: string): Promise<Blob> {
+  const key = scopePrefix() + id
   const db = await open()
   return new Promise((resolve, reject) => {
-    const req = db.transaction('photos').objectStore('photos').get(id)
+    const req = db.transaction('photos').objectStore('photos').get(key)
     req.onsuccess = () =>
       req.result instanceof Blob && req.result.type === 'image/jpeg'
         ? resolve(req.result)
@@ -211,7 +227,7 @@ export function communityDraftKey(recipeId: string) {
   } catch {
     session = 'current-browser'
   }
-  return `${session}/${recipeId}`
+  return `${scopePrefix()}${session}/${recipeId}`
 }
 function validDraft(value: unknown): value is CommunityDraft {
   const d = value as CommunityDraft
@@ -306,20 +322,42 @@ export async function prepareCommunityPhoto(file: File): Promise<Blob> {
 }
 export const communityUpdatesChannel = CHANNEL
 export async function removeRecipeCommunity(recipeId: string) {
-  await mutate(recipeId, (record, tx) => {
+  const prefix = scopePrefix()
+  await mutate(recipeId, (record, tx, keyFor) => {
     for (const post of record.posts)
-      if (post.photo) tx.objectStore('photos').delete(post.photo)
+      if (post.photo) tx.objectStore('photos').delete(keyFor(post.photo))
     const drafts = tx.objectStore('drafts').openCursor()
     drafts.onsuccess = () => {
       const cursor = drafts.result
       if (!cursor) return
       if (
         typeof cursor.key === 'string' &&
-        cursor.key.slice(cursor.key.indexOf('/') + 1) === recipeId
+        cursor.key.endsWith('/' + recipeId) &&
+        (prefix
+          ? cursor.key.startsWith(prefix)
+          : !cursor.key.startsWith('account/'))
       )
         cursor.delete()
       cursor.continue()
     }
     return emptyCommunity(recipeId)
+  })
+}
+
+export async function copyGuestCommunityPhotos(accountId: string) {
+  const db = await open()
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction('photos', 'readwrite'),
+      store = tx.objectStore('photos'),
+      request = store.openCursor()
+    request.onsuccess = () => {
+      const cursor = request.result
+      if (!cursor) return
+      if (typeof cursor.key === 'string' && cursor.key.startsWith('post-'))
+        store.put(cursor.value, `account/${accountId}/${cursor.key}`)
+      cursor.continue()
+    }
+    tx.oncomplete = () => resolve()
+    tx.onerror = tx.onabort = () => reject(storageError(tx.error))
   })
 }

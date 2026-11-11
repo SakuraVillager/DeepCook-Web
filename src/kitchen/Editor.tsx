@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useKitchen } from './context'
+import { accountHint } from './api'
 import { isMine, validRecipe, visible } from './domain'
 import { lookupRecipe } from './lookup'
 import { imageData } from './storage'
@@ -81,7 +82,7 @@ export function fillBlanks(current: Recipe, filled: Recipe): Recipe {
 export function Editor({ id }: { id: string }) {
   const { user, catalog, commit, go, notify, guard, ready } = useKitchen()
   const existing = user.recipes.find((r) => r.id === id),
-    key = `deepcook-draft-${id}`
+    key = `deepcook-draft-${accountHint()?.id ? accountHint()!.id + '-' : ''}${id}`
   const [draft, setDraft] = useState<Recipe>(() => {
     try {
       const value: unknown = JSON.parse(sessionStorage.getItem(key) ?? 'null')
@@ -236,12 +237,19 @@ export function Editor({ id }: { id: string }) {
       notes: draft.notes.filter(visible),
     }
     try {
-      await commit((d) => ({
-        ...d,
-        recipes: d.recipes.some((r) => r.id === recipe.id)
-          ? d.recipes.map((r) => (r.id === recipe.id ? recipe : r))
-          : [...d.recipes, recipe],
-      }))
+      await commit((d) => {
+        const latest = d.recipes.find((r) => r.id === recipe.id)
+        if (existing && (!latest || latest.version !== existing.version))
+          throw new Error(
+            '这道菜谱已在其他设备修改或删除。当前草稿已保留，请重新打开菜谱后核对。',
+          )
+        return {
+          ...d,
+          recipes: d.recipes.some((r) => r.id === recipe.id)
+            ? d.recipes.map((r) => (r.id === recipe.id ? recipe : r))
+            : [...d.recipes, recipe],
+        }
+      })
       try {
         sessionStorage.removeItem(key)
       } catch {

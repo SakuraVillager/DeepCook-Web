@@ -1,9 +1,11 @@
 import { createContext, useContext } from 'react'
 import type { Recipe, UserData } from './types'
+import type { AccountState } from './useAccount'
 export type Go = (path: string) => void
 export interface KitchenContext {
   catalog: Recipe[]
   user: UserData
+  account: AccountState
   ready: boolean
   interactive: boolean
   go: Go

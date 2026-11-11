@@ -1321,3 +1321,67 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+.k-account {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px 40px;
+  align-items: center;
+  padding: clamp(24px, 3vw, 40px);
+  margin: 0 0 32px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+.k-account h2 {
+  overflow-wrap: anywhere;
+  font-size: clamp(25px, 3vw, 40px);
+  margin: 12px 0;
+  font-weight: 500;
+}
+.k-account p {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.k-account__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  align-items: center;
+}
+.k-account .k-account__error,
+.k-account__error {
+  color: var(--rust, #a63e28);
+  line-height: 1.8;
+  grid-column: 1 / -1;
+}
+.k-account-form small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 6px;
+}
+.k-account-form .k-account-merge {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.k-account-merge input {
+  margin-top: 2px;
+}
+.k-account-form .k-account-merge > span {
+  color: var(--ink);
+}
+@media (max-width: 700px) {
+  .k-account {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .k-account__actions {
+    justify-content: flex-start;
+    gap: 20px;
+  }
+}

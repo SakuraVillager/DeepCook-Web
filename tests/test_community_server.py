@@ -8,10 +8,10 @@ import sys
 from PIL import Image
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parents[1] / 'server'))
 spec = importlib.util.spec_from_file_location('community_server', Path(__file__).parents[1] / 'server/community.py')
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
-sys.path.insert(0, str(Path(__file__).parents[1] / 'server'))
 from promote_community import promote
 ORIGIN = 'https://cook.example.com'
 

@@ -20,11 +20,11 @@ args = parser.parse_args()
 if not re.fullmatch(r'[a-zA-Z0-9.-]+', args.api_host):
     parser.error('Invalid API hostname')
 for origin in args.origin:
-    if origin == '*': continue
+    if origin == '*': parser.error('Account cookies require explicit allowed origins')
     parsed = urlsplit(origin)
     if parsed.scheme not in ('http', 'https') or not parsed.netloc or parsed.path or parsed.query or parsed.fragment or any(c in origin for c in '\n\r,"'):
         parser.error('Origins must contain only scheme and hostname (and optional port)')
-files = ['community.py', 'gunicorn.conf.py', 'requirements.txt', 'recipe-ids.json', 'backup.py', 'promote_community.py', 'legacy-community.json',
+files = ['community.py', 'accounts.py', 'account_data.py', 'errors.py', 'gunicorn.conf.py', 'requirements.txt', 'recipe-ids.json', 'backup.py', 'promote_community.py', 'legacy-community.json',
          'deepcook-community.service', 'deepcook-backup.service', 'deepcook-backup.timer']
 root = pathlib.Path(__file__).parent
 archive = io.BytesIO()
@@ -57,7 +57,8 @@ subprocess.run(['python3','-m','pip','--python',str(root/'venv/bin/python'),'ins
 env = pathlib.Path('/etc/deepcook-community.env')
 previous_env=env.read_text().splitlines() if env.exists() else []
 backup_token=next((line.split('=',1)[1] for line in previous_env if line.startswith('DEEPCOOK_BACKUP_TOKEN=')),secrets.token_hex(32))
-env.write_text('DEEPCOOK_ORIGINS='+','.join(CONFIG['origins'])+'\\nDEEPCOOK_DATABASE=/var/lib/deepcook-community/community.sqlite3\\nDEEPCOOK_BACKUP_TOKEN='+backup_token+'\\n')
+preserved=[line for line in previous_env if line and not line.startswith(('DEEPCOOK_ORIGINS=','DEEPCOOK_DATABASE=','DEEPCOOK_BACKUP_TOKEN='))]
+env.write_text('DEEPCOOK_ORIGINS='+','.join(CONFIG['origins'])+'\\nDEEPCOOK_DATABASE=/var/lib/deepcook-community/community.sqlite3\\nDEEPCOOK_BACKUP_TOKEN='+backup_token+'\\n'+'\\n'.join(preserved)+'\\n')
 env.chmod(0o600)
 for name in ['deepcook-community.service','deepcook-backup.service','deepcook-backup.timer']:
     shutil.copy2(root/name, pathlib.Path('/etc/systemd/system')/name)

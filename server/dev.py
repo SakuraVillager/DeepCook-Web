@@ -19,7 +19,7 @@ if not args.database:
     atexit.register(temporary.cleanup)
     args.database = str(Path(temporary.name) / 'community.sqlite3')
 signal.signal(signal.SIGTERM, lambda *args: sys.exit(0))
-app = CommunityApp(args.database, json.loads(Path(__file__).with_name('recipe-ids.json').read_text()), ['http://127.0.0.1:4173', 'http://127.0.0.1:5173'], rate_limits=False, reserve_bytes=0)
+app = CommunityApp(args.database, json.loads(Path(__file__).with_name('recipe-ids.json').read_text()), ['http://127.0.0.1:4173', 'http://127.0.0.1:5173'], rate_limits=False, reserve_bytes=0, secure_cookies=False)
 class ThreadedServer(ThreadingMixIn, WSGIServer):
     daemon_threads = True
 class Quiet(WSGIRequestHandler):

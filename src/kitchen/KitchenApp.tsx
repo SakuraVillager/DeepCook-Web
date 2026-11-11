@@ -14,6 +14,8 @@ import { Reader } from './Reader'
 import { readUser, updateUser } from './storage'
 import type { Recipe, UserData } from './types'
 import { Empty, Flip } from './ui'
+import { useAccount } from './useAccount'
+import { readCloudUser, saveCloudUser, userScope } from './account-api'
 
 function currentRoute() {
   return window.location.hash.startsWith('#/')
@@ -35,13 +37,22 @@ const navItems = [
 ]
 
 export default function KitchenApp() {
+  const account = useAccount()
+  const accountId = account.account?.id
+  const currentAccount = useRef(accountId)
+  currentAccount.current = accountId
+  const userLoad = useRef(0)
+  const loadedScope = useRef('')
   const [route, setRoute] = useState(currentRoute),
     [catalog, setCatalog] = useState<Recipe[]>([]),
     [catalogError, setCatalogError] = useState(''),
     [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<UserData>(emptyUser),
-    [ready, setReady] = useState(false),
+  const [storedUser, setUser] = useState<UserData>(emptyUser),
+    [dataReady, setReady] = useState(false),
     [storageError, setStorageError] = useState('')
+  const scopeMatches = loadedScope.current === userScope(accountId)
+  const user = scopeMatches ? storedUser : emptyUser()
+  const ready = dataReady && scopeMatches && !account.syncing
   const [message, setMessage] = useState<{
     text: string
     undo?: () => void
@@ -93,32 +104,90 @@ export default function KitchenApp() {
     }
   }, [])
   const loadUser = useCallback(async () => {
+    if (!account.ready) return
+    const generation = ++userLoad.current
+    if (loadedScope.current !== userScope(accountId)) {
+      loadedScope.current = userScope(accountId)
+      setReady(false)
+      setUser(emptyUser())
+    }
     try {
-      setUser(await readUser())
+      const data = accountId
+        ? (await readCloudUser(accountId)).data
+        : await readUser()
+      if (
+        generation !== userLoad.current ||
+        currentAccount.current !== accountId
+      )
+        return
+      setUser(data)
       setReady(true)
       setStorageError('')
     } catch (e) {
+      if (
+        generation !== userLoad.current ||
+        currentAccount.current !== accountId
+      )
+        return
+      if (accountId) {
+        try {
+          const cached = await readUser(userScope(accountId))
+          if (
+            generation !== userLoad.current ||
+            currentAccount.current !== accountId
+          )
+            return
+          setUser(cached)
+          setReady(true)
+          setStorageError(
+            '云端暂时无法连接，正在显示此账号的本机缓存；保存需要联网。',
+          )
+          return
+        } catch {
+          /* Preserve both remote and damaged local records. */
+        }
+      }
       setReady(false)
       setStorageError(
         e instanceof Error ? e.message : '本地数据读取失败，原数据已保留。',
       )
     }
-  }, [])
+  }, [account.ready, accountId])
   useEffect(() => {
     void loadCatalog()
+  }, [loadCatalog])
+  useEffect(() => {
     void loadUser()
-  }, [loadCatalog, loadUser])
+  }, [loadUser])
   useEffect(() => {
     if (!('BroadcastChannel' in window)) return
     const channel = new BroadcastChannel('deepcook-updates')
-    channel.onmessage = () => void loadUser()
+    channel.onmessage = (event) => {
+      if (event.data === userScope(accountId) || event.data === 'updated')
+        void loadUser()
+    }
     return () => channel.close()
-  }, [loadUser])
+  }, [loadUser, accountId])
+  useEffect(() => {
+    const refresh = () => {
+      if (
+        accountId &&
+        document.visibilityState === 'visible' &&
+        !pendingWrites.current
+      )
+        void loadUser()
+    }
+    document.addEventListener('visibilitychange', refresh)
+    return () => document.removeEventListener('visibilitychange', refresh)
+  }, [accountId, loadUser])
   const commit = useCallback(
     async (transform: (data: UserData) => UserData) => {
       pendingWrites.current++
       try {
-        const next = await updateUser(transform)
+        const next = accountId
+          ? await saveCloudUser(accountId, transform)
+          : await updateUser(transform)
+        if (currentAccount.current !== accountId) return
         setUser(next)
         setStorageError('')
       } catch (e) {
@@ -130,7 +199,7 @@ export default function KitchenApp() {
         pendingWrites.current--
       }
     },
-    [notify],
+    [notify, accountId],
   )
   const go = useCallback((next: string) => {
     if (next === activeRoute.current || guard.current?.() === false) return
@@ -178,14 +247,16 @@ export default function KitchenApp() {
   }, [user.preferences.theme])
   const favorite = useCallback(
     (recipe: Recipe) => {
-      let removed: UserData['favorites'][number] | undefined
+      const removed = user.favorites.find((f) => f.recipeId === recipe.id)
       void commit((d) => {
-        removed = d.favorites.find((f) => f.recipeId === recipe.id)
         return {
           ...d,
           favorites: removed
             ? d.favorites.filter((f) => f.recipeId !== recipe.id)
-            : [{ recipeId: recipe.id, timestamp: Date.now() }, ...d.favorites],
+            : [
+                { recipeId: recipe.id, timestamp: Date.now() },
+                ...d.favorites.filter((f) => f.recipeId !== recipe.id),
+              ],
         }
       })
         .then(() => {
@@ -206,7 +277,7 @@ export default function KitchenApp() {
         })
         .catch(() => {})
     },
-    [commit, notify],
+    [commit, notify, user.favorites],
   )
   const [, page, rawId, rawStep] = route.split('/'),
     id = decode(rawId),
@@ -277,6 +348,7 @@ export default function KitchenApp() {
       value={{
         catalog,
         user,
+        account,
         ready,
         interactive: introDone,
         commit,
@@ -318,7 +390,10 @@ export default function KitchenApp() {
             </div>
           )}
           <main className="k-main" id="kitchen-main" tabIndex={-1} ref={main}>
-            <div key={reader ? 'reader' : route} className="k-page">
+            <div
+              key={`${accountId ?? 'guest'}/${reader ? 'reader' : route}`}
+              className="k-page"
+            >
               {content}
             </div>
           </main>
