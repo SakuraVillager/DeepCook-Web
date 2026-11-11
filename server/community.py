@@ -63,6 +63,13 @@ class CommunityApp:
                 body TEXT NOT NULL, created_at INTEGER NOT NULL
             );
             CREATE INDEX IF NOT EXISTS posts_page ON posts(recipe, submission, created_at DESC, id DESC);
+            CREATE TABLE IF NOT EXISTS profiles (
+                owner TEXT PRIMARY KEY, display_name TEXT NOT NULL,
+                import_key TEXT UNIQUE
+            );
+            CREATE TABLE IF NOT EXISTS community_imports (
+                key TEXT PRIMARY KEY, applied_at INTEGER NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS photos (
                 post_id TEXT PRIMARY KEY, recipe TEXT NOT NULL, owner TEXT NOT NULL,
                 file TEXT NOT NULL, source_hash TEXT NOT NULL, size INTEGER NOT NULL,
@@ -275,7 +282,7 @@ class CommunityApp:
             clause = " AND (posts.created_at, posts.id) < (?, ?)"
             params.extend([timestamp, post_id])
         rows = self.db.execute(
-            "SELECT posts.*,photos.file AS photo_file FROM posts LEFT JOIN photos ON posts.id=photos.post_id AND photos.published=1 WHERE posts.recipe=? AND posts.submission=?" + clause +
+            "SELECT posts.*,photos.file AS photo_file,profiles.display_name FROM posts LEFT JOIN photos ON posts.id=photos.post_id AND photos.published=1 LEFT JOIN profiles ON posts.owner=profiles.owner WHERE posts.recipe=? AND posts.submission=?" + clause +
             " ORDER BY posts.created_at DESC,posts.id DESC LIMIT 6", params,
         ).fetchall()
         posts = [{
@@ -284,7 +291,7 @@ class CommunityApp:
             "photo": None, "photoUrl": f'{PREFIX}/photos/{row["photo_file"]}' if row['photo_file'] else None,
             "sample": False, "cloud": True,
             "mine": row["owner"] == owner,
-            "author": "我" if row["owner"] == owner else "访客 " + row["owner"][:6],
+            "author": "我" if row["owner"] == owner else row['display_name'] or "访客 " + row["owner"][:6],
             "createdAt": row["created_at"],
         } for row in rows[:5]]
         last = rows[4] if len(rows) > 5 else None

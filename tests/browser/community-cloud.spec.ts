@@ -170,7 +170,7 @@ test('independent visitors share ratings and comments without sharing ownership'
     ).toBeVisible()
     await open(other)
     await expect(other.locator('.k-rating__score > span')).toHaveText(
-      '4 条评分',
+      '1 条评分',
     )
     await expect(
       other.getByRole('button', { name: '评价一下 ↗' }),
@@ -403,7 +403,7 @@ test('server pagination loads every record once at phone and desktop widths', as
   await page.getByRole('button', { name: '刷新交流 ↻' }).click()
   await expect(
     page.locator('.k-community-card[aria-label="菜谱评论"] h3 > span'),
-  ).toHaveText('14')
+  ).toHaveText('13')
   for (
     let n = 0;
     n < 5 &&

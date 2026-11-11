@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  communityWithSamples,
+  recipeCommunity,
   emptyCommunity,
   type CommunityRecord,
 } from './community'
@@ -126,17 +126,14 @@ export function useCommunity(recipe?: Recipe) {
         ownRating: null,
         ratings: [],
         posts: [],
-        sampleRatings: 0,
       }
-    const base = communityWithSamples(
+    const base = recipeCommunity(
       shared ? { ...record, ownRating: null } : record,
       recipe,
       catalog,
     )
     if (!shared) return base
-    const local = base.posts.map((p) =>
-      p.sample ? p : { ...p, localOnly: true },
-    )
+    const local = base.posts.map((p) => ({ ...p, localOnly: true }))
     return {
       ...base,
       ownRating: cloud?.ownRating ?? null,

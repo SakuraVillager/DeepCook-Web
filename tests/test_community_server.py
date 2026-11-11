@@ -4,12 +4,15 @@ import json
 import tempfile
 import unittest
 import uuid
+import sys
 from PIL import Image
 from pathlib import Path
 
 spec = importlib.util.spec_from_file_location('community_server', Path(__file__).parents[1] / 'server/community.py')
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
+sys.path.insert(0, str(Path(__file__).parents[1] / 'server'))
+from promote_community import promote
 ORIGIN = 'https://cook.example.com'
 
 class CommunityTests(unittest.TestCase):
@@ -212,5 +215,29 @@ class CommunityTests(unittest.TestCase):
         self.assertEqual(self.request('/unused','POST',extra={'PATH_INFO':'/internal/backup'})['status'],404)
         valid=self.request('/unused','POST',extra={'PATH_INFO':'/internal/backup','HTTP_AUTHORIZATION':'Bearer '+self.app.backup_token})
         self.assertEqual(valid['status'],200)
+
+    def test_legacy_import_preserves_existing_users_and_never_duplicates_or_resurrects_records(self):
+        self.request('/recipes/r/rating', 'PUT', {'score': 10})
+        self.post('现有用户的评论')
+        manifest = json.loads((Path(__file__).parents[1] / 'server/legacy-community.json').read_text())
+        manifest['recipes'] = [dict(manifest['recipes'][0], recipeId='r', cover='dish.jpg')]
+        Image.new('RGB', (80, 80), (150, 40, 30)).save(Path(self.temp.name) / 'dish.jpg')
+        result = promote(self.app, manifest, self.temp.name)
+        self.assertEqual(result, {'recipes': 1, 'ratings': 3, 'posts': 2, 'photos': 1, 'skipped': 0})
+        data = self.request()['body']
+        self.assertEqual(data['ownRating'], 10)
+        self.assertEqual(sum(data['ratingCounts']), 4)
+        self.assertEqual(data['postCounts'], {'comment': 2, 'submission': 1})
+        imported = [p for p in data['posts'] if p['author'] in ['阿米', '小禾']]
+        self.assertEqual(len(imported), 2)
+        self.assertTrue(all(not p['sample'] and not p['mine'] for p in imported))
+        work = next(p for p in imported if p['submission'])
+        self.assertEqual(self.request(work['photoUrl'].removeprefix(module.PREFIX))['status'], 200)
+        self.assertEqual(self.request('/recipes/r/posts/'+work['id'], 'DELETE')['status'], 403)
+        self.assertEqual(promote(self.app, manifest, self.temp.name)['skipped'], 1)
+        self.assertEqual(self.request()['body']['postCounts'], data['postCounts'])
+        self.app.db.execute('DELETE FROM posts WHERE id=?', [work['id']])
+        self.assertEqual(promote(self.app, manifest, self.temp.name)['skipped'], 1)
+        self.assertEqual(self.request()['body']['postCounts']['submission'], 0)
 
 if __name__ == '__main__': unittest.main()

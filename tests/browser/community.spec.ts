@@ -61,15 +61,15 @@ test('one local rating updates in place and survives reload', async ({
   page,
 }) => {
   await open(page)
-  await expect(page.locator('.k-rating__score > span')).toHaveText('3 条评分')
+  await expect(page.locator('.k-rating__score > span')).toHaveText('暂无评分')
   await page.getByRole('button', { name: '评价一下 ↗' }).click()
   await page.getByRole('slider', { name: '我的评分', exact: true }).fill('10')
   await page.getByRole('button', { name: '保存评分', exact: true }).click()
   await expect(
     page.getByRole('button', { name: '我的评分 10/10 ↗' }),
   ).toBeVisible()
-  await expect(page.locator('.k-rating__score > span')).toHaveText('4 条评分')
-  await expect(page.locator('.k-rating__score > b')).toHaveText('8.3')
+  await expect(page.locator('.k-rating__score > span')).toHaveText('1 条评分')
+  await expect(page.locator('.k-rating__score > b')).toHaveText('10.0')
   await page.reload()
   await expect(page.locator('.k-loading')).toHaveCount(0)
   await page.getByRole('button', { name: '我的评分 10/10 ↗' }).click()
@@ -78,8 +78,8 @@ test('one local rating updates in place and survives reload', async ({
   await expect(
     page.getByRole('button', { name: '我的评分 7/10 ↗' }),
   ).toBeVisible()
-  await expect(page.locator('.k-rating__score > span')).toHaveText('4 条评分')
-  await expect(page.locator('.k-rating__score > b')).toHaveText('7.5')
+  await expect(page.locator('.k-rating__score > span')).toHaveText('1 条评分')
+  await expect(page.locator('.k-rating__score > b')).toHaveText('7.0')
 })
 
 test('comments remain local to the recipe and only own posts can be deleted', async ({
@@ -100,12 +100,7 @@ test('comments remain local to the recipe and only own posts can be deleted', as
     .filter({ hasText: '火候刚好，下一次少放一点糖。' })
   await expect(own).toBeVisible()
   await expect(own.getByRole('button', { name: '删除这条评论' })).toBeVisible()
-  await expect(
-    page
-      .locator('.k-community-post')
-      .filter({ hasText: 'App 示例' })
-      .getByRole('button'),
-  ).toHaveCount(0)
+  await expect(page.locator('#community')).not.toContainText('App 示例')
   await page.reload()
   await expect(own).toBeVisible()
   await open(page, 'silky-eggs')
@@ -115,9 +110,7 @@ test('comments remain local to the recipe and only own posts can be deleted', as
   await own.getByRole('button', { name: '删除这条评论' }).click()
   await page.getByRole('button', { name: '确认删除', exact: true }).click()
   await expect(own).toHaveCount(0)
-  await expect(
-    page.locator('.k-community-post').filter({ hasText: 'App 示例' }),
-  ).toHaveCount(2)
+  await expect(page.locator('.k-community-post')).toHaveCount(0)
 })
 
 test('submission photos are durable bounded Blobs and are deleted atomically with the post', async ({

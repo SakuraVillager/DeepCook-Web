@@ -17,7 +17,7 @@ import {
   saveCommunityDraft,
 } from './community-storage'
 import { useKitchen } from './context'
-import { Flip, Modal, Photo } from './ui'
+import { Flip, Modal } from './ui'
 import type { CommunityState } from './useCommunity'
 import {
   cloudPhotoUrl,
@@ -45,7 +45,7 @@ function PostPhoto({ post }: { post: KitchenPost }) {
     [error, setError] = useState('')
   const url = useBlobUrl(blob)
   useEffect(() => {
-    if (post.sample || !post.photo || isCloudPhoto(post.photo)) return
+    if (!post.photo || isCloudPhoto(post.photo)) return
     let active = true
     void readCommunityPhoto(post.photo)
       .then((photo) => {
@@ -58,15 +58,7 @@ function PostPhoto({ post }: { post: KitchenPost }) {
     return () => {
       active = false
     }
-  }, [post.photo, post.sample])
-  if (post.sample)
-    return (
-      <Photo
-        className="k-community-photo"
-        path={post.photo}
-        alt={`${post.author}的作业示例，配图借用菜谱封面`}
-      />
-    )
+  }, [post.photo])
   if (isCloudPhoto(post.photo))
     return (
       <div className="k-community-photo">
@@ -330,17 +322,6 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
             </div>
           </div>
         )}
-        <p className="k-fine">
-          {community.content.sampleRatings > 0 &&
-            `含 ${community.content.sampleRatings} 条 App 示例 · `}
-          {community.shared
-            ? '公开评分，可修改。'
-            : '我的评分仅存本地，可修改。'}
-          {community.shared &&
-            community.content.ownRating === null &&
-            community.content.localRating != null &&
-            ` 本机旧评分 ${community.content.localRating} 分，重新评价可发布。`}
-        </p>
         {(community.error || draftError) && (
           <div className="k-community-error" role="alert">
             <p>{community.error || draftError}</p>
@@ -434,9 +415,6 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                       <header>
                         <div>
                           <b>{post.author}</b>
-                          {post.sample && (
-                            <span className="k-community-sample">App 示例</span>
-                          )}
                           {post.localOnly && (
                             <span className="k-community-sample">仅本机</span>
                           )}
@@ -452,7 +430,7 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                             }).format(post.createdAt)}
                           </time>
                         </div>
-                        {!post.sample && post.mine !== false && (
+                        {post.mine !== false && (
                           <button
                             className="k-community-delete"
                             disabled={busy}
@@ -472,9 +450,6 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
                         <p className="k-fine">
                           这张旧附图尚未同步，当前仅本机可见；联网后刷新交流会重试。
                         </p>
-                      )}
-                      {post.sample && post.photo && (
-                        <p className="k-fine">示例配图借用菜谱封面。</p>
                       )}
                     </div>
                   </article>
@@ -503,9 +478,8 @@ export function useRecipeInteractions({ recipeId, community }: CommunityProps) {
           )}
           <p className="k-fine">
             {community.shared
-              ? '新评分、评论及作业图文会公开保存到服务器；旧本地记录仍标为“仅本机”。清除站点数据会失去访客身份，已发布图文仍会保留。标记为 '
-              : '评分、评论和作业仅保存在当前浏览器，不会发布到服务器。清除站点数据会删除个人记录与照片；标记为 '}
-            App 示例的内容不代表真实线上互动。
+              ? '评分、评论及作业图文会公开保存到服务器；旧本地记录仍标为“仅本机”。清除站点数据会失去访客身份，已发布图文仍会保留。'
+              : '评分、评论和作业仅保存在当前浏览器，不会发布到服务器。清除站点数据会删除个人记录与照片。'}
           </p>
         </div>
       </section>

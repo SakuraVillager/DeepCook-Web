@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   emptyCommunity,
-  communityWithSamples,
+  recipeCommunity,
   ratingSummary,
   validateCommunity,
   validScore,
@@ -12,13 +12,17 @@ import {
 const catalog = JSON.parse(
   readFileSync(new URL('../public/catalog/recipes.json', import.meta.url)),
 )
-test('App seed rules preserve the three ratings and two identifiable example posts', () => {
+test('community uses persisted records without injecting ratings or posts and preserves nutrition rules', () => {
   const first = catalog[0],
-    content = communityWithSamples(emptyCommunity(first.id), first, catalog)
-  assert.deepEqual(content.ratings, [8, 9, 6])
-  assert.equal(content.posts.length, 2)
-  assert.ok(content.posts.every((p) => p.sample))
-  assert.equal(content.posts[0].author, '阿米')
+    content = recipeCommunity(emptyCommunity(first.id), first, catalog)
+  assert.deepEqual(content.ratings, [])
+  assert.equal(content.posts.length, 0)
+  const rated = recipeCommunity(
+    { ...emptyCommunity(first.id), ownRating: 9 },
+    first,
+    catalog,
+  )
+  assert.deepEqual(rated.ratings, [9])
   assert.deepEqual(content.nutrition, {
     calories: 480,
     fat: 22,
@@ -29,17 +33,16 @@ test('App seed rules preserve the three ratings and two identifiable example pos
   })
   const other = catalog.find((r, i) => i >= 12 && !r.featured)
   assert.deepEqual(
-    communityWithSamples(emptyCommunity(other.id), other, catalog).ratings,
+    recipeCommunity(emptyCommunity(other.id), other, catalog).ratings,
     [],
   )
   assert.equal(
-    communityWithSamples(emptyCommunity(other.id), other, catalog).nutrition,
+    recipeCommunity(emptyCommunity(other.id), other, catalog).nutrition,
     null,
   )
   const personal = { ...first, id: 'user-test', featured: true }
   assert.equal(
-    communityWithSamples(emptyCommunity(personal.id), personal, catalog)
-      .nutrition,
+    recipeCommunity(emptyCommunity(personal.id), personal, catalog).nutrition,
     null,
   )
 })
@@ -74,11 +77,16 @@ test('invalid local data and copied sample posts are rejected without mutating i
   const snapshot = JSON.stringify(corrupt)
   assert.throws(() => validateCommunity(corrupt, 'r'))
   assert.equal(JSON.stringify(corrupt), snapshot)
-  const sample = communityWithSamples(
-    emptyCommunity(catalog[0].id),
-    catalog[0],
-    catalog,
-  ).posts[0]
+  const sample = {
+    id: 'post-copied',
+    recipeId: catalog[0].id,
+    submission: false,
+    text: '下次想试试这个做法。',
+    photo: null,
+    author: '小禾',
+    sample: true,
+    createdAt: 1700000000000,
+  }
   assert.throws(() =>
     validateCommunity(
       { ...emptyCommunity(sample.recipeId), posts: [sample] },

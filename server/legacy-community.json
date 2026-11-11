@@ -1,0 +1,380 @@
+{
+  "migration": "legacy-community-v1",
+  "recipes": [
+    {
+      "recipeId": "braised-pork",
+      "cover": "photos/import-303fc8bc4b52adeaa4a5.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-dd04e94e-ade0-4f4f-9b54-c04c71386571",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-e3aecc44-a7c1-490d-8a66-f03140975ca5",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "silky-eggs",
+      "cover": "photos/import-b83fecb8d6caeb59d149.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-87206189-1927-44e7-ba32-29bf7374ffb8",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-513ef300-bb65-4720-b4d2-ff0567335a27",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "kung-pao",
+      "cover": "photos/import-52c8aca03aa923d931a1.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-0ee41820-f7ae-4c0c-ac2d-58d1f798a4b4",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-5b84557c-d02b-4f06-9290-ae1c1ab7ce42",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "steamed-fish",
+      "cover": "photos/import-e95ec989029121c5334a.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-0c6657bf-b803-4489-aa06-dbb850675a28",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-04fcf20d-a77a-4327-8ec2-bdf1874f757a",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "three-treasures",
+      "cover": "photos/import-e9fcdd971a9979a2ee31.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-1ed011a4-b0bf-471a-a1ac-dbfbe6579af9",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-429a7226-e6d8-4cc7-902e-690f24ee561b",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "corn-soup",
+      "cover": "photos/import-309eaa9d6ccade5339f7.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-7d5f391b-d90b-4911-b6bc-7d7a0a68e5a8",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-af4bcc26-ed02-4ec5-8ae6-703e9f9e2206",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "mapo-tofu",
+      "cover": "photos/import-24d08b8b2fa389b75fd0.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-c0cf71c1-4ecf-4237-81bd-46391770b6a6",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-e351d414-40f3-4bed-9dc2-8a7f45079667",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "cauliflower",
+      "cover": "photos/import-a26e416f06bfc8c14b5a.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-261b2786-491a-4c29-aa75-4295e9e3bbe4",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-9490308a-7ac4-4f0d-8da5-2fb51648b4d9",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "greens",
+      "cover": "photos/import-4719ca287494e79e1914.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-b83047a5-fb89-4f7f-b62f-28554389eb51",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-73f1dbdb-bc86-4041-a85e-091a49da3629",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "cabbage",
+      "cover": "photos/generated-favorites/cabbage.png",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-38e83c16-f3c9-42f2-b24e-abd1ec21877f",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-f1e51dfc-c186-49a2-a21a-4d1744a8fcb2",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "shrimp",
+      "cover": "photos/import-9b9897f2814687a7f42c.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-42542b5b-225c-4c0f-a2d7-c82808208abe",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-f0d3d924-e032-4ca4-8305-6cbfee75e809",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "tomato-tofu",
+      "cover": "photos/import-00721bee8690a04dfdd5.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-7303dd70-5b3e-40ac-969a-7ca14933c3d9",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-3a5d6057-bcf7-4bdb-9071-5b8742d25def",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "world-brigadeiro",
+      "cover": "photos/import-ce13f8246a194a26a164.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-9ae91451-0e65-4c18-8280-fd756c38c140",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-a096a645-df3b-4981-96f6-650e412df8a5",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "world-pasta-arrabbiata",
+      "cover": "photos/import-269af04a6aa291651c26.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-e7fb0a42-ab21-40ab-826d-6d8fcc110536",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-43f67bde-ee91-4bed-b903-86207f513deb",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    },
+    {
+      "recipeId": "world-spanish-tortilla",
+      "cover": "photos/import-edbdd181dceca13b4148.jpg",
+      "ratings": [
+        8,
+        9,
+        6
+      ],
+      "posts": [
+        {
+          "id": "post-eea59163-c769-4a8b-a17e-3ad9dd278eaf",
+          "author": "阿米",
+          "submission": true,
+          "text": "第一次尝试，记录一下这次的成品。",
+          "createdAt": 1700000000001
+        },
+        {
+          "id": "post-0e7c3756-8010-4c9c-adc6-dfa142024d15",
+          "author": "小禾",
+          "submission": false,
+          "text": "下次想试试这个做法。",
+          "createdAt": 1700000000000
+        }
+      ]
+    }
+  ]
+}

@@ -24,7 +24,7 @@ for origin in args.origin:
     parsed = urlsplit(origin)
     if parsed.scheme not in ('http', 'https') or not parsed.netloc or parsed.path or parsed.query or parsed.fragment or any(c in origin for c in '\n\r,"'):
         parser.error('Origins must contain only scheme and hostname (and optional port)')
-files = ['community.py', 'gunicorn.conf.py', 'requirements.txt', 'recipe-ids.json', 'backup.py',
+files = ['community.py', 'gunicorn.conf.py', 'requirements.txt', 'recipe-ids.json', 'backup.py', 'promote_community.py', 'legacy-community.json',
          'deepcook-community.service', 'deepcook-backup.service', 'deepcook-backup.timer']
 root = pathlib.Path(__file__).parent
 archive = io.BytesIO()

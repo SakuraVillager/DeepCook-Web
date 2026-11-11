@@ -34,7 +34,6 @@ export interface RecipeCommunity {
   ownRating: number | null
   ratings: number[]
   posts: KitchenPost[]
-  sampleRatings: number
   ratingCounts?: number[]
   postCounts?: { comment: number; submission: number }
   localRating?: number | null
@@ -112,37 +111,13 @@ export function isCloudPhoto(path: unknown): path is string {
     /^\/deepcook-api\/v1\/photos\/[a-f0-9]{64}\.jpg$/.test(path)
   )
 }
-export function communityWithSamples(
+export function recipeCommunity(
   record: CommunityRecord,
   recipe: Recipe,
   catalog: Recipe[],
 ): RecipeCommunity {
   const index = catalog.findIndex((r) => r.id === recipe.id)
   const seeded = index >= 0 && (index < 12 || recipe.featured)
-  const samples: KitchenPost[] = seeded
-    ? [
-        {
-          id: `example-work-${recipe.id}`,
-          recipeId: recipe.id,
-          submission: true,
-          text: '第一次尝试，记录一下这次的成品。',
-          photo: recipe.cover ?? null,
-          author: '阿米',
-          sample: true,
-          createdAt: 1700000000001,
-        },
-        {
-          id: `example-comment-${recipe.id}`,
-          recipeId: recipe.id,
-          submission: false,
-          text: '下次想试试这个做法。',
-          photo: null,
-          author: '小禾',
-          sample: true,
-          createdAt: 1700000000000,
-        },
-      ]
-    : []
   return {
     nutrition: seeded
       ? {
@@ -155,12 +130,8 @@ export function communityWithSamples(
         }
       : null,
     ownRating: record.ownRating,
-    ratings: [
-      ...(seeded ? [8, 9, 6] : []),
-      ...(record.ownRating === null ? [] : [record.ownRating]),
-    ],
-    sampleRatings: seeded ? 3 : 0,
-    posts: [...record.posts, ...samples].sort(
+    ratings: record.ownRating === null ? [] : [record.ownRating],
+    posts: [...record.posts].sort(
       (a, b) => b.createdAt - a.createdAt || b.id.localeCompare(a.id),
     ),
   }
