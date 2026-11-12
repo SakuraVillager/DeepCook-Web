@@ -36,7 +36,7 @@ export function AccountPage({
 
   return (
     <section
-      className="k-auth"
+      className={`k-auth${registering ? ' k-auth--register' : ''}`}
       aria-label={registering ? '注册厨房账号' : '登录厨房账号'}
     >
       <div className="k-auth-story">
@@ -138,73 +138,79 @@ export function AccountPage({
                 }
               }}
             >
-              <label>
-                用户名
-                <input
-                  required
-                  aria-label="用户名"
-                  aria-describedby="account-username-hint"
-                  pattern="[A-Za-z0-9_]{3,24}"
-                  minLength={3}
-                  maxLength={24}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  autoComplete="username"
-                  value={username}
-                  disabled={blocked}
-                  onChange={(event) => setUsername(event.target.value)}
-                />
-                <small id="account-username-hint">
-                  3–24 位字母、数字或下划线，不区分大小写。
-                </small>
-              </label>
-              {registering && (
+              <div
+                className={`k-auth-fields${registering ? ' is-register' : ''}`}
+              >
                 <label>
-                  账号昵称
+                  用户名
                   <input
-                    maxLength={12}
-                    autoComplete="nickname"
-                    value={name}
+                    required
+                    aria-label="用户名"
+                    aria-describedby="account-username-hint"
+                    pattern="[A-Za-z0-9_]{3,24}"
+                    minLength={3}
+                    maxLength={24}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    autoComplete="username"
+                    value={username}
                     disabled={blocked}
-                    onChange={(event) => setName(event.target.value)}
+                    onChange={(event) => setUsername(event.target.value)}
                   />
                 </label>
-              )}
-              <label>
-                密码
-                <input
-                  type="password"
-                  required
-                  aria-label="密码"
-                  aria-describedby="account-password-hint"
-                  minLength={15}
-                  maxLength={128}
-                  autoComplete={
-                    registering ? 'new-password' : 'current-password'
-                  }
-                  value={password}
-                  disabled={blocked}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-                <small id="account-password-hint">
-                  15–128 个字符，可以使用容易记住的长句。
-                </small>
-              </label>
-              {registering && (
+                {registering && (
+                  <label>
+                    账号昵称
+                    <input
+                      maxLength={12}
+                      autoComplete="nickname"
+                      value={name}
+                      disabled={blocked}
+                      onChange={(event) => setName(event.target.value)}
+                    />
+                  </label>
+                )}
                 <label>
-                  再次输入密码
+                  密码
                   <input
                     type="password"
                     required
+                    aria-label="密码"
+                    aria-describedby="account-password-hint"
                     minLength={15}
                     maxLength={128}
-                    autoComplete="new-password"
-                    value={confirm}
+                    autoComplete={
+                      registering ? 'new-password' : 'current-password'
+                    }
+                    value={password}
                     disabled={blocked}
-                    onChange={(event) => setConfirm(event.target.value)}
+                    onChange={(event) => setPassword(event.target.value)}
                   />
                 </label>
-              )}
+                {registering && (
+                  <label>
+                    再次输入密码
+                    <input
+                      type="password"
+                      required
+                      minLength={15}
+                      maxLength={128}
+                      autoComplete="new-password"
+                      value={confirm}
+                      disabled={blocked}
+                      onChange={(event) => setConfirm(event.target.value)}
+                    />
+                  </label>
+                )}
+              </div>
+              <p className="k-auth-field-hints">
+                <span id="account-username-hint">
+                  用户名：3–24 位字母、数字或下划线。
+                </span>
+                <span id="account-password-hint">
+                  密码：15–128 个字符，可以使用长句。
+                </span>
+              </p>
               <label className="k-account-merge">
                 <input
                   type="checkbox"
@@ -212,9 +218,7 @@ export function AccountPage({
                   disabled={blocked}
                   onChange={(event) => setMerge(event.target.checked)}
                 />
-                <span>
-                  将此浏览器的资料、收藏、个人菜谱及已发布的访客互动并入账号。
-                </span>
+                <span>合并本机资料、收藏、菜谱和已发布互动。</span>
               </label>
               {(error || auth.error) && (
                 <p className="k-account__error" role="alert">
@@ -234,12 +238,10 @@ export function AccountPage({
                       : '登录账号'}
                 </button>
                 <Flip disabled={blocked} onClick={() => go(destination)}>
-                  先逛逛菜谱 ↗
+                  先逛逛 ↗
                 </Flip>
               </div>
-              <p className="k-fine">
-                目前使用用户名和密码登录，尚未启用邮箱验证与邮件找回密码。
-              </p>
+              <p className="k-fine">暂未开启邮箱验证与密码找回，请记好密码。</p>
             </form>
           </>
         )}

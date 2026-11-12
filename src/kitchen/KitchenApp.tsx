@@ -373,7 +373,7 @@ export default function KitchenApp() {
     >
       <>
         <div
-          className={`kitchen ${reader ? 'kitchen--reader' : ''}`}
+          className={`kitchen ${reader ? 'kitchen--reader' : ''}${authPage ? ' kitchen--auth' : ''}`}
           inert={!introDone && !authPage}
         >
           <a
@@ -416,7 +416,12 @@ export default function KitchenApp() {
               <Flip onClick={() => void loadUser()}>重试 ↗</Flip>
             </div>
           )}
-          <main className="k-main" id="kitchen-main" tabIndex={-1} ref={main}>
+          <main
+            className={`k-main${authPage ? ' k-main--auth' : ''}`}
+            id="kitchen-main"
+            tabIndex={-1}
+            ref={main}
+          >
             <div
               key={`${accountId ?? 'guest'}/${reader ? 'reader' : route}`}
               className="k-page"
@@ -424,7 +429,9 @@ export default function KitchenApp() {
               {content}
             </div>
           </main>
-          {!reader && <Footer homeHref="../index.html" assetPrefix="../" />}
+          {!reader && !authPage && (
+            <Footer homeHref="../index.html" assetPrefix="../" />
+          )}
           {message && (
             <div key={message.key} className="k-toast" role="status">
               <span>{message.text}</span>

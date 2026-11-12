@@ -65,41 +65,63 @@ async function photoFixture(page: Page) {
   }
 }
 
-test('account forms fit phone, tablet and desktop widths', async ({ page }) => {
+test('login and registration are single-screen pages without the site footer', async ({
+  page,
+}) => {
   await open(page)
   await page.getByRole('button', { name: '注册账号 ↗', exact: true }).click()
-  await expect(page).toHaveURL(/#\/register\?/)
-  await expect(page.getByRole('dialog')).toHaveCount(0)
-  for (const width of [320, 768, 1440]) {
-    await page.setViewportSize({ width, height: 900 })
-    await page
-      .locator('.k-auth-form')
-      .getByRole('button', { name: '创建账号', exact: true })
-      .scrollIntoViewIfNeeded()
-    await expect(
-      page
-        .locator('.k-auth-form')
-        .getByRole('button', { name: '创建账号', exact: true }),
-    ).toBeVisible()
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-    ).toBeTruthy()
-    expect(
+  for (const mode of ['register', 'login'] as const) {
+    if (mode === 'login')
       await page
-        .locator('.k-auth-form')
-        .evaluate((dialog) => dialog.scrollWidth <= dialog.clientWidth),
-    ).toBeTruthy()
-    if (width !== 768) {
+        .locator('.k-auth-tabs')
+        .getByRole('link', { name: '登录', exact: true })
+        .click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(page.locator('footer.footer')).toHaveCount(0)
+    for (const [width, height] of [
+      [1440, 900],
+      [1366, 768],
+      [1280, 720],
+      [1024, 600],
+      [768, 900],
+      [390, 844],
+      [320, 740],
+      [375, 667],
+    ]) {
+      await page.setViewportSize({ width, height })
       await page.evaluate(() =>
         window.scrollTo({ top: 0, behavior: 'instant' }),
       )
-      await page.screenshot({
-        path: test.info().outputPath(`registration-${width}.png`),
-      })
+      await expect
+        .poll(() =>
+          page.evaluate(() => ({
+            width: document.documentElement.scrollWidth <= innerWidth,
+            height: document.documentElement.scrollHeight <= innerHeight + 1,
+          })),
+        )
+        .toEqual({ width: true, height: true })
+      const bounds = await page.locator('.k-auth-panel').boundingBox()
+      expect(bounds!.y).toBeGreaterThanOrEqual(width <= 899 ? 64 : 76)
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(height + 1)
+      if ((width === 1366 || width === 390) && mode === 'register')
+        await page.screenshot({
+          path: test.info().outputPath(`account-${width}.png`),
+        })
     }
   }
+  await page.setViewportSize({ width: 390, height: 420 })
+  await page.getByRole('textbox', { name: '用户名', exact: true }).focus()
+  await page
+    .getByRole('button', { name: '登录账号', exact: true })
+    .scrollIntoViewIfNeeded()
+  await expect(
+    page.getByRole('button', { name: '登录账号', exact: true }),
+  ).toBeInViewport()
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBeTruthy()
 })
 
 test('registration imports the guest kitchen and all private data follows the account across browsers', async ({
