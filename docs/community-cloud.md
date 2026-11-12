@@ -14,7 +14,7 @@
 
 登录、注册页面分别为 `/app/#/login`、`/app/#/register`，不使用弹窗，也不显示网站底部栏；常用电脑、平板和手机尺寸采用一屏布局，极短视口保留原生滚动。在线版顶栏根据会话显示账号入口或头像/昵称；注册与登录可携带校验后的站内返回路径，成功后返回来源页面。
 
-账号采用用户名和密码注册、登录；目前不收集邮箱，未启用邮箱验证或邮件找回。用户名为 3–24 位 ASCII 字母、数字或下划线，按小写唯一；昵称最多 12 个字。密码 15–128 个字符，使用随机盐及 600,000 轮 PBKDF2-HMAC-SHA256，只在受限并发的密码计算区校验，不保存明文。方案参考 [OWASP 密码存储建议](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)。
+账号采用用户名和密码注册、登录；目前不收集邮箱，未启用邮箱验证或邮件找回。用户名为 3–24 位 ASCII 字母、数字或下划线，按小写唯一；昵称最多 12 个字。密码 6–128 个字符，使用随机盐及 600,000 轮 PBKDF2-HMAC-SHA256，只在受限并发的密码计算区校验，不保存明文。方案参考 [OWASP 密码存储建议](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)。
 
 生产使用 `__Host-deepcook_session`：HTTPS、HttpOnly、SameSite=Lax、Path=/、无 Domain，7 天绝对有效期。会话随机 256 位，数据库只保存摘要，可退出撤销，最多保留 10 个会话。本机测试显式使用非 Secure 的不同 Cookie 名，生产始终强制 Secure。前端 localStorage 仅保存可公开的账号提示和原有随机访客身份，不保存账号密码或会话令牌。
 

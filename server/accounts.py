@@ -110,7 +110,7 @@ class Accounts:
             username, password = body['username'], body['password']
             if not isinstance(username, str) or not re.fullmatch(r'[a-zA-Z0-9_]{3,24}', username): raise ApiError(400, '用户名需为 3–24 位字母、数字或下划线。')
             username = username.lower()
-            if not isinstance(password, str) or not 15 <= len(password) <= 128: raise ApiError(400, '密码需为 15–128 个字符。')
+            if not isinstance(password, str) or not 6 <= len(password) <= 128: raise ApiError(400, '密码需为 6–128 个字符。')
             try: password.encode('utf-8')
             except UnicodeError: raise ApiError(400, '密码包含无法处理的字符。') from None
             if type(body['claimGuest']) is not bool: raise ApiError(400, '请选择是否合并访客互动。')

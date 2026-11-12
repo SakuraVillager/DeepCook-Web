@@ -177,7 +177,7 @@ export function AccountPage({
                     required
                     aria-label="密码"
                     aria-describedby="account-password-hint"
-                    minLength={15}
+                    minLength={6}
                     maxLength={128}
                     autoComplete={
                       registering ? 'new-password' : 'current-password'
@@ -193,7 +193,7 @@ export function AccountPage({
                     <input
                       type="password"
                       required
-                      minLength={15}
+                      minLength={6}
                       maxLength={128}
                       autoComplete="new-password"
                       value={confirm}
@@ -208,7 +208,7 @@ export function AccountPage({
                   用户名：3–24 位字母、数字或下划线。
                 </span>
                 <span id="account-password-hint">
-                  密码：15–128 个字符，可以使用长句。
+                  密码：6–128 个字符。
                 </span>
               </p>
               <label className="k-account-merge">

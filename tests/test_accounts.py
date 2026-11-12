@@ -75,6 +75,22 @@ class AccountTests(unittest.TestCase):
         self.app.db.execute('UPDATE sessions SET expires_at=0')
         self.assertIsNone(self.request('/auth/session',cookie=result['headers']['Set-Cookie'].split(';')[0])['body']['account'])
 
+    def test_six_character_password_registers_and_logs_in_but_invalid_lengths_are_rejected(self):
+        for password in ['12345', 'x' * 129, None]:
+            for path in ['/auth/register', '/auth/login']:
+                with self.subTest(path=path, password_length=len(password) if isinstance(password,str) else None):
+                    result=self.request(path,'POST',{'username':'shortpass','password':password,'claimGuest':False})
+                    self.assertEqual(result['status'],400)
+                    self.assertEqual(result['body']['error'],'密码需为 6–128 个字符。')
+        self.assertEqual(self.app.db.execute('SELECT COUNT(*) FROM accounts').fetchone()[0],0)
+        body={'username':'shortpass','password':'123456','claimGuest':False}
+        registered=self.request('/auth/register','POST',body)
+        self.assertEqual(registered['status'],200,registered['body'])
+        self.request('/auth/logout','POST',cookie=registered['headers']['Set-Cookie'].split(';')[0])
+        logged_in=self.request('/auth/login','POST',body)
+        self.assertEqual(logged_in['status'],200,logged_in['body'])
+        self.assertEqual(logged_in['body']['account']['id'],registered['body']['account']['id'])
+
     def test_guest_claim_is_optional_and_existing_account_rating_wins(self):
         post='post-'+str(uuid.uuid4())
         self.request('/recipes/r/rating','PUT',{'score':8})

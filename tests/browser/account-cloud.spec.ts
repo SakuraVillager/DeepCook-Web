@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 const API = 'http://127.0.0.1:4199/deepcook-api/v1'
-const PASSWORD = 'a long test kitchen password 123'
+const PASSWORD = '123456'
 test.use({ reducedMotion: 'reduce' })
 async function open(page: Page, path = '/profile') {
   await page.goto(`/app/#${path}`)
@@ -64,6 +64,38 @@ async function photoFixture(page: Page) {
     ),
   }
 }
+
+test('six-character passwords can register and log in while five characters are blocked', async ({
+  page,
+}) => {
+  const username = 'six_' + crypto.randomUUID().slice(0, 8)
+  await open(page, '/register')
+  const form = page.locator('.k-auth-form')
+  await form.getByLabel('用户名', { exact: true }).fill(username)
+  const password = form.getByLabel('密码', { exact: true })
+  const confirm = form.getByLabel('再次输入密码', { exact: true })
+  await password.fill('12345')
+  await confirm.fill('123456')
+  await form.getByRole('button', { name: '创建账号', exact: true }).click()
+  await expect(password).toBeFocused()
+  expect(
+    await password.evaluate((el: HTMLInputElement) => el.validity.tooShort),
+  ).toBeTruthy()
+  await expect(page).toHaveURL(/#\/register$/)
+  await password.fill('123456')
+  await confirm.fill('12345')
+  await form.getByRole('button', { name: '创建账号', exact: true }).click()
+  await expect(confirm).toBeFocused()
+  expect(
+    await confirm.evaluate((el: HTMLInputElement) => el.validity.tooShort),
+  ).toBeTruthy()
+  await confirm.fill('123456')
+  await form.getByRole('checkbox').uncheck()
+  await form.getByRole('button', { name: '创建账号', exact: true }).click()
+  await expect(page).toHaveURL(/#\/profile$/)
+  await page.getByRole('button', { name: '退出登录 ↗' }).click()
+  await accountForm(page, username)
+})
 
 test('login and registration are single-screen pages without the site footer', async ({
   page,
