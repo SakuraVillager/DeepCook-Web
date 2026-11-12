@@ -1364,15 +1364,19 @@
 }
 .k-account-form .k-account-merge {
   display: flex;
+  flex-direction: row;
   gap: 12px;
   align-items: flex-start;
   font-size: 13px;
   line-height: 1.8;
 }
-.k-account-merge input {
-  margin-top: 2px;
+.k-account-form .k-account-merge > input[type='checkbox'] {
+  margin: 0;
+  padding: 0;
 }
 .k-account-form .k-account-merge > span {
+  flex: 1;
+  min-width: 0;
   color: var(--ink);
 }
 @media (max-width: 700px) {
@@ -1572,11 +1576,6 @@
 .k-auth-actions .k-flip {
   font-size: 12px;
   white-space: nowrap;
-}
-.k-auth-form > .k-fine {
-  font-size: 10px;
-  line-height: 1.7;
-  color: var(--muted);
 }
 .k-auth-progress {
   min-height: 280px;

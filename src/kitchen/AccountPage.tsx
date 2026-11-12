@@ -241,7 +241,6 @@ export function AccountPage({
                   先逛逛 ↗
                 </Flip>
               </div>
-              <p className="k-fine">暂未开启邮箱验证与密码找回，请记好密码。</p>
             </form>
           </>
         )}
