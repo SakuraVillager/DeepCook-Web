@@ -12,6 +12,8 @@ type HeaderEdition = {
   items: { href: string; zh: string; en: string }[]
   activeHref: string
   onNavigate: (href: string) => void
+  accountHref?: string
+  account?: { name: string; avatar?: string }
 }
 
 export function Header({ edition }: { edition?: HeaderEdition } = {}) {
@@ -19,8 +21,13 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
   const [onLight, setOnLight] = useState(false)
   const online = Boolean(edition)
   const items = edition?.items ?? navItems
-  const ctaHref = online ? '../index.html' : './app/'
-  const ctaText = online ? '官网首页' : '在线使用'
+  const accountPath = edition?.account
+    ? '/profile'
+    : (edition?.accountHref ?? '/login')
+  const ctaHref = online ? `#${accountPath}` : './app/'
+  const ctaText = online
+    ? (edition?.account?.name ?? '注册 / 登录')
+    : '在线使用'
   const linkHref = (href: string) => (online ? `#${href}` : href)
 
   useEffect(() => {
@@ -123,13 +130,41 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
         </nav>
 
         <div className="site-header__right">
-          <LetterLink
-            text={ctaText}
-            href={ctaHref}
-            className="header-cta letter-link--en"
-            ariaLabel={online ? 'DeepCook 官网首页' : '在线使用 DeepCook'}
-            arrow
-          />
+          {edition?.account ? (
+            <a
+              className="header-cta header-account"
+              href={ctaHref}
+              title={edition.account.name}
+              aria-label={`进入${edition.account.name}的厨房`}
+              onClick={(event) => go(event, accountPath)}
+            >
+              <span className="header-account__avatar" aria-hidden="true">
+                <span>{Array.from(edition.account.name)[0] ?? '炊'}</span>
+                {edition.account.avatar && (
+                  <img
+                    key={edition.account.avatar}
+                    src={edition.account.avatar}
+                    alt=""
+                    onError={(event) => {
+                      event.currentTarget.hidden = true
+                    }}
+                  />
+                )}
+              </span>
+              <span className="header-account__name">
+                {edition.account.name}
+              </span>
+            </a>
+          ) : (
+            <LetterLink
+              text={ctaText}
+              href={ctaHref}
+              className="header-cta letter-link--en"
+              ariaLabel={online ? '注册或登录' : '在线使用 DeepCook'}
+              onClick={online ? (event) => go(event, accountPath) : undefined}
+              arrow
+            />
+          )}
           <button
             className="menu-toggle"
             type="button"
@@ -184,13 +219,15 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
             </a>
           ))}
           <a
-            className="mobile-menu__link"
+            className={`mobile-menu__link${online ? ' mobile-menu__link--account' : ''}`}
             href={ctaHref}
             tabIndex={open ? 0 : -1}
-            onClick={() => setOpen(false)}
+            onClick={
+              online ? (event) => go(event, accountPath) : () => setOpen(false)
+            }
           >
             <span>{ctaText}</span>
-            <span>{online ? '05 / HOME' : '05 / OPEN APP'}</span>
+            <span>{online ? '05 / ACCOUNT' : '05 / OPEN APP'}</span>
           </a>
         </nav>
 

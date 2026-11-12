@@ -246,3 +246,91 @@
     display: flex;
   }
 }
+
+.header-account {
+  min-width: 0;
+  gap: 10px;
+  padding: 4px 12px 4px 5px;
+  letter-spacing: 0;
+}
+.header-account__avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--olive);
+  color: var(--paper);
+  font-size: 12px;
+}
+.header-account__avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.header-account__avatar img[hidden] {
+  display: none;
+}
+.header-account__name {
+  max-width: 140px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 12px var(--font-zh);
+}
+.mobile-menu__link--account > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mobile-menu__link--account > span:last-child {
+  flex: none;
+}
+@media (max-width: 899px) {
+  .site-header--online {
+    gap: 12px;
+  }
+  .site-header--online .site-header__right {
+    gap: 12px;
+    min-width: 0;
+  }
+  .site-header--online .header-cta {
+    display: inline-flex;
+    height: 34px;
+    padding: 0 10px;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+  .site-header--online .header-account {
+    padding: 2px 9px 2px 3px;
+  }
+  .header-account__avatar {
+    width: 26px;
+    height: 26px;
+  }
+  .header-account__name {
+    max-width: clamp(50px, 14vw, 80px);
+    font-size: 11px;
+  }
+}
+@media (max-width: 380px) {
+  .site-header--online .site-header__brand {
+    gap: 8px;
+  }
+  .site-header--online .site-header__word {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+  .site-header--online .site-header__right {
+    gap: 8px;
+  }
+  .site-header--online .header-cta .arrow {
+    display: none;
+  }
+}

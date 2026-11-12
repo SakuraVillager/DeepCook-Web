@@ -6,7 +6,7 @@ import { useReducedMotion } from '../hooks/useReducedMotion'
 import { Browse } from './Browse'
 import { CatalogLoader } from './CatalogLoader'
 import { Kitchen } from './context'
-import { emptyUser, publicUrl, validRecipe } from './domain'
+import { emptyUser, publicUrl, validRecipe, assetUrl } from './domain'
 import { Editor } from './Editor'
 import { Profile, Settings } from './Profile'
 import { RecipeView } from './RecipeView'
@@ -16,6 +16,8 @@ import type { Recipe, UserData } from './types'
 import { Empty, Flip } from './ui'
 import { useAccount } from './useAccount'
 import { readCloudUser, saveCloudUser, userScope } from './account-api'
+import { AccountPage } from './AccountPage'
+import { accountPagePath } from './account-routes'
 
 function currentRoute() {
   return window.location.hash.startsWith('#/')
@@ -279,10 +281,12 @@ export default function KitchenApp() {
     },
     [commit, notify, user.favorites],
   )
-  const [, page, rawId, rawStep] = route.split('/'),
+  const [routePath, routeQuery = ''] = route.split('?')
+  const [, page, rawId, rawStep] = routePath.split('/'),
     id = decode(rawId),
     step = decode(rawStep),
     recipe = [...catalog, ...user.recipes].find((r) => r.id === id)
+  const authPage = page === 'login' || page === 'register'
   const reader = page === 'read',
     selectedNav =
       page === 'edit'
@@ -299,11 +303,20 @@ export default function KitchenApp() {
       settings: '偏好与设置',
       recent: '最近浏览',
       edit: '写一道菜',
+      login: '登录厨房账号',
+      register: '注册厨房账号',
     }
     document.title = `${recipe?.title ?? titles[page ?? ''] ?? '在线版'} — DeepCook`
   }, [page, recipe?.title])
   let content
-  if (loading)
+  if (authPage)
+    content = (
+      <AccountPage
+        mode={page}
+        next={new URLSearchParams(routeQuery).get('next')}
+      />
+    )
+  else if (loading)
     content = <div className="k-loading-placeholder" aria-hidden="true" />
   else if (catalogError)
     content = (
@@ -350,7 +363,7 @@ export default function KitchenApp() {
         user,
         account,
         ready,
-        interactive: introDone,
+        interactive: introDone || authPage,
         commit,
         go,
         notify,
@@ -361,7 +374,7 @@ export default function KitchenApp() {
       <>
         <div
           className={`kitchen ${reader ? 'kitchen--reader' : ''}`}
-          inert={!introDone}
+          inert={!introDone && !authPage}
         >
           <a
             className="skip-link"
@@ -380,6 +393,20 @@ export default function KitchenApp() {
                 items: navItems,
                 activeHref: selectedNav,
                 onNavigate: go,
+                accountHref: accountPagePath(
+                  'login',
+                  authPage
+                    ? (new URLSearchParams(routeQuery).get('next') ??
+                        '/profile')
+                    : routePath,
+                ),
+                account:
+                  account.account && !account.expired
+                    ? {
+                        name: user.profile.name.trim() || account.account.name,
+                        avatar: assetUrl(user.profile.avatar),
+                      }
+                    : undefined,
               }}
             />
           )}
@@ -418,7 +445,7 @@ export default function KitchenApp() {
           )}
           <div className="grain" aria-hidden="true" />
         </div>
-        {!introDone && (
+        {!introDone && !authPage && (
           <CatalogLoader
             ready={!loading}
             reduced={reduced}

@@ -20,25 +20,27 @@ async function accountForm(
       exact: true,
     })
     .click()
-  const dialog = page.getByRole('dialog')
-  await dialog
+  await expect(page).toHaveURL(register ? /#\/register\?/ : /#\/login\?/)
+  const form = page.locator('.k-auth-form')
+  await form
     .getByRole('textbox', { name: '用户名', exact: true })
     .fill(username)
-  await dialog.getByLabel('密码', { exact: true }).fill(PASSWORD)
+  await form.getByLabel('密码', { exact: true }).fill(PASSWORD)
   if (register) {
-    await dialog.getByLabel('再次输入密码', { exact: true }).fill(PASSWORD)
-    await dialog
+    await form.getByLabel('再次输入密码', { exact: true }).fill(PASSWORD)
+    await form
       .getByRole('textbox', { name: '账号昵称', exact: true })
       .fill('初始厨房')
   }
-  await dialog.getByRole('checkbox').setChecked(merge)
-  await dialog
+  await form.getByRole('checkbox').setChecked(merge)
+  await form
     .getByRole('button', {
       name: register ? '创建账号' : '登录账号',
       exact: true,
     })
     .click()
-  await expect(dialog).toHaveCount(0)
+  await expect(page).toHaveURL(/#\/profile$/)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.locator('.k-account')).toContainText('@' + username)
 }
 async function cloud(page: Page) {
@@ -66,15 +68,17 @@ async function photoFixture(page: Page) {
 test('account forms fit phone, tablet and desktop widths', async ({ page }) => {
   await open(page)
   await page.getByRole('button', { name: '注册账号 ↗', exact: true }).click()
+  await expect(page).toHaveURL(/#\/register\?/)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
   for (const width of [320, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 })
     await page
-      .getByRole('dialog')
+      .locator('.k-auth-form')
       .getByRole('button', { name: '创建账号', exact: true })
       .scrollIntoViewIfNeeded()
     await expect(
       page
-        .getByRole('dialog')
+        .locator('.k-auth-form')
         .getByRole('button', { name: '创建账号', exact: true }),
     ).toBeVisible()
     expect(
@@ -84,13 +88,17 @@ test('account forms fit phone, tablet and desktop widths', async ({ page }) => {
     ).toBeTruthy()
     expect(
       await page
-        .getByRole('dialog')
+        .locator('.k-auth-form')
         .evaluate((dialog) => dialog.scrollWidth <= dialog.clientWidth),
     ).toBeTruthy()
-    if (width !== 768)
+    if (width !== 768) {
+      await page.evaluate(() =>
+        window.scrollTo({ top: 0, behavior: 'instant' }),
+      )
       await page.screenshot({
         path: test.info().outputPath(`registration-${width}.png`),
       })
+    }
   }
 })
 
@@ -143,6 +151,11 @@ test('registration imports the guest kitchen and all private data follows the ac
     'src',
     /\/account\/media\/[a-f0-9]{64}\.jpg$/,
   )
+  await expect(page.locator('.header-account__name')).toHaveText('跨设备厨房')
+  await expect(page.locator('.header-account__avatar img')).toHaveAttribute(
+    'src',
+    /\/account\/media\//,
+  )
   await open(page, '/settings')
   await page
     .getByRole('combobox', { name: '明暗模式', exact: true })
@@ -187,6 +200,18 @@ test('registration imports the guest kitchen and all private data follows the ac
         .getByRole('group', { name: '喜欢这些味道' })
         .getByRole('button', { name: '甜', exact: true }),
     ).toHaveAttribute('aria-pressed', 'true')
+    for (const width of [320, 390, 768, 1024, 1440]) {
+      await other.setViewportSize({ width, height: 900 })
+      await expect(other.locator('.header-account')).toBeVisible()
+      await expect(other.locator('.header-account__name')).toHaveText(
+        '跨设备厨房',
+      )
+      expect(
+        await other.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBeTruthy()
+    }
     const remote = await cloud(other)
     expect(remote.data.preferences.theme).toBe('dark')
     expect(remote.data.preferences.readingSize).toBe('large')
@@ -303,4 +328,74 @@ test('a concurrent update rebases favorites while preserving another device pref
       (r: { recipeId: string }) => r.recipeId === 'shrimp',
     ),
   ).toHaveLength(1)
+})
+
+test('the header opens dedicated account pages and returns to the original recipe after registration', async ({
+  page,
+}) => {
+  await open(page, '/recipe/corn-soup')
+  const header = page.locator('header.site-header')
+  await header.getByRole('link', { name: '注册或登录', exact: true }).click()
+  await expect(page).toHaveURL(/#\/login\?next=%2Frecipe%2Fcorn-soup$/)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await page
+    .locator('.k-auth-tabs')
+    .getByRole('link', { name: '注册', exact: true })
+    .click()
+  await expect(page).toHaveURL(/#\/register\?next=%2Frecipe%2Fcorn-soup$/)
+  const username = 'entry_' + crypto.randomUUID().slice(0, 8)
+  await page
+    .getByRole('textbox', { name: '用户名', exact: true })
+    .fill(username)
+  await page.getByLabel('密码', { exact: true }).fill(PASSWORD)
+  await page.getByLabel('再次输入密码', { exact: true }).fill(PASSWORD)
+  await page
+    .getByRole('textbox', { name: '账号昵称', exact: true })
+    .fill('入口测试')
+  await page.getByRole('checkbox').uncheck()
+  await page.getByRole('button', { name: '创建账号', exact: true }).click()
+  await expect(page).toHaveURL(/#\/recipe\/corn-soup$/)
+  await expect(header.locator('.header-account__name')).toHaveText('入口测试')
+  await expect(header.locator('.header-account__avatar')).toHaveText('入')
+  await header
+    .getByRole('link', { name: '进入入口测试的厨房', exact: true })
+    .click()
+  await expect(page).toHaveURL(/#\/profile$/)
+  await page.reload()
+  await expect(header.locator('.header-account__name')).toHaveText('入口测试')
+  await page.getByRole('button', { name: '退出登录 ↗' }).click()
+  await expect(
+    header.getByRole('link', { name: '注册或登录', exact: true }),
+  ).toBeVisible()
+  await page.setViewportSize({ width: 320, height: 844 })
+  await expect(
+    header.getByRole('link', { name: '注册或登录', exact: true }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: '打开菜单' }).click()
+  await page.locator('.mobile-menu__link--account').click()
+  await expect(page).toHaveURL(/#\/login\?next=%2Fprofile$/)
+  await expect(page.locator('#mobile-menu')).toHaveAttribute(
+    'aria-hidden',
+    'true',
+  )
+  await expect(page.locator('body')).not.toHaveClass(/is-locked/)
+})
+
+test('direct registration stays usable when the recipe catalog cannot be loaded', async ({
+  page,
+}) => {
+  await page.route('**/catalog/recipes.json', (route) => route.abort('failed'))
+  await page.goto('/app/#/register?next=https%3A%2F%2Fevil.example')
+  await expect(page.locator('.k-auth-form')).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: '创建账号', exact: true }),
+  ).toBeEnabled()
+  await expect(page.locator('.k-loading')).toHaveCount(0)
+  await page
+    .locator('.k-auth-tabs')
+    .getByRole('link', { name: '登录', exact: true })
+    .click()
+  await expect(page).toHaveURL(/#\/login\?next=%2Fprofile$/)
+  await page.reload()
+  await expect(page.locator('.k-auth-form')).toBeVisible()
 })
