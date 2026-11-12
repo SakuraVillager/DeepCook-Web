@@ -400,7 +400,7 @@ test('online footer reuses the homepage footer and keeps app navigation intact',
   await expect(
     footer.getByRole('link', { name: '在线使用', exact: true }),
   ).toHaveAttribute('href', '../app/')
-  await expect(footer.getByRole('link', { name: 'AI 路线' })).toHaveAttribute(
+  await expect(footer.getByRole('link', { name: 'AI 下厨' })).toHaveAttribute(
     'href',
     '../index.html#next',
   )
@@ -431,8 +431,10 @@ test('cursor ring trails the dot while moving and centers on the pointer at rest
   page,
 }) => {
   await page.addInitScript(() => sessionStorage.setItem('deepcook-intro', '1'))
-  for (const path of ['/app/', '/']) {
+  for (const path of ['/app/', '/', '/android/']) {
     await page.goto(path)
+    await page.evaluate(() => document.fonts.ready)
+    if (path === '/app/') await expect(page.locator('.k-loading')).toHaveCount(0)
     await page.mouse.move(120, 260)
     await expect(page.locator('.cursor')).toHaveCSS('opacity', '1')
     for (const [x, y] of [

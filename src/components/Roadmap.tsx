@@ -1,28 +1,37 @@
 import type { CSSProperties } from 'react'
 import { ChapterLabel } from './ChapterLabel'
 import { DesignCanvas } from './DesignCanvas'
+import { LetterLink } from './LetterLink'
 
 export function Roadmap() {
   return (
-    <section className="section chapter canvas-page next on-dark" id="next" data-theme="dark">
-      <DesignCanvas className="container chapter__canvas" label="AI 路线画布">
-        <ChapterLabel index="05" title="WHAT'S NEXT" heat="备菜 · PREP" />
+    <section
+      className="section chapter canvas-page next on-dark"
+      id="next"
+      data-theme="dark"
+    >
+      <DesignCanvas className="container chapter__canvas" label="AI 下厨画布">
+        <ChapterLabel
+          index="05"
+          title="AI IN YOUR KITCHEN"
+          heat="备菜 · PREP"
+        />
         <div className="chapter-heading next__heading">
           <div>
             <h2 className="h2" data-reveal>
               把 AI 请进厨房。
             </h2>
             <p className="next__promise" data-reveal>
-              不是替你做饭，
-              是让你更懂做饭。
+              不是替你做饭， 是让你更懂做饭。
             </p>
           </div>
           <div className="next__status" data-reveal>
             <div className="next__badge" data-reveal>
-              COMING SOON · 开发中
+              AVAILABLE IN APP · 下载体验
             </div>
             <p>
-              0.5.1 还没有 AI。下面是我们正在设计的方向，不是已经上线的功能。
+              AI 下厨已在 APP
+              中实现。把现有食材和口味告诉它，一起安排今晚这一餐。
             </p>
           </div>
         </div>
@@ -37,7 +46,11 @@ export function Roadmap() {
                 而不是一串看起来合理的食材清单。
               </p>
             </article>
-            <article className="next-card" data-reveal style={{ '--reveal-delay': '80ms' } as CSSProperties}>
+            <article
+              className="next-card"
+              data-reveal
+              style={{ '--reveal-delay': '80ms' } as CSSProperties}
+            >
               <span className="next-card__num">02 / WHY</span>
               <h3>为什么这样做</h3>
               <p>
@@ -45,26 +58,32 @@ export function Roadmap() {
                 让下一次不看菜谱也做得出来。
               </p>
             </article>
-            <article className="next-card" data-reveal style={{ '--reveal-delay': '160ms' } as CSSProperties}>
+            <article
+              className="next-card"
+              data-reveal
+              style={{ '--reveal-delay': '160ms' } as CSSProperties}
+            >
               <span className="next-card__num">03 / TONIGHT</span>
               <h3>今晚吃什么</h3>
               <p>
-                结合忌口、营养目标和可用时间，给出一周晚餐建议，并顺手列出还缺的食材。
+                结合忌口、口味和可用时间，聊聊今晚的菜单，再看看还缺哪些食材。
               </p>
             </article>
           </div>
 
           <div className="concept" data-reveal>
-            <span className="concept__tag">CONCEPT PREVIEW · 非实际功能</span>
+            <span className="concept__tag">AI COOKING · APP 内体验</span>
             <div className="concept__side">
-              <h4>一次概念对话</h4>
+              <h4>聊聊今晚这一餐</h4>
               <p>
-                这是我们对 AI 在 DeepCook 里角色的想象：先理解你的厨房，再给出一条做得到的路。
+                从冰箱里的食材开始，把时间、口味和困惑说出来。打开 APP，和 AI
+                一起下厨。
               </p>
             </div>
-            <div className="concept__chat" aria-label="AI 概念对话示意">
+            <div className="concept__chat" aria-label="AI 下厨对话示意">
               <p className="bubble bubble--user">
-                冰箱里只剩番茄、鸡蛋和半颗包菜。今晚想吃得清淡一点，只有 20 分钟。
+                冰箱里只剩番茄、鸡蛋和半颗包菜。今晚想吃得清淡一点，只有 20
+                分钟。
               </p>
               <p className="bubble bubble--ai">
                 先做番茄炒蛋，包菜手撕后大火快炒，两道一起 18 分钟能上桌。
@@ -74,9 +93,12 @@ export function Roadmap() {
           </div>
         </div>
 
-        <p className="label next__disclaimer">
-          AI FEATURES ARE NOT AVAILABLE IN 0.5.1 · 仅为设计方向
-        </p>
+        <LetterLink
+          text="下载 APP 体验"
+          href="./android/#download"
+          className="next__download"
+          arrow
+        />
       </DesignCanvas>
     </section>
   )

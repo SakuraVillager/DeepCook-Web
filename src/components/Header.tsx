@@ -16,22 +16,30 @@ type HeaderEdition = {
   account?: { name: string; avatar?: string }
 }
 
-export function Header({ edition }: { edition?: HeaderEdition } = {}) {
+type HeaderPage = {
+  items: { href: string; zh: string; en: string }[]
+  cta: { text: string; href: string }
+}
+
+export function Header({
+  edition,
+  page,
+}: { edition?: HeaderEdition; page?: HeaderPage } = {}) {
   const [open, setOpen] = useState(false)
   const [onLight, setOnLight] = useState(false)
   const online = Boolean(edition)
-  const items = edition?.items ?? navItems
+  const items = edition?.items ?? page?.items ?? navItems
   const accountPath = edition?.account
     ? '/profile'
     : (edition?.accountHref ?? '/login')
-  const ctaHref = online ? `#${accountPath}` : './app/'
+  const ctaHref = online ? `#${accountPath}` : (page?.cta.href ?? './app/')
   const ctaText = online
     ? (edition?.account?.name ?? '注册 / 登录')
-    : '在线使用'
+    : (page?.cta.text ?? '在线使用')
   const linkHref = (href: string) => (online ? `#${href}` : href)
 
   useEffect(() => {
-    if (online) return
+    if (online || page) return
     let frame = 0
 
     const update = () => {
@@ -64,7 +72,7 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
       window.removeEventListener('resize', onScroll)
       if (frame) window.cancelAnimationFrame(frame)
     }
-  }, [online])
+  }, [online, page])
 
   useEffect(() => {
     if (!open) return
@@ -85,8 +93,9 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
   }, [open])
 
   const go = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-    event.preventDefault()
     setOpen(false)
+    if (!edition && !href.startsWith('#')) return
+    event.preventDefault()
     if (edition) {
       edition.onNavigate(href)
       return
@@ -97,14 +106,16 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
   return (
     <>
       <header
-        className={`site-header${online ? ' site-header--online' : ''}${online || onLight ? ' is-on-light' : ''}`}
+        className={`site-header${online || page ? ' site-header--online' : ''}${online || page || onLight ? ' is-on-light' : ''}`}
       >
         <a
           className="site-header__brand"
-          href={online ? '../index.html' : '#top'}
-          aria-label={online ? 'DeepCook 官网首页' : 'DeepCook，回到顶部'}
+          href={online || page ? '../index.html' : '#top'}
+          aria-label={
+            online || page ? 'DeepCook 官网首页' : 'DeepCook，回到顶部'
+          }
           onClick={(event) => {
-            if (online) return
+            if (online || page) return
             event.preventDefault()
             scrollToTop()
           }}
@@ -160,8 +171,16 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
               text={ctaText}
               href={ctaHref}
               className="header-cta letter-link--en"
-              ariaLabel={online ? '注册或登录' : '在线使用 DeepCook'}
-              onClick={online ? (event) => go(event, accountPath) : undefined}
+              ariaLabel={
+                online ? '注册或登录' : (page?.cta.text ?? '在线使用 DeepCook')
+              }
+              onClick={
+                online
+                  ? (event) => go(event, accountPath)
+                  : page
+                    ? (event) => go(event, ctaHref)
+                    : undefined
+              }
               arrow
             />
           )}
@@ -223,7 +242,9 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
             href={ctaHref}
             tabIndex={open ? 0 : -1}
             onClick={
-              online ? (event) => go(event, accountPath) : () => setOpen(false)
+              online
+                ? (event) => go(event, accountPath)
+                : (event) => go(event, ctaHref)
             }
           >
             <span>{ctaText}</span>
@@ -242,7 +263,7 @@ export function Header({ edition }: { edition?: HeaderEdition } = {}) {
           </div>
           <a
             className="btn btn--ink btn--small"
-            href={`${online ? '../' : './'}download/DeepCook-0.5.1-preview.apk`}
+            href={`${online || page ? '../' : './'}download/DeepCook-0.5.1-preview.apk`}
             download
             tabIndex={open ? 0 : -1}
           >

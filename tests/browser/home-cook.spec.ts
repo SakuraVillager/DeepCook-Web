@@ -55,6 +55,13 @@ test('the recipe scrolls inside a screen-sized pinned chapter, then leaves with 
   const left = page.locator('.cook__left'),
     panel = page.locator('.cook__panel'),
     viewport = page.locator('.cook__viewport')
+  expect(
+    await page
+      .locator('.cook__reader')
+      .evaluate((el) =>
+        Math.abs(el.getBoundingClientRect().bottom - innerHeight),
+      ),
+  ).toBeLessThan(2)
   const top = (await left.boundingBox())!.y
   const panelStart = (await panel.boundingBox())!.y
   const distance = await page
@@ -71,6 +78,13 @@ test('the recipe scrolls inside a screen-sized pinned chapter, then leaves with 
   for (const progress of [0.25, 0.5, 0.8]) {
     await at(page, progress)
     expect(Math.abs((await left.boundingBox())!.y - top)).toBeLessThan(2)
+    expect(
+      await page
+        .locator('.cook__reader')
+        .evaluate((el) =>
+          Math.abs(el.getBoundingClientRect().bottom - innerHeight),
+        ),
+    ).toBeLessThan(2)
     expect(Math.abs((await viewport.boundingBox())!.y)).toBeLessThan(2)
     expect(
       Math.abs(
@@ -142,6 +156,13 @@ test('phone and tablet layouts keep the visible canvas bounded while reading the
   ]) {
     await page.setViewportSize({ width, height })
     await openCook(page)
+    expect(
+      await page
+        .locator('.cook__reader')
+        .evaluate((el) =>
+          Math.abs(el.getBoundingClientRect().bottom - innerHeight),
+        ),
+    ).toBeLessThan(2)
     const initial = (await page.locator('.cook__left').boundingBox())!.y
     await at(page, 0.6)
     expect(

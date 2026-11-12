@@ -56,10 +56,26 @@ export function Cook() {
     const measure = () => {
       measurementFrame = 0
       if (stopped || !viewport.clientHeight) return
-      const nextScale =
-        viewport.getBoundingClientRect().height / viewport.clientHeight
-      if (nextScale <= 0) return
+      const nextScale = parseFloat(
+        getComputedStyle(viewport).getPropertyValue('--canvas-scale'),
+      )
+      if (!Number.isFinite(nextScale) || nextScale <= 0) return
       scale = nextScale
+      const screen = host.querySelector<HTMLElement>('.cook__viewport')
+      if (screen) {
+        const top =
+          viewport.getBoundingClientRect().top -
+          screen.getBoundingClientRect().top
+        const height = Math.max(1, (screen.clientHeight - top) / scale)
+        if (
+          Math.abs(
+            parseFloat(
+              viewport.style.getPropertyValue('--cook-reader-height') || '0',
+            ) - height,
+          ) > 0.5
+        )
+          viewport.style.setProperty('--cook-reader-height', `${height}px`)
+      }
       const nextTravel =
         Math.max(0, content.offsetHeight - viewport.clientHeight) * scale
       if (Math.abs(travel - nextTravel) > 0.1) {
@@ -116,6 +132,7 @@ export function Cook() {
       revealStep.current = null
       host.style.removeProperty('--cook-travel')
       content.style.removeProperty('--cook-offset')
+      viewport.style.removeProperty('--cook-reader-height')
     }
   }, [])
 

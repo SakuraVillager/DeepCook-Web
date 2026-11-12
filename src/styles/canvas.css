@@ -615,7 +615,8 @@
   padding: calc(var(--header-h) + 16px) 40px 24px;
   overflow: clip;
 }
-.chapter__canvas .cook__reader { height: 100%; min-height: 0; overflow: clip; }
+.chapter__canvas .cook__reader { height: var(--cook-reader-height, 100%); min-height: 0; overflow: clip; }
+.has-js .cook__reader[data-reveal] { transform: none; }
 .chapter__canvas .cook__reader:focus-visible { outline: 2px solid var(--olive); outline-offset: 4px; }
 .chapter__canvas .cook__panel {
   position: relative;
@@ -629,3 +630,34 @@
 @media (max-width: 600px) {
   .cook__viewport { padding: calc(var(--header-h) + 12px) 12px 12px; }
 }
+
+/* Finish the horizontal collection before this full-screen chapter leaves. */
+.find.canvas-page.canvas-page {
+  display: block;
+  height: calc(100dvh + var(--find-travel, 0px));
+  padding: 0;
+  overflow: visible;
+}
+.find__viewport {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100dvh;
+  padding: calc(var(--header-h) + 16px) 40px 24px;
+  overflow: clip;
+}
+.find .showcase__viewport { scroll-snap-type: none; scroll-behavior: auto; overflow-anchor: none; }
+@media (max-width: 600px) {
+  .find__viewport { padding: calc(var(--header-h) + 12px) 12px 12px; }
+}
+
+.chapter__canvas .next__download {
+  justify-self: start;
+  align-self: center;
+  min-height: 32px;
+  font-size: 12px;
+  color: var(--yolk);
+  border-bottom: 1px solid currentColor;
+}
+.canvas-portrait .next__download,
+.canvas-compact .next__download { font-size: 11px; }

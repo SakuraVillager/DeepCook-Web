@@ -19,7 +19,7 @@
   --line-light-strong: rgba(243, 237, 224, 0.4);
 
   /* Type */
-  --font-display: 'Archivo Variable', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: 'Archivo Variable', 'Helvetica Neue', Helvetica, Arial, 'Noto Sans SC Variable', sans-serif;
   --font-serif: 'Instrument Serif', 'Times New Roman', serif;
   --font-zh: 'Noto Sans SC Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
     'Noto Sans CJK SC', sans-serif;

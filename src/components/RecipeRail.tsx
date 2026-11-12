@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { menuRecipes } from '../data/recipes'
 import { LetterLink } from './LetterLink'
+import { getLenis } from '../lib/scroll'
 
 function metaFor(recipe: (typeof menuRecipes)[number]) {
   const region = recipe.region !== '无' ? recipe.region : ''
@@ -29,24 +30,97 @@ export function RecipeRail() {
   const [atStart, setAtStart] = useState(true)
   const [atEnd, setAtEnd] = useState(false)
 
-  useEffect(() => {
+  const moveTo = useRef<((left: number, immediate?: boolean) => void) | null>(
+    null,
+  )
+
+  useLayoutEffect(() => {
     const el = viewport.current
-    if (!el) return
-
+    const host = el?.closest<HTMLElement>('#features')
+    if (!el || !host) return
+    let frame = 0,
+      resizeFrame = 0,
+      expected = 0,
+      scale = 1,
+      travel = 0,
+      stopped = false
+    const maxScroll = () => Math.max(0, el.scrollWidth - el.clientWidth)
     const update = () => {
-      const max = el.scrollWidth - el.clientWidth
-      setAtStart(el.scrollLeft <= 4)
-      setAtEnd(el.scrollLeft >= max - 4)
+      frame = 0
+      const distance = Math.max(
+        0,
+        Math.min(travel, -host.getBoundingClientRect().top),
+      )
+      expected = Math.max(0, Math.min(maxScroll(), distance / scale))
+      if (Math.abs(el.scrollLeft - expected) > 0.5) el.scrollLeft = expected
+      setAtStart(expected <= 4)
+      setAtEnd(expected >= maxScroll() - 4)
     }
-
-    update()
-    el.addEventListener('scroll', update, { passive: true })
-    const observer = new ResizeObserver(update)
+    const jump = (left: number, immediate = false) => {
+      const top =
+        window.scrollY +
+        host.getBoundingClientRect().top +
+        Math.max(0, Math.min(maxScroll(), left)) * scale
+      const lenis = getLenis()
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (lenis)
+        lenis.scrollTo(top, { immediate: immediate || reduced, duration: 0.55 })
+      else
+        window.scrollTo({
+          top,
+          behavior: immediate || reduced ? 'instant' : 'smooth',
+        })
+      if (immediate || reduced) update()
+    }
+    const measure = () => {
+      resizeFrame = 0
+      const nextScale = parseFloat(
+        getComputedStyle(el).getPropertyValue('--canvas-scale'),
+      )
+      if (!Number.isFinite(nextScale) || nextScale <= 0) return
+      scale = nextScale
+      const next = maxScroll() * scale
+      if (Math.abs(travel - next) > 0.1) {
+        travel = next
+        host.style.setProperty('--find-travel', `${travel}px`)
+        getLenis()?.resize()
+      }
+      cancelAnimationFrame(frame)
+      update()
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update)
+    }
+    const onResize = () => {
+      if (!resizeFrame) resizeFrame = requestAnimationFrame(measure)
+    }
+    const onRailScroll = () => {
+      if (Math.abs(el.scrollLeft - expected) > 1) jump(el.scrollLeft, true)
+    }
+    moveTo.current = jump
+    const observer = new ResizeObserver(onResize)
     observer.observe(el)
-
+    if (el.firstElementChild) observer.observe(el.firstElementChild)
+    const canvas = host.querySelector('.design-canvas')
+    if (canvas) observer.observe(canvas)
+    el.addEventListener('scroll', onRailScroll, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onResize)
+    void document.fonts.ready.then(() => {
+      if (!stopped) onResize()
+    })
+    measure()
+    onResize()
     return () => {
-      el.removeEventListener('scroll', update)
+      stopped = true
       observer.disconnect()
+      cancelAnimationFrame(frame)
+      cancelAnimationFrame(resizeFrame)
+      el.removeEventListener('scroll', onRailScroll)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
+      host.style.removeProperty('--find-travel')
+      moveTo.current = null
     }
   }, [])
 
@@ -55,15 +129,16 @@ export function RecipeRail() {
     if (!el) return
     const card = el.querySelector<HTMLElement>('.recipe-card')
     const step = card ? card.offsetWidth + 18 : el.clientWidth * 0.8
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    el.scrollBy({ left: direction * step, behavior: reduced ? 'auto' : 'smooth' })
+    moveTo.current?.(el.scrollLeft + direction * step)
   }
 
   return (
     <div className="showcase" data-reveal>
       <div className="showcase__head">
         <div className="showcase__intro">
-          <span className="label showcase__kicker">TONIGHT · 06 DISHES / FROM 494</span>
+          <span className="label showcase__kicker">
+            TONIGHT · 06 DISHES / FROM 494
+          </span>
           <h3 className="showcase__title">今天，想做点什么？</h3>
           <p className="showcase__sub">
             6 道精选，来自 494 道离线菜谱；未标注的用时与难度不猜测。
@@ -96,7 +171,7 @@ export function RecipeRail() {
         ref={viewport}
         tabIndex={0}
         role="region"
-        aria-label="精选菜谱，可横向滚动"
+        aria-label="精选菜谱，随页面滚动横向浏览，也可横向滑动"
       >
         <div className="showcase__track">
           {menuRecipes.map((recipe, index) => (
@@ -104,7 +179,7 @@ export function RecipeRail() {
               className="recipe-card"
               key={recipe.id}
               href={`./app/?recipe=${recipe.id}`}
-              aria-label={`${recipe.title}，在在线版中查看（准备中）`}
+              aria-label={`${recipe.title}，在在线版中查看`}
             >
               <div className="recipe-card__media">
                 <img
@@ -151,7 +226,7 @@ export function RecipeRail() {
               <p className="showcase-card-end__label">
                 道菜谱全部收录在 App 内。
                 <br />
-                在线版整理中，入口先留给你。
+                打开在线版，继续寻找今晚的好菜。
               </p>
             </div>
             <LetterLink
@@ -165,7 +240,7 @@ export function RecipeRail() {
       </div>
 
       <div className="showcase__foot">
-        <span className="label">SCROLL → 横向滑动</span>
+        <span className="label">SCROLL ↓ 向下滚动，横向浏览</span>
       </div>
     </div>
   )

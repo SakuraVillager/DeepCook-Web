@@ -52,6 +52,7 @@ export function Footer({
 
           <div className="footer__col">
             <h4>获取 / GET</h4>
+            <a href={`${assetPrefix}android/`}>APP 介绍</a>
             <a
               href={`${assetPrefix}download/DeepCook-0.5.1-preview.apk`}
               download
@@ -73,7 +74,7 @@ export function Footer({
               href={`${homeHref}#next`}
               onClick={(event) => go(event, '#next')}
             >
-              AI 路线
+              AI 下厨
             </a>
             <span className="footer__plain">内容来源：HowToCook</span>
             <span className="footer__plain">Based Cooking · Unlicense</span>

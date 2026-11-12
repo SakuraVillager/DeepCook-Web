@@ -10,8 +10,9 @@ function redirectOnlineEntry(
   res: ServerResponse,
   next: () => void,
 ) {
-  if (req.url?.split('?')[0] === '/app') {
-    res.writeHead(302, { Location: req.url.replace('/app', '/app/') })
+  const path = req.url?.split('?')[0]
+  if (path === '/app' || path === '/android') {
+    res.writeHead(302, { Location: req.url!.replace(path, `${path}/`) })
     res.end()
     return
   }
@@ -60,6 +61,7 @@ export default defineConfig({
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
         app: resolve(import.meta.dirname, 'app/index.html'),
+        android: resolve(import.meta.dirname, 'android/index.html'),
       },
     },
   },

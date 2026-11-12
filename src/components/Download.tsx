@@ -23,8 +23,7 @@ export function Download() {
         <div className="download__grid">
           <a
             className="download-card download-card--apk"
-            href="./download/DeepCook-0.5.1-preview.apk"
-            download
+            href="./android/"
             data-reveal
           >
             <div className="download-card__top">
@@ -38,7 +37,7 @@ export function Download() {
                 Preview 构建可直接覆盖开发版安装。
               </p>
               <span className="btn btn--ghost">
-                下载 APK
+                了解 APP / 下载
                 <span className="arrow" aria-hidden="true" />
               </span>
             </div>
