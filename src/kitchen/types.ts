@@ -53,6 +53,33 @@ export interface Preferences {
   showStepImages: boolean
   keepScreenOn: boolean
 }
+export interface FoodProfile {
+  cuisines: string[]
+  spice: string | null
+  tastes: string[]
+  diet: string | null
+  /** null means unanswered; [] means explicitly no known allergens. */
+  allergens: string[] | null
+  avoided: string[]
+  experience: string | null
+  minutes: number | null
+  servings: string | null
+  goals: string[]
+}
+export interface FoodSetup {
+  profile: FoodProfile
+  draft: FoodProfile | null
+  page: number
+  completed: boolean
+}
+export interface AndroidCloudData {
+  schema: 1
+  preferences: Record<string, unknown>
+  foodSetup: FoodSetup
+  dishNotes: unknown[]
+  coverOverrides: Record<string, string>
+  privateCommunity: Record<string, unknown>
+}
 export interface UserData {
   favorites: SavedRecipe[]
   recent: SavedRecipe[]
@@ -64,6 +91,8 @@ export interface UserData {
     avoids: string[]
   }
   preferences: Preferences
+  foodSetup: FoodSetup
+  android?: AndroidCloudData
 }
 export const REGIONS = [
   '中式',

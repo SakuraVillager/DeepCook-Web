@@ -18,6 +18,7 @@ import { useAccount } from './useAccount'
 import { readCloudUser, saveCloudUser, userScope } from './account-api'
 import { AccountPage } from './AccountPage'
 import { accountPagePath } from './account-routes'
+import { FoodProfileSetup } from './FoodProfileSetup'
 
 function currentRoute() {
   return window.location.hash.startsWith('#/')
@@ -291,7 +292,7 @@ export default function KitchenApp() {
     selectedNav =
       page === 'edit'
         ? '/mine'
-        : ['recent', 'settings'].includes(page ?? '')
+        : ['recent', 'settings', 'food-profile'].includes(page ?? '')
           ? '/profile'
           : `/${page}`
   useEffect(() => {
@@ -301,6 +302,7 @@ export default function KitchenApp() {
       mine: '我的菜谱',
       profile: '我的厨房',
       settings: '偏好与设置',
+      'food-profile': '饮食偏好',
       recent: '最近浏览',
       edit: '写一道菜',
       login: '登录厨房账号',
@@ -335,6 +337,7 @@ export default function KitchenApp() {
     )
   else if (page === 'recipe') content = <RecipeView key={id} recipe={recipe} />
   else if (page === 'read') content = <Reader recipe={recipe} stepId={step} />
+  else if (page === 'food-profile') content = <FoodProfileSetup />
   else if (page === 'edit')
     content = ready ? (
       <Editor key={id} id={id} />

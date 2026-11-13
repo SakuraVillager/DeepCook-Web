@@ -8,9 +8,24 @@ import {
 import { readUser, updateUser, validateUser } from './storage'
 import type { UserData } from './types'
 import { copyGuestCommunityPhotos } from './community-storage'
+import { hasFoodAnswers } from './food-recommendations'
 
 export const userScope = (accountId?: string) =>
   accountId ? `account/${accountId}` : 'user'
+function cloudPayload(value: UserData) {
+  const { android: existing, foodSetup, ...wire } = value
+  return {
+    ...wire,
+    android: {
+      schema: 1 as const,
+      preferences: existing?.preferences ?? {},
+      foodSetup,
+      dishNotes: existing?.dishNotes ?? [],
+      coverOverrides: existing?.coverOverrides ?? {},
+      privateCommunity: existing?.privateCommunity ?? {},
+    },
+  }
+}
 const writes = new Map<string, Promise<unknown>>()
 function sessionChanged(account: Account) {
   if (accountHint()?.id === account.id) saveAccountHint(account)
@@ -102,7 +117,7 @@ export function saveCloudUser(
           uploaded,
         )
         try {
-          const body = { revision: current.revision, data, mutationId }
+          const body = { revision: current.revision, data: cloudPayload(data), mutationId }
           let result
           try {
             result = await apiRequest('/account/data', 'PUT', body, accountId)
@@ -183,6 +198,8 @@ export function mergeUserData(remote: UserData, local: UserData) {
       avoids,
     },
     preferences: fresh ? local.preferences : remote.preferences,
+    foodSetup: remote.foodSetup.completed || hasFoodAnswers(remote.foodSetup.profile)
+      ? remote.foodSetup : local.foodSetup,
   }
 }
 export async function importLocalUser(accountId: string) {

@@ -3,6 +3,7 @@ import { useKitchen } from './context'
 import { filterRecipes } from './domain'
 import { CATEGORIES, REGIONS, type Filter, type Recipe } from './types'
 import { Empty, Flip, Heading, Photo, Star } from './ui'
+import { recommendRecipes } from './food-recommendations'
 
 export function RecipeCard({
   recipe,
@@ -143,7 +144,9 @@ export function Browse({
     filter.difficulty,
   )
   const featured =
-    mode === 'discover' && !searching ? catalog.filter((r) => r.featured) : []
+    mode === 'discover' && !searching
+      ? recommendRecipes([...catalog, ...user.recipes], user.foodSetup.profile)
+      : []
   const settings = {
     discover: ['01', 'FIND YOUR DISH', '今天，想做点什么？'],
     favorites: ['02', 'SAVED FOR LATER', '收藏好菜，慢慢下厨。'],
@@ -265,8 +268,8 @@ export function Browse({
       {featured.length > 0 && (
         <section className="k-featured">
           <div className="k-section-label">
-            <span className="label">TONIGHT’S TABLE / 今晚的灵感</span>
-            <span className="label">SELECTED 06</span>
+            <span className="label">{user.foodSetup.profile.cuisines.length || user.foodSetup.profile.allergens?.length || user.foodSetup.profile.goals.length ? 'MADE FOR YOUR KITCHEN / 为你推荐' : 'TONIGHT’S TABLE / 今晚的灵感'}</span>
+            <span className="label">SELECTED {String(featured.length).padStart(2, '0')}</span>
           </div>
           <div className="k-featured__track">
             {featured.map((r, i) => (

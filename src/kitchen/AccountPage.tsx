@@ -24,8 +24,8 @@ export function AccountPage({
 
   useEffect(() => {
     if (auth.ready && auth.account && !auth.expired && !auth.syncing)
-      go(destination)
-  }, [auth.ready, auth.account, auth.expired, auth.syncing, destination, go])
+      go(registering ? '/food-profile' : destination)
+  }, [auth.ready, auth.account, auth.expired, auth.syncing, destination, go, registering])
 
   if (!auth.enabled)
     return (

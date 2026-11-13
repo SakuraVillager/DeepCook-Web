@@ -1,4 +1,4 @@
-import type { Filter, Recipe, UserData } from './types'
+import type { Filter, FoodProfile, FoodSetup, Recipe, UserData } from './types'
 import { privateImageUrl } from './api.ts'
 
 export const DEFAULT_PREFERENCES: UserData['preferences'] = {
@@ -7,12 +7,20 @@ export const DEFAULT_PREFERENCES: UserData['preferences'] = {
   showStepImages: true,
   keepScreenOn: false,
 }
+export const emptyFoodProfile = (): FoodProfile => ({
+  cuisines: [], spice: null, tastes: [], diet: null, allergens: null,
+  avoided: [], experience: null, minutes: null, servings: null, goals: [],
+})
+export const emptyFoodSetup = (): FoodSetup => ({
+  profile: emptyFoodProfile(), draft: null, page: 0, completed: false,
+})
 export const emptyUser = (): UserData => ({
   favorites: [],
   recent: [],
   recipes: [],
   profile: { name: '', avatar: null, likes: [], avoids: [] },
   preferences: { ...DEFAULT_PREFERENCES },
+  foodSetup: emptyFoodSetup(),
 })
 export const visible = (value?: string | null) =>
   Boolean(value?.trim() && value.trim() !== '无')

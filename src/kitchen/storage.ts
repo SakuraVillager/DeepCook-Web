@@ -1,5 +1,5 @@
-import { emptyUser, validRecipe } from './domain'
-import type { UserData } from './types'
+import { emptyFoodSetup, emptyUser, validRecipe } from './domain'
+import type { AndroidCloudData, UserData } from './types'
 
 let database: Promise<IDBDatabase> | undefined
 function open() {
@@ -19,7 +19,10 @@ function open() {
 }
 export function validateUser(value: unknown): UserData {
   if (value == null) return emptyUser()
-  const d = value as UserData
+  const raw = value as Partial<UserData> & { android?: Partial<AndroidCloudData> }
+  const android = raw.android && typeof raw.android === 'object' ? raw.android : undefined
+  const setup = raw.foodSetup ?? android?.foodSetup ?? emptyFoodSetup()
+  const d = { ...raw, foodSetup: setup } as UserData
   if (
     !d ||
     !Array.isArray(d.recipes) ||
@@ -45,6 +48,20 @@ export function validateUser(value: unknown): UserData {
     typeof d.preferences.keepScreenOn !== 'boolean'
   )
     throw new Error('本地数据暂时无法读取，原数据已保留。')
+  const validSet = (items: unknown): items is string[] =>
+    Array.isArray(items) && items.length <= 100 && items.every((item) => typeof item === 'string' && item.length <= 80)
+  const profile = d.foodSetup?.profile
+  if (!profile || !validSet(profile.cuisines) || !validSet(profile.tastes) ||
+      !validSet(profile.avoided) || !validSet(profile.goals) ||
+      !(profile.allergens == null || validSet(profile.allergens)) ||
+      !(profile.spice == null || typeof profile.spice === 'string') ||
+      !(profile.diet == null || typeof profile.diet === 'string') ||
+      !(profile.experience == null || typeof profile.experience === 'string') ||
+      !(profile.minutes == null || Number.isInteger(profile.minutes)) ||
+      !(profile.servings == null || typeof profile.servings === 'string') ||
+      !Number.isInteger(d.foodSetup.page) || typeof d.foodSetup.completed !== 'boolean' ||
+      !(d.foodSetup.draft == null || typeof d.foodSetup.draft === 'object'))
+    throw new Error('饮食偏好数据暂时无法读取，原数据已保留。')
   return d
 }
 export async function readUser(scope = 'user'): Promise<UserData> {
