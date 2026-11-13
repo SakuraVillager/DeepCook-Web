@@ -81,26 +81,24 @@ export function FoodProfileSetup() {
   )
 
   return (
-    <section className="k-food-setup">
-      <div className="k-food-setup__frame">
-        <div className="k-food-groups">
-          <fieldset>
+    <>
+          <fieldset className="k-tag-field">
             <legend>喜欢哪些菜系？ <small>可多选</small></legend>
             {chips(cuisines, profile.cuisines, (value) => update((p) => ({ ...p, cuisines: toggle(p.cuisines, value) })))}
           </fieldset>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>平时吃多辣？ <small>选一项，也可以不选</small></legend>
             {chips(spices, profile.spice ? [profile.spice] : [], (value) => update((p) => ({ ...p, spice: p.spice === value ? null : value })))}
           </fieldset>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>偏爱哪些味道？ <small>可多选</small></legend>
             {chips(tastes, profile.tastes, (value) => update((p) => ({ ...p, tastes: toggle(p.tastes, value, '都喜欢') })))}
           </fieldset>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>有固定的饮食方式吗？</legend>
             {chips(diets, profile.diet ? [profile.diet] : [], (value) => update((p) => ({ ...p, diet: p.diet === value ? null : value })))}
           </fieldset>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>有过敏或不耐受的食材吗？ <small>与普通忌口分开记录</small></legend>
             {chips(
               [...allergens, ...(profile.allergens ?? []).filter((value) => !allergens.includes(value)), '没有已知项'],
@@ -116,31 +114,29 @@ export function FoodProfileSetup() {
             )}
             {addInput('allergen', customAllergen, setCustomAllergen)}
           </fieldset>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>有不喜欢或不吃的食材吗？ <small>可多选，也可以自己添加</small></legend>
             {chips([...avoided, ...profile.avoided.filter((value) => !avoided.includes(value))], profile.avoided, (value) => update((p) => ({ ...p, avoided: p.avoided.includes(value) ? p.avoided.filter((item) => item !== value) : [...p.avoided, value] })))}
             {addInput('avoided', customAvoid, setCustomAvoid)}
           </fieldset>
           <p className="k-food-safety">推荐会按已记录的材料避开相关菜谱，材料信息可能不完整；下厨前请核对实际食材及调料。</p>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>你的下厨经验？</legend>
             {chips(experience, profile.experience ? [profile.experience] : [], (value) => update((p) => ({ ...p, experience: p.experience === value ? null : value })))}
           </fieldset>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>通常愿意花多久？</legend>
             {chips(['15 min 内', '30 min 内', '60 min 内', '时间不限'], profile.minutes == null ? [] : [profile.minutes === 0 ? '时间不限' : `${profile.minutes} min 内`], (value) => update((p) => ({ ...p, minutes: value === '时间不限' ? (p.minutes === 0 ? null : 0) : (p.minutes === Number.parseInt(value) ? null : Number.parseInt(value)) })))}
           </fieldset>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>通常给几个人做饭？</legend>
             {chips(['1 人', '2 人', '3～4 人', '5 人及以上', '不固定'], profile.servings ? [profile.servings] : [], (value) => update((p) => ({ ...p, servings: p.servings === value ? null : value })))}
           </fieldset>
-          <fieldset>
+          <fieldset className="k-tag-field">
             <legend>你想从 DeepCook 收获什么？ <small>可多选</small></legend>
             {chips(goals, profile.goals, (value) => update((p) => ({ ...p, goals: toggle(p.goals, value) })))}
             <p className="k-food-goal-notes">{profile.goals.map((goal) => goalNotes[goals.indexOf(goal)]).filter(Boolean).join(' · ')}</p>
           </fieldset>
-        </div>
-      </div>
-    </section>
+    </>
   )
 }

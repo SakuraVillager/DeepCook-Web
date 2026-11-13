@@ -311,8 +311,8 @@ export function Profile({ focusFood = false }: { focusFood?: boolean }) {
               </div>
             </fieldset>
           ))}
+          <FoodProfileSetup />
         </div>
-        <FoodProfileSetup />
       </section>
       {photo && (
         <AvatarCrop

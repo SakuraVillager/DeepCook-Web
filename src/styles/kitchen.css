@@ -3,23 +3,12 @@
   background: var(--paper);
 }
 
-.k-food-setup { max-width: 1120px; margin: 0 auto; }
-.k-taste > .k-food-setup { grid-column: 1 / -1; }
-.k-food-setup__frame { max-width: none; margin: 0; padding: 0; background: transparent; border: 0; }
-.k-food-groups { display: grid; gap: 28px; }
-.k-food-groups fieldset, .k-food-goals { min-width: 0; margin: 0; padding: 0; border: 0; }
-.k-food-groups legend, .k-food-goals legend { width: 100%; margin-bottom: 14px; font-size: 12px; font-weight: 400; }
-.k-food-groups legend small, .k-food-goals legend small { padding-left: 7px; color: var(--muted, #766f62); font-size: 12px; font-weight: 400; }
 .k-food-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .k-food-add { display: flex; gap: 8px; max-width: 440px; margin-top: 12px; }
 .k-food-add input { min-width: 0; flex: 1; height: 42px; padding: 0 12px; border: 1px solid var(--line, rgba(40,32,20,.18)); background: transparent; color: inherit; }
 .k-food-add button { padding: 0 15px; border: 1px solid var(--line, rgba(40,32,20,.18)); background: transparent; color: inherit; cursor: pointer; }
-.k-food-safety { margin: -12px 0 0; color: var(--muted, #766f62); font-size: 12px; line-height: 1.8; }
-.k-food-goals legend { margin-bottom: 5px; }
+.k-food-safety { margin: 12px 0 32px; color: var(--muted, #766f62); font-size: 12px; line-height: 1.8; }
 .k-food-goal-notes { margin: 12px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
-@media (max-width: 640px) {
-  .k-food-setup { width: 100%; }
-}
 .kitchen {
   --surface: var(--paper-3);
   min-height: 100dvh;
