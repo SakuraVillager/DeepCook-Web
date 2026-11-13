@@ -76,7 +76,7 @@ class Accounts:
 
     @staticmethod
     def public(account):
-        return {'id': account['id'], 'username': account['username'], 'name': account['display_name'] or account['username']} if account else None
+        return {'id': account['id'], 'username': account['username'], 'name': account['display_name'] or account['username'], 'createdAt': account['created_at'] * 1000} if account else None
 
     def password(self, value, stored=None):
         if not self.password_lock.acquire(blocking=False): raise ApiError(429, '登录服务正忙，请稍后重试。')
@@ -159,6 +159,26 @@ class Accounts:
         account = self.current(environ, required=True)
         self.app.limit((ip,'account-read'), 600, 60)
         if method != 'GET': self.app.limit((account['id'],'account-write'), 120, 60)
+        if path == '/auth/change-password' and method == 'POST':
+            self.app.limit((account['id'],'password-change'), 5, 600)
+            body = self.app.body(environ, {'currentPassword','newPassword'})
+            current, replacement = body['currentPassword'], body['newPassword']
+            if not isinstance(current,str) or not 6 <= len(current) <= 128 or not isinstance(replacement,str) or not 6 <= len(replacement) <= 128:
+                raise ApiError(400, '密码需为 6–128 个字符。')
+            try: current.encode('utf-8'); replacement.encode('utf-8')
+            except UnicodeError: raise ApiError(400, '密码包含无法处理的字符。') from None
+            if not self.password(current,account['password_hash']): raise ApiError(400, '当前密码不正确。')
+            encoded = self.password(replacement)
+            token_hash = hashlib.sha256(self.cookie_token(environ).encode()).hexdigest()
+            with self.lock:
+                self.db.execute('BEGIN IMMEDIATE')
+                try:
+                    changed = self.db.execute('UPDATE accounts SET password_hash=? WHERE id=? AND password_hash=?',[encoded,account['id'],account['password_hash']])
+                    if changed.rowcount != 1: raise ApiError(409, '密码已在另一台设备更新，请重新登录。')
+                    self.db.execute('DELETE FROM sessions WHERE account_id=? AND token_hash!=?',[account['id'],token_hash])
+                    self.db.execute('COMMIT')
+                except Exception: self.db.execute('ROLLBACK'); raise
+            return {'ok': True}
         if path == '/account/data' and method == 'GET':
             with self.lock:
                 row = self.db.execute('SELECT * FROM account_data WHERE account_id=?', [account['id']]).fetchone()

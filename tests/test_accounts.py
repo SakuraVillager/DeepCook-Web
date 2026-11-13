@@ -154,6 +154,48 @@ class AccountTests(unittest.TestCase):
         self.assertEqual(self.save(cookie,latest['data'],revision=latest['revision'])['status'],200)
         self.assertEqual(self.request('/account/data',cookie=cookie)['body']['revision'],2)
 
+    def test_android_extension_and_step_timing_preserve_web_fields_and_picture_ownership(self):
+        cookie,_=self.register()
+        picture=self.upload(cookie)
+        data=empty_data('跨端厨房')
+        recipe=json.loads((Path(__file__).parents[1]/'public/catalog/recipes.json').read_text())[0]
+        recipe['id']='user-'+str(uuid.uuid4())
+        recipe['steps'][0].update(minutes=5,kind='PASSIVE')
+        data['recipes']=[recipe]
+        data['android']={'schema':1,'preferences':{'voiceInputEnabled':False,'colorSource':'DYNAMIC'},
+                         'foodSetup':{'completed':True,'profile':{'cuisines':['中式家常']}},
+                         'dishNotes':[],'coverOverrides':{'r':picture},
+                         'privateCommunity':{recipe['id']:{'score':9,'posts':[{'id':'post-'+str(uuid.uuid4()),'text':'自己的笔记','submission':True,'photo':picture,'createdAt':1700000000000}]}}}
+        saved=self.save(cookie,data)
+        self.assertEqual(saved['status'],200,saved['body'])
+        self.assertEqual(self.request('/account/data',cookie=cookie)['body']['data'],data)
+        # Web clients update the common fields without dropping the opaque Android extension.
+        data['profile']['likes']=['清淡']
+        self.assertEqual(self.save(cookie,data,revision=1)['status'],200)
+        self.assertEqual(self.request('/account/data',cookie=cookie)['body']['data']['android'],data['android'])
+        other,_=self.register('other')
+        self.assertEqual(self.save(other,data)['status'],400)
+        for key,value in [('schema',2),('privateCommunity',{'r':{'score':9,'posts':[]}}),('coverOverrides',{'r':'file:///private/photo.jpg'})]:
+            invalid=json.loads(json.dumps(data));invalid['android'][key]=value
+            self.assertEqual(self.save(cookie,invalid,revision=2)['status'],400)
+        invalid=json.loads(json.dumps(data));invalid['recipes'][0]['steps'][0]['kind']='UNKNOWN'
+        self.assertEqual(self.save(cookie,invalid,revision=2)['status'],400)
+        self.assertEqual(self.request('/account/data',cookie=cookie)['body']['revision'],2)
+
+    def test_change_password_verifies_current_and_revokes_other_sessions(self):
+        cookie,account=self.register()
+        other=self.request('/auth/login','POST',{'username':'tester','password':PASSWORD,'claimGuest':False})
+        other_cookie=other['headers']['Set-Cookie'].split(';')[0]
+        denied=self.request('/auth/change-password','POST',{'currentPassword':'incorrect','newPassword':'cook26'},cookie=cookie)
+        self.assertEqual(denied['status'],400)
+        self.assertEqual(self.request('/auth/session',cookie=other_cookie)['body']['account']['id'],account['id'])
+        changed=self.request('/auth/change-password','POST',{'currentPassword':PASSWORD,'newPassword':'cook26'},cookie=cookie)
+        self.assertEqual(changed['status'],200,changed['body'])
+        self.assertEqual(self.request('/auth/session',cookie=cookie)['body']['account']['id'],account['id'])
+        self.assertIsNone(self.request('/auth/session',cookie=other_cookie)['body']['account'])
+        self.assertEqual(self.request('/auth/login','POST',{'username':'tester','password':PASSWORD,'claimGuest':False})['status'],401)
+        self.assertEqual(self.request('/auth/login','POST',{'username':'tester','password':'cook26','claimGuest':False})['status'],200)
+
     def test_validation_csrf_and_account_header_cannot_bypass_ownership(self):
         cookie,account=self.register()
         self.assertEqual(self.request('/auth/logout','POST',cookie=cookie,origin='https://evil.example')['status'],403)

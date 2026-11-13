@@ -34,7 +34,49 @@ def validate_data(data):
         fail()
     def identifier(value):
         if not isinstance(value, str) or not ID.fullmatch(value): fail()
-    if not isinstance(data, dict) or set(data) != {'favorites','recent','recipes','profile','preferences'}: fail()
+    required = {'favorites','recent','recipes','profile','preferences'}
+    if not isinstance(data, dict) or not required <= set(data) or not set(data) <= required | {'android'}: fail()
+    if 'android' in data:
+        android = data['android']
+        if not isinstance(android, dict) or set(android) != {'schema','preferences','foodSetup','dishNotes','coverOverrides','privateCommunity'}: fail()
+        if type(android['schema']) is not int or android['schema'] != 1: fail()
+        if not isinstance(android['preferences'],dict) or not isinstance(android['foodSetup'],dict): fail()
+        array(android['dishNotes'],200)
+        if not isinstance(android['coverOverrides'],dict) or len(android['coverOverrides']) > 1000: fail()
+        for key, value in android['coverOverrides'].items():
+            identifier(key)
+            if not isinstance(value,str): fail()
+            image(value,static=False)
+        if not isinstance(android['privateCommunity'],dict) or len(android['privateCommunity']) > 200: fail()
+        for key, entry in android['privateCommunity'].items():
+            identifier(key)
+            if not key.startswith('user-') or not isinstance(entry,dict) or set(entry) != {'score','posts'}: fail()
+            if entry['score'] is not None and (type(entry['score']) is not int or not 1 <= entry['score'] <= 10): fail()
+            array(entry['posts'],200)
+            seen = set()
+            for post in entry['posts']:
+                if not isinstance(post,dict) or set(post) != {'id','text','submission','photo','createdAt'}: fail()
+                identifier(post['id'])
+                if post['id'] in seen or type(post['submission']) is not bool: fail()
+                seen.add(post['id']); text(post['text'],2000)
+                if not post['text'].strip() or (not post['submission'] and post['photo'] is not None): fail()
+                if type(post['createdAt']) is not int or not 0 <= post['createdAt'] <= 8640000000000000: fail()
+                image(post['photo'],static=False)
+        def bounded(value, depth=0):
+            if depth > 10: fail()
+            if value is None or type(value) is bool: return
+            if type(value) is int:
+                if abs(value) > 8640000000000000: fail()
+            elif isinstance(value,str): text(value,20000)
+            elif isinstance(value,list):
+                array(value,1000)
+                for child in value: bounded(child,depth+1)
+            elif isinstance(value,dict):
+                if len(value) > 1000: fail()
+                for key,child in value.items():
+                    text(key,128); bounded(child,depth+1)
+            else: fail()
+        bounded(android)
     profile, preferences = data['profile'], data['preferences']
     if not isinstance(profile, dict) or set(profile) != {'name','avatar','likes','avoids'}: fail()
     text(profile['name'], 12); image(profile['avatar'], static=False)
@@ -82,11 +124,13 @@ def validate_data(data):
             identifier(ingredient['id']); text(ingredient['name']); text(ingredient['amount'])
         steps = set()
         for step in recipe['steps']:
-            if not isinstance(step, dict) or not {'id','order','title','text'} <= set(step) or not set(step) <= {'id','order','title','text','image','ingredientRefs','cue'}: fail()
+            if not isinstance(step, dict) or not {'id','order','title','text'} <= set(step) or not set(step) <= {'id','order','title','text','image','ingredientRefs','cue','minutes','kind'}: fail()
             identifier(step['id'])
             if step['id'] in steps or type(step['order']) is not int or not 0 <= step['order'] <= 1000: fail()
             steps.add(step['id']); text(step['title'], 200); text(step['text'], 20000); image(step.get('image'))
             if step.get('cue') is not None: text(step['cue'], 2000)
+            if step.get('minutes') is not None and (type(step['minutes']) is not int or not 1 <= step['minutes'] <= 100000): fail()
+            if step.get('kind') not in (None,'ACTIVE','PASSIVE'): fail()
             if 'ingredientRefs' in step:
                 array(step['ingredientRefs'], 200)
                 for ref in step['ingredientRefs']: identifier(ref)

@@ -71,6 +71,20 @@ export function Footer({
           <div className="footer__col">
             <h4>关于 / ABOUT</h4>
             <a
+              href="https://github.com/SakuraVillager/DeepCook-Web"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              DeepCook Web · GitHub
+            </a>
+            <a
+              href="https://github.com/SakuraVillager/DeepCook"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              DeepCook APP · GitHub
+            </a>
+            <a
               href={`${homeHref}#next`}
               onClick={(event) => go(event, '#next')}
             >
