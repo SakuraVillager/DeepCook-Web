@@ -955,13 +955,13 @@
 }
 .k-taste .k-section-title {
   position: sticky;
-  top: calc(var(--header-h) + 32px);
+  top: calc(var(--header-h) + 64px);
   align-self: start;
   min-width: 0;
 }
 .k-editor-section .k-section-title {
   position: sticky;
-  top: calc(var(--header-h) + 32px);
+  top: calc(var(--header-h) + 64px);
   align-self: start;
   min-width: 0;
 }
