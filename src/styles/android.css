@@ -537,19 +537,7 @@
   justify-content: space-between;
 }
 .android-download__mirror {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 48px;
-  padding: 12px 20px;
   margin-top: 12px;
-  border: 1px solid var(--line);
-  font-size: 13px;
-  transition: background 180ms ease;
-}
-.android-download__mirror:hover,
-.android-download__mirror:focus-visible {
-  background: var(--yolk);
 }
 .android-download__note {
   margin-top: 20px;

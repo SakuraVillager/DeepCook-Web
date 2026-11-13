@@ -339,7 +339,7 @@ export function AndroidIntro() {
               服务器直接下载 <span aria-hidden="true">↓</span>
             </a>
             <a
-              className="android-download__mirror"
+              className="btn btn--ink android-download__mirror"
               href={appDownload.githubUrl}
             >
               GitHub 下载 <span aria-hidden="true">↗</span>

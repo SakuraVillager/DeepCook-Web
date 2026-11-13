@@ -1,135 +1,192 @@
 # DeepCook Web
 
-DeepCook 官网、Android APP 介绍页与浏览器版。首页以「火候」为叙事线索；`/android/` 介绍 APP 并提供下载；`/app/` 提供找菜、收藏、分步阅读与个人菜谱。
+从找到一道菜，到看懂步骤、动手烹饪，再到分享成品与保存自己的拿手菜。DeepCook 将官网、浏览器应用、原生 Android App 和云端服务连接成一套持续使用的厨房工具：固定菜谱离线可读，个人资料随账号同步，评分、评论和交作业由云端共享。
 
-- 设计参考：`rerise.co` 的编辑式排版、逐字动画、翻字导航、全屏滚动叙事与慢速缓动
-- 色彩与结构为 DeepCook 重做：暖米纸、灶火黄、墨黑与橄榄绿；6 个「火候」章节
-- 官网保留原有介绍与正式 APK（0.6.1）；网页版原有找菜、收藏、阅读和个人菜谱以 Android 0.3.0 及随包菜谱为功能基线；评分、营养表、评论和交作业已按远程 Android `main` 接入。未实现的计时、营养计算和 AI 不在网页版提供
+[访问官网](https://deepcook.jijiz.cn/) · [打开网页版](https://deepcook.jijiz.cn/app/) · [Android 项目](https://github.com/SakuraVillager/DeepCook) · [服务器下载 APK](https://deepcook-backend.jijiz.cn/deepcook-api/v1/downloads/DeepCook-0.6.1.apk) · [GitHub Release](https://github.com/SakuraVillager/DeepCook/releases/tag/v0.6.1)
 
-## 本地运行
+## 项目亮点
 
-```powershell
+| 设计与工程实践 | 实际实现 | 源码入口 |
+| --- | --- | --- |
+| 从展示到使用的完整产品路径 | 官网介绍 → 找菜与筛选 → 分步阅读 → 收藏或自建 → 评分、评论与交作业 → 账号同步 | [应用入口](src/kitchen/KitchenApp.tsx)、[Android 介绍](src/AndroidIntro.tsx) |
+| Web 与 Android 共用账号和数据 | 昵称、头像、饮食偏好、收藏、最近浏览、个人菜谱及图片同步；固定菜谱沿用稳定 ID | [Web 同步](src/kitchen/account-api.ts)、[Android 云端实现](https://github.com/SakuraVillager/DeepCook/tree/dc87f6a/app/src/main/java/com/deepcook/app/data/cloud) |
+| 离线阅读与云端持久化结合 | 494 道内置菜谱、806 张引用图片；Service Worker 缓存应用与菜谱，IndexedDB 保存本机状态和按账号隔离的缓存 | [内容同步工具](tools/sync-catalog.py)、[离线缓存](public/app/sw.js)、[本机存储](src/kitchen/storage.ts) |
+| 面向真实网络故障的同步设计 | 保存带版本校验和操作标识，处理多设备冲突、重复请求与响应丢失；失败时保留输入和草稿 | [账号同步](src/kitchen/account-api.ts)、[互动提交](src/kitchen/useCommunity.ts)、[服务端事务](server/accounts.py) |
+| 围绕做菜场景组织交互 | 详情居中阅读、桌面步骤与图片分栏、手机与 iPad 触控翻步、进度恢复和可选阅读常亮 | [阅读页](src/kitchen/Reader.tsx)、[手势处理](src/kitchen/useReaderSwipe.ts)、[详情页](src/kitchen/RecipeView.tsx) |
+| 从开发延伸到部署与交付 | 多页面静态构建、轻量 API、定时备份、正式签名 APK、双下载源、SHA-256 校验和断点续传 | [构建配置](vite.config.ts)、[服务部署](server/deploy.py)、[下载服务](server/downloads.py) |
+
+## 功能与体验路径
+
+1. **找到今晚想做的菜。** 搜索菜名、别名与材料，多词全部匹配；分类、时间和难度可组合筛选。搜索条件与列表展开状态可恢复。
+2. **看懂材料和做法。** 查看份量、材料、准备、步骤图片、观察提示、注意事项和内容来源。原文缺失的数据显示「无」，不根据步骤数猜测时间或难度。
+3. **进入分步阅读。** 从任意步骤开始，通过目录、按钮或触控滑动翻步；刷新后恢复阅读进度。桌面采用左侧步骤、右侧配图，窄屏采用上下结构，阅读页不重复展示准备材料。
+4. **积累自己的厨房。** 收藏支持撤销；最近浏览去重并最多保留 50 条。个人菜谱可新建、编辑、删除和上传图片，资料补全先查本地，再查固定版本的远程来源，只填空白字段。
+5. **记录做菜结果。** 内置菜谱支持 1–10 分评分、评论和交作业，自己的评分可修改，自己的内容可删除。作业可附一张云端成品照；公开记录支持分页查看。
+6. **跨设备继续使用。** 注册或登录后同步资料、偏好、显示与阅读设置、收藏、最近浏览及个人菜谱；可选择合并原有本机资料和已发布的访客互动。Web 与 Android 使用同一套云端账号。
+
+账号页位于 `/app/#/login` 与 `/app/#/register`，支持直接打开、刷新和登录后返回原页面。未登录时右上角显示「注册 / 登录」，登录后显示头像和昵称。登录与注册使用独立的一屏布局，不显示网站底部栏。
+
+## 架构与数据流
+
+```mermaid
+flowchart LR
+    Web[React 浏览器应用] --> Static[静态菜谱与固定配图]
+    Web <--> Cache[Service Worker / IndexedDB]
+    Web <-->|HTTPS / HttpOnly Cookie| API[Python / Gunicorn API]
+    App[Kotlin / Compose Android App] --> Assets[安装包内菜谱与固定配图]
+    App <-->|HTTPS| API
+    API --> DB[(SQLite)]
+    API --> Media[互动图片与私人图片文件]
+    DB --> Backup[数据库与图片一致性快照]
+    Media --> Backup
+```
+
+| 数据类型 | 存储与访问方式 |
+| --- | --- |
+| 内置菜谱、固定封面与步骤图、来源和许可 | Web 静态资源 / Android assets；正常浏览不需要将固定资源上传数据库 |
+| 账号、密码哈希、会话、个人资料与同步版本 | 服务端保存；个人资料通过登录会话校验归属 |
+| 收藏、最近浏览、偏好、个人菜谱 | 登录后云端持久化，客户端保留按账号隔离的缓存；游客使用本机存储 |
+| 内置菜谱的评分、评论和交作业 | 云端统一维护；Web 个人菜谱互动保存在本机账号空间，Android 私有互动通过账号扩展同步 |
+| 作业照、头像和个人菜谱图片 | 文件存储与数据库关联分开；已发布的作业照公开，私人图片需登录并校验归属 |
+| 未发布草稿与阅读状态 | 本机保存，用于刷新恢复和失败重试；发布或云端保存需要联网 |
+
+静态内容与动态业务分开部署，使浏览菜谱不必为每张固定图片访问数据库。后端采用单进程、多线程和 SQLite WAL，适合当前小规模单机部署；通过索引、游标分页、ETag、请求大小限制和图片压缩控制资源使用。数据库写入通过锁与事务协调，避免将多进程扩容当作默认部署方式。
+
+Web 使用 React 19、TypeScript、Vite 多页面构建；官网动效由 GSAP / ScrollTrigger 与 Lenis 实现。Android 使用 Kotlin、Jetpack Compose、Repository 与 StateFlow，具体实现见 [Android README](https://github.com/SakuraVillager/DeepCook#readme)。
+
+## 安全与可靠性设计
+
+安全措施落在服务端校验、数据生命周期和发布流程中，各项均可定位到实现与回归测试。
+
+| 关注点 | 已实现的措施 | 实现与验证 |
+| --- | --- | --- |
+| 密码与会话 | 独立随机盐、PBKDF2-HMAC-SHA256（600,000 次迭代）、恒定时间比较；数据库保存会话令牌哈希；退出使会话失效，改密撤销其他会话 | [accounts.py](server/accounts.py)、[账号测试](tests/test_accounts.py) |
+| 浏览器认证与请求来源 | 生产会话使用 `__Host-` Cookie，设置 Secure、HttpOnly、SameSite=Lax；账号写入检查允许的 Origin；账号会话令牌不写入 localStorage | [服务端认证](server/accounts.py)、[客户端请求](src/kitchen/api.ts)、[跨来源与归属测试](tests/test_accounts.py) |
+| 私有资料与内容权限 | 服务端从会话确定账号；个人资料与图片按归属读取，评论与作业只能由所有者删除；前端传入账号 ID 不能替代鉴权 | [账号接口](server/accounts.py)、[互动接口](server/community.py)、[权限测试](tests/test_community_server.py) |
+| 输入与图片上传 | 校验字段、类型、长度、图片大小与尺寸；服务端解码后重新编码 JPEG，使用内容哈希命名；设置上传配额、待发布图片数量及磁盘预留 | [上传处理](server/community.py)、[私人图片处理](server/accounts.py)、[资料校验](server/account_data.py) |
+| 并发与重复提交 | 参数绑定查询、事务写入、revision 冲突校验和 mutationId 去重；上传与正式发布分阶段处理，未发布作业图片不公开 | [账号事务](server/accounts.py)、[互动事务](server/community.py)、[故障恢复测试](tests/browser/account-cloud.spec.ts) |
+| 资源与运行权限 | 登录及互动请求限流；专用服务用户、只读系统目录、禁止提权、内存与任务数限制；APK 下载分块读取并限制同时传输数量 | [服务单元](server/deepcook-community.service)、[下载服务](server/downloads.py)、[下载测试](tests/test_downloads.py) |
+| 备份与清理 | 数据库备份配合关联图片生成一致性快照，校验数据库后标记完成；每日定时执行，保留最近 7 份完成快照，并清理过期暂存图片 | [备份实现](server/community.py)、[定时任务](server/deepcook-backup.timer)、[备份测试](tests/test_community_server.py) |
+| 发布凭据与安装包 | 正式签名密钥和口令保存在仓库外；公开 Release 不嵌入开发者 AI 服务密钥；分发提供 SHA-256 校验，APK 下载不占用静态站点单文件配额 | [Android 构建配置](https://github.com/SakuraVillager/DeepCook/blob/dc87f6a/app/build.gradle.kts)、[发布元数据](src/data/app-download.ts) |
+
+客户端遇到上传失败、存储配额不足或保存响应丢失时保留输入，用户可继续重试。损坏的本机记录保留原件并提示处理，不自动清空用户数据；旧私有互动也不会因启用云端而自动公开。
+
+## 视觉与交互
+
+官网以「火候」为叙事线索，使用暖米纸、灶火黄、墨黑与橄榄绿，搭配 Archivo、Instrument Serif 和 Noto Sans SC 本地字体。设计参考 `rerise.co` 的编辑式排版与滚动叙事，配色、内容与章节围绕 DeepCook 重新组织。
+
+- 首页包含加载揭示、交叉淡入 Hero、逐字翻转链接、精选菜谱横向浏览与烹饪步骤滚动展示。第二章浏览完横向卡轨后再离场；第三章左侧文字固定，右侧菜谱在一屏窗口中滚动，结束后整屏离场。
+- 中间章节通过 `DesignCanvas` 按横屏、竖屏和短屏画布统一缩放；应用内容页采用响应式网格和自然滚动，长菜谱不塞进固定比例画布。
+- 官网、在线版与阅读页共用 `Header`、`Footer`、`Cursor` 和设计变量。鼠标光点快速跟随、圆环稍慢跟随；悬停交互元素时放大圆环并隐藏光点。
+- 菜谱首次加载沿用首页进度与揭示语言，正常动效下至少保留 1.6 秒的可读提示；数据未就绪时继续等待，站内切页不重复播放。
+- 尊重 `prefers-reduced-motion`，减少动态效果时跳过强制动画等待；提供语义化标题、图片替代文本、可见键盘焦点和进度语义。
+- 手机与 iPad 的横向翻步保留纵向滚动、双指缩放和文字选择，避免阅读手势与翻页相互抢占。
+
+相关实现位于 [画布样式](src/styles/canvas.css)、[详情样式](src/styles/recipe.css)、[阅读样式](src/styles/reader.css) 与 [触控回归](tests/browser/reader-touch.spec.ts)。
+
+## 工程结构
+
+```text
+src/components/       官网章节与跨页面复用组件
+src/kitchen/          浏览、详情、阅读、编辑、账号与同步
+src/data/             官网内容与统一 APK 下载配置
+src/styles/           设计变量、官网与应用样式
+public/catalog/       固定菜谱、图片、来源索引与许可
+public/app/sw.js      应用离线缓存
+server/               账号、互动、图片、备份与下载服务
+tests/                领域测试、API 测试与浏览器回归
+tools/                菜谱同步与隔离测试构建工具
+```
+
+## 本地运行与构建
+
+需要 Node.js 24+；Python 服务依赖见 [server/requirements.txt](server/requirements.txt)。
+
+```bash
 npm ci
 npm run dev
 ```
 
-需要 Node.js 24+（测试使用原生 TypeScript 类型擦除）。
+开发服务器默认 `http://localhost:5173/`。`/`、`/android/` 和 `/app/` 为独立 Vite 多页面入口，应用内部使用 hash 路由。未配置 `VITE_COMMUNITY_API` 时使用本机模式；启用账号和云端互动需要另行运行并配置 API。该变量是公开服务地址，不是凭据，不应放入密钥。
 
-开发服务器默认 `http://localhost:5173/`。首页、`/android/` 与 `/app/` 是独立的 Vite 多页面入口，在线版复用首页字体、设计变量和逐字翻转链接，样式单独加载。
-
-首屏 Hero 和页脚保持原始布局，不受画布约束。中间六个章节使用固定比例画布：横向 `1280 × 800`，手机竖向 `420 × 900`，短屏手机 `420 × 720`，中等宽度竖向 `800 × 900`。区域内部以百分比网格组织组件，由 `DesignCanvas` 使用 `min(可用宽度 / 设计宽度, 可用高度 / 设计高度)` 统一缩放，字体、间距和组件同步变化；窄窗口优先占满可用宽度，将多余空间留在上下。第二章精选菜谱由页面纵向滚动驱动横向浏览：全屏画布吸附，全部卡片浏览完后再整屏离场；左右按钮、原生横滑和键盘浏览同步到页面进度。第三章烹饪模式由页面滚动驱动：可见画布固定为一屏，左侧文字保持不动，右侧完整菜谱在裁剪窗口中向上移动，裁剪窗口底部始终贴齐屏幕底部；菜谱滚完后整屏一起向上离场。没有内层滚动条，鼠标在左右两侧滚动、触控滑动和键盘阅读都使用原生页面滚动；其他章节无内部纵向滚动。画布样式在 `src/styles/canvas.css`，`useCanvasPages` 根据章节实际位置保持窗口缩放时的阅读位置。
-
-## 构建与预览
-
-```powershell
+```bash
 npm run build
 npm run preview
 ```
 
-产物在 `dist/`。部署时站点根目录即 `dist/`：
+生产产物位于 `dist/`，`base` 为 `./`。部署时需支持目录索引，确保 `/app/` 和 `/android/` 分别返回对应 `index.html`；API 的 HTTPS 反向代理由部署者配置。
 
-- `/` → 首页
-- `/android/` → Android APP 介绍、阅读/AI 功能说明和当前 APK 下载
-- `/app/` → 浏览器版，内部通过 hash 路由导航，可直接刷新任意功能页
-- `/catalog/` → Android 菜谱、引用图片及来源/许可清单
-- `/download/DeepCook-0.6.1.apk` → 正式安装包下载入口（重定向至服务器 HTTPS 下载）
-- `/download/DeepCook-0.5.1-preview.apk` → 旧地址兼容跳转至新版
-- `/photos/*.jpg` → 首页使用的菜谱图
-
-`base` 为 `./`，可部署在任意子路径。`appType` 为 `mpa`，请确保静态服务器支持目录索引（`/app/` → `/app/index.html`、`/android/` → `/android/index.html`）；不支持时可改用对应的 `index.html` 直链。
-
-## 页面结构
-
-| 区块 | 内容 |
+| 路径 | 用途 |
 | --- | --- |
-| Loader | 0–100 计数器，`clip-path` 上掀；同一会话内只播放一次 |
-| Hero | 三张菜谱图慢速交叉淡入、逐字标题 `COOK DEEPER.`、旋转印章、下载/在线入口 |
-| 01 Manifesto | 产品理念、494 / 372 / 219 / 100% 数据 |
-| 02 Find + Tonight | 搜索说明 + 6 道精选，先横向滚完，再进入下一屏 |
-| 03 Cook | 红烧肉步骤节选、滚动点亮当前步骤、计时器卡片 |
-| 04 Understand | 每份营养四列（示例数据）、10 分制评分与本地交流 |
-| 05 Next | APP AI 下厨介绍、对话示意与「下载 APP 体验」入口 |
-| 06 Download | APP 介绍/下载页与在线版入口 |
-| Footer | 大字标、链接、内容/图片来源说明 |
+| `/` | 官网首页 |
+| `/android/` | Android 功能介绍与两种 APK 下载入口 |
+| `/app/` | 浏览器应用，支持内部路由直接刷新 |
+| `/catalog/` | 固定菜谱、引用图片和来源许可 |
+| `/download/DeepCook-0.6.1.apk` | 重定向至服务器的正式 APK 下载 |
+| `/download/DeepCook-0.5.1-preview.apk` | 旧下载路径兼容跳转 |
 
-## 技术栈
+EdgeOne 重定向在 [edgeone.json](edgeone.json) 中配置，并随构建复制到产物；本地开发与预览也提供相同的下载跳转。APK 保存在服务器和 GitHub Releases，静态站点中不包含大型安装包。
 
-- Vite + React 19 + TypeScript
-- GSAP + ScrollTrigger（首屏逐字、视差）
-- Lenis（平滑滚动）
-- Fontsource 本地字体：Archivo Variable、Instrument Serif Italic、Noto Sans SC Variable
-- 纯 CSS 设计令牌，无 UI 框架
-
-## 动效与无障碍
-
-- 主缓动 `cubic-bezier(.165,.84,.44,1)`，段落揭示 0.9–1.05s
-- 导航、按钮逐字母上翻；标题逐字上升；图片慢速 Ken Burns；菜谱卡悬停不位移、不缩放
-- `prefers-reduced-motion` 下跳过 Loader 与逐字，改用原生滚动；菜谱卡轨可直接横向滚动
-- 跳转链接、语义化标题、可见焦点、图片 alt、`aria-current` / progressbar 均已处理
-
-## 内容与素材
-
-- 网页版菜谱数据与图片从 `~/DeepCook/app/src/main/assets` 当前工作区只读复制，包含本地尚未提交的菜谱及图片；不执行 fetch/pull，不修改 Android 工程。
-- 菜谱内容来源：HowToCook（Unlicense）、Based Cooking（Unlicense）；部分图片来自 FoodiesFeed（CC0 等效）。
-- 首页营养数值、评分、评论均为 App 中的**示例数据**，页面已明确标注。
-- APK 为 0.6.1 正式签名 Release 构建，提供服务器直接下载与 GitHub Releases 两个入口，避免超过 EdgeOne 单文件大小限制；安装包和校验文件不包含签名私钥。
-
-## 更新下载版本
-
-1. 在 APP 仓库构建正式签名 Release APK，验证版本、签名和 SHA-256 后发布到 GitHub Releases，并上传服务器的发布文件目录。
-2. 更新 `src/data/app-download.ts` 的版本、文件名、大小、校验值和下载地址，网站各入口共享该配置；同步 `edgeone.json` 的下载重定向。服务器通过已有 HTTPS API 路径提供流式下载、断点续传与 `.sha256` 校验文件，不将安装包写入数据库。
-3. APK 不再放入静态产物；保留旧路径的重定向，避免用户继续下载旧包。正式签名与旧调试版不同，旧用户需先同步资料，再卸载后安装正式版。
-
-APP 介绍页沿用官网共用 Header、Footer、Cursor 和字体，采用自然响应式布局；菜谱、阅读、AI 图片区域由现有照片和 HTML/CSS 界面示意组成，未新增大型图片。当前提供 v0.6.1 正式签名 APK。
-
-## 浏览器版
-
-沿用首页设计变量、Archivo / Instrument Serif / Noto Sans SC 字体、米纸/墨黑/暖黄/橄榄绿、大字、细线、图片卡轨和逐字翻转。应用内容采用响应式网格和自然滚动，长菜谱不放进固定高度缩放画布；分步阅读使用全屏布局、固定顶部进度和底部翻步。宽屏采用左侧步骤、右侧步骤配图的分栏布局，没有步骤图时右侧留空；字号、步骤编号与图片高度随屏幕调整，长正文在栏内滚动。900px 以下切换为步骤在上、配图在下的单栏，中间阅读区整体滚动，翻步后恢复到内容顶部；阅读页不展示准备材料。应用不启用 Lenis，确保长列表、表单和键盘滚动正常。
-
-- 找菜：494 道内置菜谱、6 道精选；多词全部匹配，搜索菜名/地域/分类/原名别名/材料；250 ms 防抖，分类/用时/难度组合筛选；恢复搜索条件与列表展开数量。
-- 详情：封面、原文份量、材料、准备、步骤图片与观察提示、注意事项、分段跳转和来源。缺失参数显示「无」，不推测。
-- 详情首屏：宽屏左侧封面，右侧依次排列菜名与简介、用时/难度/份量、紧凑评分、四列营养摘要、阅读与收藏操作；手机与平板切换上下结构。完整营养表可展开查看热量、脂肪、蛋白质、碳水、膳食纤维和钠。数据沿用 App 内置示例并明确标识，其他菜谱显示「无」，不根据材料推算。
-- 互动：10 分制评分，每道菜仅保留并更新一条自己的评分；按 8–10 / 6–7 / 1–5 分展示分布。评论与交作业支持最多 2000 字、按时间倒序、删除自己的内容；作业可选一张云端成品照。原有互动已迁入云端，按普通评分、评论及作业展示，不再由前端叠加示例。生产环境中新评分和作业图文公开共享；个人菜谱随账号私有同步，旧私有互动不自动公开。
-- 阅读：任意步骤进入、目录跳转、前后翻步、刷新恢复；手机与 iPad 可在正文或步骤配图上左滑下一步、右滑上一步，首尾不循环；保留纵向阅读滚动、双指缩放与文字选择，目录打开时停用翻步手势。切换使用轻微横向揭示，减少动态效果时跳过；返回详情定位当前步骤；设置中可启用浏览器 Screen Wake Lock（支持时）。
-- 收藏：倒序、取消和撤销；最近浏览去重，最多 50 条，可逐条删除或清空。
-- 个人菜谱：新建、编辑、删除，封面上传；材料、步骤增删与步骤排序；保留编辑 ID；保存完成后退出。IndexedDB 事务失败保留输入，损坏记录保留原数据并提示重试；编辑草稿通过 sessionStorage 在当前标签页恢复。
-- 资料补全：复用本地菜谱优先，未命中时才查询随包索引对应的固定 HowToCook commit；失败可重试或手填。只填空白字段，保留手写内容和来源。远程原文请求依赖访问 GitHub 的网络与 CORS。
-- 我的厨房：昵称、相册头像与方形内容裁剪，喜欢/忌口互斥标签。偏好仅记录，尚不参与搜索推荐。
-- 设置：跟随系统/明暗模式、三档阅读字号、步骤图、阅读常亮；分项清理收藏、历史或显示/阅读设置；来源和许可。网页使用固定品牌色，不映射 Android 动态色。
-
-厨房账号在独立的 `/app/#/login` 与 `/app/#/register` 页面进行登录和注册，沿用官网字体、配色和编辑式排版，使用紧凑的一屏布局，登录与注册页不显示网站底部栏；极短窗口与键盘弹出时保留自然滚动，不裁掉表单。在线版右上角为账号入口，未登录显示「注册 / 登录」，登录后显示本人头像（未设置时为昵称首字）和昵称，点击进入「我的厨房」。从菜谱等页面进入账号页时，登录后返回原页面；账号页支持直接打开和刷新，且不依赖菜谱目录加载成功。厨房账号支持用户名/密码注册、登录和退出。登录后，昵称、头像、喜欢/忌口、显示与阅读设置、收藏、最近浏览、个人菜谱及其图片保存到服务器，可跨设备读取；个人图片需登录且仅本人可读。浏览器按账号保存独立阅读缓存，离线可读取已缓存文字，云端修改需要联网。游客仍使用本地 IndexedDB。注册/登录时可选择合并本机资料与已发布的访客互动；本机原件保留，同 ID 的个人菜谱以云端版本为准。邮箱验证和邮件找回暂未启用。
-
-会话使用 HTTPS HttpOnly Cookie，密码只保存加盐 PBKDF2 哈希；不会将账号令牌放入 localStorage。资料通过版本校验与操作 ID 防止并发覆盖及重试重复，编辑过期的个人菜谱保留草稿并提示核对。公开互动仍可由游客使用，登录后的内容归属账号。
-
-评分、评论和交作业参考远程 [DeepCook `main` 的 `e7c1bce`](https://github.com/SakuraVillager/DeepCook/tree/e7c1bce9818f7d0898c32d1835b2fcefe1c641d9)，本次只读取 GitHub 上的源码，没有拉取或修改本机 Android 工作区，也没有重新同步随包菜谱。行为、存储设计与源码对应关系见 [互动移植说明](docs/community-port.md)。
-
-互动的本地部分使用 `deepcook-community` IndexedDB 的 `recipes`、`photos` 和 `drafts` 三个对象仓库，保留原有 `deepcook-kitchen` 结构。旧本地记录保留并标为「仅本机」，不自动公开。成品照接受 20 MB 以内的 JPG / PNG / WebP，裁剪为 4:3、1200×900 JPEG，单张不超过 1 MB，草稿阶段以 Blob 保存并释放临时展示 URL。发布时将附图上传服务器文件目录，SQLite 保存关联；其他访客及设备可查看作业图文，菜谱固定配图不迁移。草稿在当前标签页刷新后可恢复；发布失败保留输入，网络中断重试使用同一 ID，避免重复发布。
-
-服务器使用独立的 Python / Gunicorn / SQLite 小服务，保存评分、文字及图片关联，附图存放在独立文件目录，不运行完整 Supabase。生产 API 地址由 `.env.production` 中公开的 `VITE_COMMUNITY_API` 配置；开发模式未配置时和未登录的个人资料仍使用原有本地逻辑。服务监听本机端口，由站点管理员在独立的 deepcook-backend.jijiz.cn 配置 HTTPS 反向代理；支持所有权校验、分页、访客/IP 限流、ETag 和浏览器缓存优先展示。部署、备份和接口说明见 [轻量云端互动](docs/community-cloud.md)。
-
-生产构建在 `/app/` 范围注册 Service Worker：首次联网访问后缓存应用入口、加载过的脚本/样式/字体和菜谱 JSON；图片按需缓存，最多 160 个资源。再次离线打开可浏览完整文本目录，未缓存或被淘汰的图片显示占位。需要 HTTPS 或 localhost；开发模式不注册。官网首页不在 Service Worker 控制范围内。
-
-### 同步 Android 内容
+### 同步固定菜谱
 
 ```bash
 python3 tools/sync-catalog.py ~/DeepCook
 ```
 
-脚本复制原始 recipes.json、806 个当前引用图片（494 张封面 + 312 张步骤图），以及来源索引、图片清单、许可文件。保留原始目录（含嵌套路径）、ID 和内容，不下载或重建菜谱。数据和图片原样复制，因此完整静态产物约 200 MB；图片在页面中延迟加载。修改源内容后重新同步并运行测试。
+该工具只读取指定 Android 工作区，复制菜谱及其引用图片、来源清单与许可，保留原始 ID、路径和内容；不执行 fetch/pull，不修改 Android 工程，也不上传用户资料。同步后运行内容契约测试，检查 ID 唯一性与图片引用。
 
-### 验证
+### 更新 APK
+
+1. 在 Android 项目构建正式签名 Release，核验版本、签名、大小与 SHA-256；签名材料保留在仓库外。
+2. 将同一安装包与校验文件发布至 GitHub Releases 和服务器下载服务。
+3. 更新 [app-download.ts](src/data/app-download.ts) 与 [edgeone.json](edgeone.json)，网站各入口共用版本和地址；保留旧下载路径兼容跳转。
+4. 重新构建和部署静态站点，检查两个下载源及断点续传。
+
+当前正式包为 **0.6.1 / Android 8.0+ / 137.9 MB**。正式签名与旧调试版不同，旧用户需先同步资料，卸载旧版后安装；后续正式版本需持续使用同一发布密钥。
+
+## 验证与质量保障
+
+测试覆盖数据规则、服务端权限与事务、浏览器使用路径三层。失败、重试和多设备情形有独立用例，测试构建与线上写入隔离。
+
+| 测试层 | 覆盖内容 | 入口 |
+| --- | --- | --- |
+| 领域与内容契约 | 菜谱 ID 与引用文件、多词搜索、组合筛选、缺失数据、浏览去重、评分分档与正文约束 | [domain.test.mjs](tests/domain.test.mjs)、[community.test.mjs](tests/community.test.mjs) |
+| Python API | 注册与会话、改密、账号与图片归属、访客合并、版本冲突、重试去重、限流、图片发布、备份、下载范围与并发限制 | [账号测试](tests/test_accounts.py)、[互动测试](tests/test_community_server.py)、[下载测试](tests/test_downloads.py) |
+| 浏览器交互 | 搜索、收藏、编辑与草稿、触控阅读、离线重开、响应式、共享组件、动画与下载入口 | [浏览器回归](tests/browser/) |
+| 本机云端联调 | 独立浏览器共享互动、跨设备资料与图片、上传失败、响应丢失、账号切换和并发恢复 | [账号联调](tests/browser/account-cloud.spec.ts)、[互动联调](tests/browser/community-cloud.spec.ts) |
+
+最近一次 0.6.1 发布验证通过 **11 项 Web 领域测试、27 项 Python API 测试和 4 项下载页／导航／页脚浏览器回归**；下载页用例检查了 320、390、768、1024、1440 像素宽度。APK 的版本、非调试标记、正式签名和两下载源的校验值已核对，服务器下载验证了字节范围请求。其余浏览器与云端联调用例的执行命令见下方。
 
 ```bash
+# 领域与 API
 npm test
 python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+# 浏览器本机模式：构建时清空生产 API，避免测试写入线上
 npm run build:test
 npx playwright install chromium
 npm run test:e2e
+
+# 云端联调：自动启动本机临时数据库服务
 npm run build:test -- --cloud
 npm run test:e2e -- --config playwright.cloud.config.ts
+
+# 静态检查与正式构建
+npm run lint
 npm run build
 ```
 
-Python API 测试需在虚拟环境安装 `server/requirements.txt` 中的依赖。使用已安装的 Chrome 可省略浏览器下载，例如 Linux 下运行 `CHROME_PATH=/usr/bin/google-chrome npm run test:e2e`。`build:test` 清空生产 API 地址，云端测试则使用自动启动的本机临时数据库，避免测试数据写入线上。浏览器测试覆盖找菜、收藏、阅读、编辑、资料设置、存储失败、草稿、响应式与离线功能；云端测试覆盖独立访客共享、归属校验、云端附图、上传失败、幂等重试、旧记录保持私有、缓存与分页，以及账号注册/登录/退出、访客归属迁移、跨设备资料与个人图片同步、并发冲突和保存响应丢失后的恢复。结束后运行 `npm run build` 恢复正式 API 的生产产物。
+Python 测试需先在虚拟环境安装服务依赖。已有 Chrome 时可通过 `CHROME_PATH=/usr/bin/google-chrome` 使用本机浏览器。云端联调需要 Python 可执行环境；测试结束后运行 `npm run build` 恢复正式 API 配置的产物。Lint 当前仍有既有 React 规则警告，构建与测试结果分别记录。
 
-主要实现位于 `src/kitchen/`，应用样式位于 `src/styles/kitchen.css`，详情样式位于 `src/styles/recipe.css`，分步阅读独立放在 `src/kitchen/Reader.tsx` 与 `src/styles/reader.css`。详情使用左右等宽留白的三栏网格，材料、步骤、来源始终位于中央；左侧章节说明在各自区域内吸附，滚到区域末端时自然退出，窄屏改放正文上方。首页与在线版共用 `Header`、`Footer` 及其样式；在线版导航保留首页 76px（窄屏 64px）的单行比例并加入实色背景，手机使用菜单入口。首页、在线版和阅读页直接复用同一个 `Cursor` 组件与 `cursor.css`，没有各页独立尺寸或动画参数；悬停交互元素时放大圆环并隐藏光点。圆点快速跟随、圆环稍慢跟随，保留原有的拖尾动效；定位动画与图形居中分层处理，静止时正确同心，在线版不再叠加负边距，其余官网样式独立加载。菜谱首次读取与重试时使用 `CatalogLoader`（`catalog-loader.css`）：沿用首页计数、细线进度与上掀揭示的语言，正常动效下文字至少保留 1.6 秒，再完成进度与退场；实际数据未就绪时保持等待，站内切页不重播。减少动态效果模式下不强制等待或播放过渡。`src/OnlineEdition.tsx` 是应用入口导出。
+## 当前能力边界
+
+- **Web 与 Android 按场景互补。** 网页提供找菜、阅读、个人菜谱和云端互动；App 源码包含计时、AI 厨房与语音模块。网页版尚未接入 AI、烹饪计时和营养计算，公开正式 APK 不包含开发者 AI 服务密钥，在线 AI 能力需要先配置服务。
+- **营养数据有明确来源边界。** 当前部分菜谱展示 App 固定营养示例，并在界面标明；其余显示「无」。这些数值不作为本菜谱的实测或计算结果。
+- **离线能力依赖已有内容。** Web 首次访问需要联网，之后可读取缓存的菜谱文本；图片按需缓存，最多 160 个资源，未缓存图片显示占位。注册、云端写入和跨设备同步需要网络。
+- **账号恢复与部署仍有扩展空间。** 当前提供用户名密码注册、登录、退出与改密，尚未启用邮箱验证和邮件找回；备份为单机快照，未配置异地容灾。服务定位为小规模单机使用，暂无高可用集群或公开压测结论。
+
+## 内容与许可
+
+菜谱内容来源于 HowToCook、Based Cooking 与项目自编内容；HowToCook 和 Based Cooking 使用 Unlicense，部分照片来自 FoodiesFeed（CC0 等效）。原始路径、固定来源版本与许可随内容清单保留，详情页可查看来源。首页展示的菜谱步骤、AI 对话与营养卡片用于介绍；实际使用入口为 `/app/`，互动记录由对应存储模式读取，前端不再注入样例评分或帖子。
+
+[互动移植说明](docs/community-port.md) 记录最初移植时的行为与来源版本；后续账号、云端图片和同步能力以本 README 及当前源码为准。
