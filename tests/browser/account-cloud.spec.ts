@@ -28,9 +28,6 @@ async function accountForm(
   await form.getByLabel('密码', { exact: true }).fill(PASSWORD)
   if (register) {
     await form.getByLabel('再次输入密码', { exact: true }).fill(PASSWORD)
-    await form
-      .getByRole('textbox', { name: '账号昵称', exact: true })
-      .fill('初始厨房')
   }
   await form.getByRole('checkbox').setChecked(merge)
   await form
@@ -403,20 +400,19 @@ test('the header opens dedicated account pages and returns to the original recip
     .fill(username)
   await page.getByLabel('密码', { exact: true }).fill(PASSWORD)
   await page.getByLabel('再次输入密码', { exact: true }).fill(PASSWORD)
-  await page
-    .getByRole('textbox', { name: '账号昵称', exact: true })
-    .fill('入口测试')
+  await expect(page.getByRole('textbox', { name: '账号昵称', exact: true })).toHaveCount(0)
   await page.getByRole('checkbox').uncheck()
   await page.getByRole('button', { name: '创建账号', exact: true }).click()
   await expect(page).toHaveURL(/#\/recipe\/corn-soup$/)
-  await expect(header.locator('.header-account__name')).toHaveText('入口测试')
-  await expect(header.locator('.header-account__avatar')).toHaveText('入')
+  const displayName = username.slice(0, 12)
+  await expect(header.locator('.header-account__name')).toHaveText(displayName)
+  await expect(header.locator('.header-account__avatar')).toHaveText('e')
   await header
-    .getByRole('link', { name: '进入入口测试的厨房', exact: true })
+    .getByRole('link', { name: `进入${displayName}的厨房`, exact: true })
     .click()
   await expect(page).toHaveURL(/#\/profile$/)
   await page.reload()
-  await expect(header.locator('.header-account__name')).toHaveText('入口测试')
+  await expect(header.locator('.header-account__name')).toHaveText(displayName)
   await page.getByRole('button', { name: '退出登录 ↗' }).click()
   await expect(
     header.getByRole('link', { name: '注册或登录', exact: true }),

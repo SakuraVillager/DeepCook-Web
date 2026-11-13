@@ -63,7 +63,6 @@ export function useAccount() {
     values: {
       username: string
       password: string
-      name: string
       merge: boolean
     },
   ) => {
@@ -75,7 +74,6 @@ export function useAccount() {
         {
           username: values.username,
           password: values.password,
-          name: values.name,
           claimGuest: values.merge,
         },
         false,

@@ -11,13 +11,12 @@ export function AccountPage({
   mode: 'login' | 'register'
   next: string | null
 }) {
-  const { account: auth, user, go, notify } = useKitchen()
+  const { account: auth, go, notify } = useKitchen()
   const destination = accountReturnPath(next)
   const registering = mode === 'register'
   const [username, setUsername] = useState(auth.account?.username ?? '')
   const [password, setPassword] = useState(''),
     [confirm, setConfirm] = useState('')
-  const [name, setName] = useState(user.profile.name)
   const [merge, setMerge] = useState(registering),
     [busy, setBusy] = useState(false),
     [error, setError] = useState('')
@@ -122,7 +121,6 @@ export function AccountPage({
                   await auth.authenticate(mode, {
                     username,
                     password,
-                    name,
                     merge,
                   })
                   setPassword('')
@@ -159,18 +157,6 @@ export function AccountPage({
                     onChange={(event) => setUsername(event.target.value)}
                   />
                 </label>
-                {registering && (
-                  <label>
-                    账号昵称
-                    <input
-                      maxLength={12}
-                      autoComplete="nickname"
-                      value={name}
-                      disabled={blocked}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                  </label>
-                )}
                 <label>
                   密码
                   <input

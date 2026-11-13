@@ -1532,6 +1532,9 @@
 .k-auth-fields.is-register {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+.k-auth-fields.is-register > label:first-child {
+  grid-column: 1 / -1;
+}
 .k-auth-fields > label {
   min-width: 0;
 }
