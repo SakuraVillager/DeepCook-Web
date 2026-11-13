@@ -4,6 +4,8 @@
 }
 
 .k-food-setup { max-width: 1120px; margin: 0 auto; }
+.k-taste > .k-food-setup { grid-column: 1 / -1; }
+.k-food-setup--embedded .k-food-setup__frame { max-width: none; margin: 0; padding: clamp(22px, 4vw, 40px); }
 .k-food-setup__frame { max-width: 780px; margin: 32px auto 96px; padding: clamp(24px, 5vw, 56px); background: var(--surface, #f8f4eb); border: 1px solid var(--line, rgba(40,32,20,.14)); }
 .k-food-progress { display: flex; align-items: center; gap: 7px; margin-bottom: 36px; }
 .k-food-progress button { flex: 0 0 auto; margin-left: 10px; border: 0; background: transparent; color: var(--muted, #766f62); font-size: 12px; cursor: pointer; }

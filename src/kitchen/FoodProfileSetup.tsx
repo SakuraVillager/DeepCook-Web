@@ -20,7 +20,7 @@ function toggle(items: string[], value: string, exclusive?: string) {
   return [...new Set([...items.filter((item) => item !== exclusive), ...(items.includes(value) ? [] : [value])])]
 }
 
-export function FoodProfileSetup() {
+export function FoodProfileSetup({ embedded = false }: { embedded?: boolean }) {
   const { user, commit, ready, go, notify } = useKitchen()
   const [profile, setProfile] = useState<FoodProfile>(user.foodSetup.draft ?? user.foodSetup.profile)
   const [page, setPage] = useState(0)
@@ -37,7 +37,7 @@ export function FoodProfileSetup() {
     try {
       await commit((data) => ({ ...data, foodSetup: { ...data.foodSetup, draft: profile, page: nextPage } }))
       setPage(nextPage)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      if (!embedded) window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch { /* Context keeps the user's current selection visible. */ }
     finally { setBusy(false) }
   }
@@ -46,7 +46,7 @@ export function FoodProfileSetup() {
     try {
       await commit((data) => ({ ...data, foodSetup: { profile, draft: null, page: 0, completed: true } }))
       notify('饮食偏好已保存，推荐会按你的选择调整。')
-      go('/discover')
+      if (!embedded) go('/discover')
     } catch { /* Context reports save errors. */ }
     finally { setBusy(false) }
   }
@@ -54,7 +54,7 @@ export function FoodProfileSetup() {
     setBusy(true)
     try {
       await commit((data) => ({ ...data, foodSetup: { ...data.foodSetup, profile, draft: null, page: 0, completed: true } }))
-      go('/discover')
+      if (!embedded) go('/discover')
     } catch { /* Context reports save errors. */ }
     finally { setBusy(false) }
   }
@@ -70,9 +70,9 @@ export function FoodProfileSetup() {
     kind === 'allergen' ? setCustomAllergen('') : setCustomAvoid('')
   }
   if (!ready) return <div className="k-loading-placeholder" aria-label="正在读取饮食偏好" />
-  return <section className="k-food-setup">
-    <div className="k-breadcrumb"><Flip onClick={() => go('/settings')}>← 我的厨房</Flip></div>
-    <Heading index="05" en="YOUR FOOD PROFILE" title="让推荐更合你的口味。" />
+  return <section className={`k-food-setup${embedded ? ' k-food-setup--embedded' : ''}`}>
+    {!embedded && <div className="k-breadcrumb"><Flip onClick={() => go('/settings')}>← 我的厨房</Flip></div>}
+    {!embedded && <Heading index="05" en="YOUR FOOD PROFILE" title="让推荐更合你的口味。" />}
     <div className="k-food-setup__frame">
       <div className="k-food-progress" aria-label={`第 ${page + 1} 页，共 4 页`}>{titles.map((_, i) => <span key={i} className={i <= page ? 'active' : ''} />)}<button type="button" disabled={busy} onClick={() => void skip()}>跳过设置</button></div>
       <div className="k-food-setup__top"><div><span className="label">认识你的口味 · {page + 1}/4</span><h2>{titles[page]}</h2><p>{descriptions[page]}</p></div><span className="k-food-setup__mark">0{page + 1}</span></div>

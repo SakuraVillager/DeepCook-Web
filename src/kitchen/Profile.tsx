@@ -7,6 +7,7 @@ import { AVOIDS, LIKES, type Preferences } from './types'
 import { Flip, Heading, Modal } from './ui'
 import { isCloudCommunity } from './community-api'
 import { AccountCard } from './AccountCard'
+import { FoodProfileSetup } from './FoodProfileSetup'
 
 function AvatarCrop({
   source,
@@ -277,9 +278,7 @@ export function Profile() {
           <span className="label">TASTE NOTES</span>
           <h2>喜欢的，与不想吃的。</h2>
           <p>
-            先记下你的口味。当前偏好用于记录，
-            <br />
-            尚不参与搜索或推荐。
+            先记下常吃偏好；下方的饮食设置会用于首页推荐，搜索仍可浏览全部菜谱。
           </p>
         </div>
         <div>
@@ -308,6 +307,7 @@ export function Profile() {
             </fieldset>
           ))}
         </div>
+        <FoodProfileSetup embedded />
       </section>
       {photo && (
         <AvatarCrop
@@ -345,10 +345,6 @@ export function Settings() {
         en="MAKE YOURSELF AT HOME"
         title="按你的习惯，下厨。"
       />
-      <section className="k-food-settings-link">
-        <div><span className="label">YOUR FOOD PROFILE</span><h2>让找菜更合口味。</h2><p>设置菜系、辣度、饮食方式、过敏原与下厨习惯，推荐会据此调整。</p></div>
-        <button className="btn btn--ghost" onClick={() => go('/food-profile')}>{user.foodSetup.completed ? '编辑饮食偏好' : '配置饮食偏好'} ↗</button>
-      </section>
       <div className="k-settings">
         <section>
           <span className="label">LOOK & FEEL</span>
