@@ -59,7 +59,7 @@ export function FoodProfileSetup({ embedded = false }: { embedded?: boolean }) {
     finally { setBusy(false) }
   }
   const chips = (options: string[], selected: string[], onToggle: (value: string) => void) => (
-    <div className="k-food-chips">{options.map((option) => <button type="button" key={option} className={selected.includes(option) ? 'active' : ''} aria-pressed={selected.includes(option)} onClick={() => onToggle(option)}>{selected.includes(option) && <span aria-hidden="true">✓</span>}{option}</button>)}</div>
+    <div className="k-tags k-food-chips">{options.map((option) => <button type="button" key={option} className={selected.includes(option) ? 'active' : ''} aria-pressed={selected.includes(option)} onClick={() => onToggle(option)}>{option}</button>)}</div>
   )
   const addChip = (kind: 'allergen' | 'avoided') => {
     const value = (kind === 'allergen' ? customAllergen : customAvoid).trim()
@@ -92,7 +92,7 @@ export function FoodProfileSetup({ embedded = false }: { embedded?: boolean }) {
         <fieldset><legend>通常愿意花多久？</legend>{chips(['15 min 内', '30 min 内', '60 min 内', '时间不限'], profile.minutes == null ? [] : [profile.minutes === 0 ? '时间不限' : `${profile.minutes} min 内`], (v) => update((p) => ({ ...p, minutes: v === '时间不限' ? (p.minutes === 0 ? null : 0) : (p.minutes === Number.parseInt(v) ? null : Number.parseInt(v)) })))}</fieldset>
         <fieldset><legend>通常给几个人做饭？</legend>{chips(['1 人', '2 人', '3～4 人', '5 人及以上', '不固定'], profile.servings ? [profile.servings] : [], (v) => update((p) => ({ ...p, servings: p.servings === v ? null : v })))}</fieldset>
       </div>}
-      {page === 3 && <fieldset className="k-food-goals"><legend>你想从 DeepCook 收获什么？ <small>可多选</small></legend>{goals.map((goal, i) => <button type="button" key={goal} className={profile.goals.includes(goal) ? 'active' : ''} aria-pressed={profile.goals.includes(goal)} onClick={() => update((p) => ({ ...p, goals: toggle(p.goals, goal) }))}><span className="k-food-goals__check">{profile.goals.includes(goal) ? '✓' : '＋'}</span><span><b>{goal}</b><small>{goalNotes[i]}</small></span></button>)}</fieldset>}
+      {page === 3 && <fieldset className="k-food-goals"><legend>你想从 DeepCook 收获什么？ <small>可多选</small></legend><div className="k-tags k-food-chips">{goals.map((goal, i) => <button type="button" key={goal} className={profile.goals.includes(goal) ? 'active' : ''} aria-pressed={profile.goals.includes(goal)} title={goalNotes[i]} onClick={() => update((p) => ({ ...p, goals: toggle(p.goals, goal) }))}>{goal}</button>)}</div><p className="k-food-goal-notes">{profile.goals.map((goal) => goalNotes[goals.indexOf(goal)]).filter(Boolean).join(' · ')}</p></fieldset>}
       <div className="k-food-setup__actions">{page > 0 ? <button type="button" className="k-food-skip" disabled={busy} onClick={() => void persistDraft(page - 1)}>← 上一步</button> : <span /> }<button type="button" className="btn" disabled={busy} onClick={() => page < 3 ? void persistDraft(page + 1) : void finish()}>{busy ? '保存中…' : page < 3 ? '下一步 ↗' : '保存偏好，开始找菜 ↗'}</button></div>
       <p className="k-food-footnote">随时可在「我的厨房 · 饮食偏好」中修改</p>
     </div>
