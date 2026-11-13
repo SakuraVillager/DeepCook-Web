@@ -953,6 +953,12 @@
   border-top: 1px solid var(--line);
   scroll-margin-top: 100px;
 }
+.k-taste .k-section-title {
+  position: sticky;
+  top: calc(var(--header-h) + 102px);
+  align-self: start;
+  min-width: 0;
+}
 .k-taste .k-tag-field + .k-tag-field {
   margin-top: 32px;
 }
@@ -1251,6 +1257,9 @@
     grid-template-columns: 1fr;
     gap: 28px;
     padding-top: 32px;
+  }
+  .k-taste .k-section-title {
+    position: static;
   }
   .k-settings {
     grid-template-columns: 1fr;
