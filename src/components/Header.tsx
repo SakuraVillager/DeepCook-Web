@@ -1,3 +1,4 @@
+import { BrandMark } from './BrandMark'
 import { useEffect, useState, type MouseEvent } from 'react'
 import { LetterLink } from './LetterLink'
 import { navItems } from '../data/recipes'
@@ -122,7 +123,7 @@ export function Header({
           }}
         >
           <span className="site-header__seal" aria-hidden="true">
-            炊
+            <BrandMark />
           </span>
           <span className="site-header__word">DEEPCOOK</span>
         </a>
@@ -151,7 +152,7 @@ export function Header({
               onClick={(event) => go(event, accountPath)}
             >
               <span className="header-account__avatar" aria-hidden="true">
-                <span>{Array.from(edition.account.name)[0] ?? '炊'}</span>
+                <span>{Array.from(edition.account.name)[0] || <BrandMark />}</span>
                 {edition.account.avatar && (
                   <img
                     key={edition.account.avatar}
@@ -208,7 +209,7 @@ export function Header({
         <div className="mobile-menu__top">
           <span className="inline-brand">
             <span className="site-header__seal" aria-hidden="true">
-              炊
+              <BrandMark />
             </span>
             <span className="site-header__word">DEEPCOOK</span>
           </span>

@@ -33,6 +33,22 @@ body.is-locked {
   overflow: hidden;
 }
 
+.brand-mark {
+  display: block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  border-radius: 20%;
+}
+
+.site-header__seal .brand-mark,
+.footer__seal .brand-mark,
+.stamp__center .brand-mark,
+.k-auth-seal .brand-mark {
+  width: 100%;
+  height: 100%;
+}
+
 ::selection {
   background: var(--yolk);
   color: var(--ink);

@@ -1469,7 +1469,6 @@
   place-items: center;
   width: 42px;
   height: 42px;
-  border: 1px solid var(--olive);
   color: var(--olive);
   font-size: 19px;
   transform: rotate(-7deg);

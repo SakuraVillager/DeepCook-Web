@@ -1,3 +1,4 @@
+import { BrandMark } from '../components/BrandMark'
 import { useState, useEffect, useRef } from 'react'
 import { useKitchen } from './context'
 import { DEFAULT_PREFERENCES, publicUrl, assetUrl } from './domain'
@@ -164,7 +165,7 @@ export function Profile() {
               {user.profile.avatar ? (
                 <img src={assetUrl(user.profile.avatar)} alt="我的头像" />
               ) : (
-                <span aria-hidden="true">炊</span>
+                <span aria-hidden="true"><BrandMark /></span>
               )}
             </div>
             <div>

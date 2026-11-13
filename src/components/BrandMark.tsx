@@ -1,0 +1,18 @@
+// Paths and colors extracted unchanged from Android res/drawable/ic_launcher.xml.
+export function BrandMark() {
+  return (
+    <svg
+      className="brand-mark"
+      viewBox="0 0 108 108"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path fill="#FFE0A3" d="M0,0h108v108h-108z" />
+      <path
+        fill="#805600"
+        d="M33,60C17,57 22,35 37,36C39,18 66,18 70,36C86,34 91,57 75,60L73,80L35,80Z"
+      />
+      <path fill="#FFFBF4" d="M39,64h30v5h-30zM40,74h28v3h-28z" />
+    </svg>
+  )
+}

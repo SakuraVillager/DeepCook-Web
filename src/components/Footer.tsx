@@ -1,3 +1,4 @@
+import { BrandMark } from './BrandMark'
 import type { MouseEvent } from 'react'
 import { appDownload } from '../data/app-download'
 import { navItems } from '../data/recipes'
@@ -29,7 +30,7 @@ export function Footer({
         <div className="footer__grid">
           <div className="footer__brand">
             <span className="footer__seal" aria-hidden="true">
-              炊
+              <BrandMark />
             </span>
             <p>
               一款离线优先的中文菜谱 App。把菜谱拆开，把火候讲清楚。

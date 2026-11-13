@@ -36,7 +36,6 @@
   place-items: center;
   width: 25px;
   height: 25px;
-  border: 1px solid currentColor;
   font-family: var(--font-zh);
   font-size: 12px;
   font-weight: 700;

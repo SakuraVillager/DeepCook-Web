@@ -1,3 +1,4 @@
+import { BrandMark } from '../components/BrandMark'
 import {
   useEffect,
   useRef,
@@ -92,7 +93,7 @@ export function Photo({
         />
       ) : null}
       <span className="k-photo__empty" aria-hidden="true">
-        炊<span>DEEPCOOK</span>
+        <BrandMark /><span>DEEPCOOK</span>
       </span>
     </div>
   )
@@ -135,7 +136,7 @@ export function Empty({
   return (
     <div className="k-empty">
       <span className="k-empty__mark" aria-hidden="true">
-        炊
+        <BrandMark />
       </span>
       <h2>{title}</h2>
       <p>{text}</p>

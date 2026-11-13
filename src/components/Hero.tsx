@@ -1,3 +1,4 @@
+import { BrandMark } from './BrandMark'
 import { useEffect, useId, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -34,7 +35,7 @@ function Stamp() {
           <textPath href={`#${pathId}`} textLength={274} lengthAdjust="spacing">EAT WELL · COOK DEEPER · 好好吃饭 · </textPath>
         </text>
       </svg>
-      <span className="stamp__center">炊</span>
+      <span className="stamp__center"><BrandMark /></span>
     </div>
   )
 }

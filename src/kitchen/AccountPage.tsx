@@ -1,3 +1,4 @@
+import { BrandMark } from '../components/BrandMark'
 import { useEffect, useState } from 'react'
 import { useKitchen } from './context'
 import { accountPagePath, accountReturnPath } from './account-routes'
@@ -73,7 +74,7 @@ export function AccountPage({
             <i>Your own kitchen.</i>
           </span>
           <span className="k-auth-seal" aria-hidden="true">
-            炊
+            <BrandMark />
           </span>
         </div>
       </div>

@@ -91,3 +91,42 @@ test('mobile APP navigation closes and reaches the correct section', async ({
       .evaluate((el) => el.classList.contains('is-locked')),
   ).toBeFalsy()
 })
+
+test('three APP features alternate on desktop and stack on phones with a dedicated AI section', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 })
+    await page.goto('/android/')
+    await page.evaluate(() => document.fonts.ready)
+    await expect(page.locator('.android-feature')).toHaveCount(3)
+    for (const id of ['pocket', 'reader', 'ai']) {
+      const feature = page.locator(`#${id}`)
+      await feature.scrollIntoViewIfNeeded()
+      const picture = feature.locator('img.android-screen')
+      await picture.evaluate((element: HTMLImageElement) => element.decode())
+      await expect(picture).toBeVisible()
+      await expect(feature.locator('figcaption')).toContainText('界面示意')
+      const copy = await feature.locator('.android-feature__copy').boundingBox()
+      const visual = await feature
+        .locator('.android-feature__visual')
+        .boundingBox()
+      expect(copy).not.toBeNull()
+      expect(visual).not.toBeNull()
+      if (width > 760) {
+        if (id === 'reader')
+          expect(visual!.x + visual!.width).toBeLessThanOrEqual(copy!.x)
+        else expect(copy!.x + copy!.width).toBeLessThanOrEqual(visual!.x)
+      } else {
+        expect(visual!.y).toBeGreaterThanOrEqual(copy!.y + copy!.height)
+      }
+    }
+    await expect(page.locator('#ai h2')).toHaveText('把 AI，请进厨房。')
+    await expect(page.locator('#ai')).toContainText('缺料')
+    await expect(page.locator('#download h2')).toHaveText(
+      '下一顿，从这里开始。',
+    )
+    await expect(page.locator('.android-download__card > .btn')).toHaveCount(2)
+  }
+})
