@@ -955,7 +955,7 @@
 }
 .k-taste .k-section-title {
   position: sticky;
-  top: calc(var(--header-h) + 102px);
+  top: var(--header-h);
   align-self: start;
   min-width: 0;
 }
