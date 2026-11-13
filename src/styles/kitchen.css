@@ -959,6 +959,12 @@
   align-self: start;
   min-width: 0;
 }
+.k-editor-section .k-section-title {
+  position: sticky;
+  top: var(--header-h);
+  align-self: start;
+  min-width: 0;
+}
 .k-taste .k-tag-field + .k-tag-field {
   margin-top: 32px;
 }
@@ -1259,6 +1265,9 @@
     padding-top: 32px;
   }
   .k-taste .k-section-title {
+    position: static;
+  }
+  .k-editor-section .k-section-title {
     position: static;
   }
   .k-settings {
