@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { resolve } from 'node:path'
 import { readFileSync } from 'node:fs'
 import { defineConfig, type Plugin } from 'vite'
+import { appDownload } from './src/data/app-download.ts'
 
 // Keep the existing extensionless entry and normalize its relative asset URLs.
 function redirectOnlineEntry(
@@ -11,6 +12,17 @@ function redirectOnlineEntry(
   next: () => void,
 ) {
   const path = req.url?.split('?')[0]
+  if (
+    path === `/download/${appDownload.fileName}` ||
+    path === '/download/DeepCook-0.5.1-preview.apk'
+  ) {
+    res.writeHead(302, {
+      Location: appDownload.url,
+      'Cache-Control': 'no-cache',
+    })
+    res.end()
+    return
+  }
   if (path === '/app' || path === '/android') {
     res.writeHead(302, { Location: req.url!.replace(path, `${path}/`) })
     res.end()
@@ -51,11 +63,33 @@ function offlineKitchen(): Plugin {
   }
 }
 
+function deploymentRedirects(): Plugin {
+  return {
+    name: 'deployment-redirects',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'edgeone.json',
+        source: readFileSync(
+          resolve(import.meta.dirname, 'edgeone.json'),
+          'utf8',
+        ),
+      })
+    },
+  }
+}
+
 // Relative base so the built site can be dropped into any sub-path.
 export default defineConfig({
   base: './',
   appType: 'mpa',
-  plugins: [react(), onlineEntryRedirect(), offlineKitchen()],
+  plugins: [
+    react(),
+    onlineEntryRedirect(),
+    offlineKitchen(),
+    deploymentRedirects(),
+  ],
   build: {
     rollupOptions: {
       input: {

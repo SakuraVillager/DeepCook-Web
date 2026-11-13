@@ -396,7 +396,7 @@ test('online footer reuses the homepage footer and keeps app navigation intact',
   await expect(footer.locator('.footer__word')).toHaveText('DEEPCOOK')
   await expect(
     footer.getByRole('link', { name: '下载 Android 版' }),
-  ).toHaveAttribute('href', '../download/DeepCook-0.5.1-preview.apk')
+  ).toHaveAttribute('href', 'https://deepcook-backend.jijiz.cn/deepcook-api/v1/downloads/DeepCook-0.6.1.apk')
   await expect(
     footer.getByRole('link', { name: '在线使用', exact: true }),
   ).toHaveAttribute('href', '../app/')

@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from PIL import Image, UnidentifiedImageError
 from errors import ApiError
 from accounts import Accounts
+from downloads import Downloads
 
 PREFIX = "/deepcook-api/v1"
 POST_ID = re.compile(r"post-[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}\Z")
@@ -77,6 +78,7 @@ class CommunityApp:
             CREATE TABLE IF NOT EXISTS photo_garbage(file TEXT PRIMARY KEY);
         """)
         self.accounts = Accounts(self, secure_cookies=secure_cookies)
+        self.downloads = Downloads(Path(database).parent / "releases")
         with self.lock: self.prune(orphan_scan=True)
 
     def prune(self, orphan_scan=False):
@@ -429,6 +431,8 @@ class CommunityApp:
         raise ApiError(405, "不支持的操作。")
 
     def __call__(self, environ, start_response):
+        if environ['PATH_INFO'].startswith(PREFIX + '/downloads/'):
+            return self.downloads(environ, start_response)
         origin = environ.get("HTTP_ORIGIN", "")
         headers = [("Content-Type", "application/json; charset=utf-8"), ("Cache-Control", "private, no-cache"),
                    ("X-Content-Type-Options", "nosniff"), ("Vary", "Origin, Authorization, Cookie, X-DeepCook-Account")]

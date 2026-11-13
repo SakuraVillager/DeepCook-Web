@@ -1,3 +1,4 @@
+import { appDownload } from '../data/app-download'
 import { ChapterLabel } from './ChapterLabel'
 import { DesignCanvas } from './DesignCanvas'
 
@@ -33,8 +34,8 @@ export function Download() {
             <div>
               <h3>下载 Android 版</h3>
               <p>
-                494 道菜谱随包提供，第一次打开就能用。
-                Preview 构建可直接覆盖开发版安装。
+                494 道菜谱随包提供，登录后可离线翻阅。
+                账号资料与互动联网同步。
               </p>
               <span className="btn btn--ghost">
                 了解 APP / 下载
@@ -43,9 +44,9 @@ export function Download() {
             </div>
             <div className="download-card__bottom">
               <div className="download-card__meta">
-                VERSION 0.5.1 · 17.5 MB
+                VERSION {appDownload.version} · {appDownload.sizeLabel}
                 <br />
-                ANDROID 8.0+ · PREVIEW
+                ANDROID 8.0+ · RELEASE
               </div>
               <span className="download-card__arrow" aria-hidden="true">
                 ↓
@@ -84,7 +85,7 @@ export function Download() {
 
         <div className="download__note">
           <span>首次安装需在系统设置中允许「安装未知来源应用」。</span>
-          <span>APK 使用本机 Debug 签名，仅用于体验；正式发布签名另行配置。</span>
+          <span>旧调试版请先同步资料，卸载后再安装正式版。</span>
         </div>
       </DesignCanvas>
     </section>

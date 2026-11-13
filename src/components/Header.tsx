@@ -1,6 +1,7 @@
 import { useEffect, useState, type MouseEvent } from 'react'
 import { LetterLink } from './LetterLink'
 import { navItems } from '../data/recipes'
+import { appDownload } from '../data/app-download'
 import {
   scrollToSection,
   scrollToTop,
@@ -255,7 +256,9 @@ export function Header({
         <div className="mobile-menu__foot">
           <div>
             <p className="label">
-              {online ? 'DEEPCOOK / ONLINE EDITION' : 'DEEPCOOK 0.5.1'}
+              {online
+                ? 'DEEPCOOK / ONLINE EDITION'
+                : `DEEPCOOK ${appDownload.version}`}
             </p>
             <p className="label muted">
               {online ? '好好吃饭，慢慢下厨。' : 'ANDROID 8.0+ · OFFLINE'}
@@ -263,7 +266,7 @@ export function Header({
           </div>
           <a
             className="btn btn--ink btn--small"
-            href={`${online || page ? '../' : './'}download/DeepCook-0.5.1-preview.apk`}
+            href={appDownload.url}
             download
             tabIndex={open ? 0 : -1}
           >

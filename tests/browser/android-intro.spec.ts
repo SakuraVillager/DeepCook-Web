@@ -28,17 +28,21 @@ test('APP introduction fits phones, tablets and desktops with working download a
     const download = page.locator('.android-download__card a[download]')
     await expect(download).toHaveAttribute(
       'href',
-      '../download/DeepCook-0.5.1-preview.apk',
+      'https://deepcook-backend.jijiz.cn/deepcook-api/v1/downloads/DeepCook-0.6.1.apk',
+    )
+    await expect(page.locator('.android-download__mirror')).toHaveAttribute(
+      'href',
+      'https://github.com/SakuraVillager/DeepCook/releases/download/v0.6.1/DeepCook-0.6.1.apk',
     )
     await page.locator('#download').scrollIntoViewIfNeeded()
     await expect(download).toBeInViewport()
     await expect(page.locator('.android-download__note')).toContainText(
-      '新版安装包将随后更新',
+      '安装包使用正式签名',
     )
   }
-  const apk = await page.request.head('/download/DeepCook-0.5.1-preview.apk')
+  const apk = await page.request.head('/download/DeepCook-0.6.1.apk')
   expect(apk.ok()).toBeTruthy()
-  expect(Number(apk.headers()['content-length'])).toBeGreaterThan(17_000_000)
+  expect(Number(apk.headers()['content-length'])).toBe(144_547_847)
   await page.goto('/android')
   await expect(page).toHaveURL(/\/android\/$/)
   await page.getByRole('link', { name: 'DeepCook 官网首页' }).click()

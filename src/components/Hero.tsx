@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { appDownload } from '../data/app-download'
 import { LetterLink } from './LetterLink'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -191,7 +192,7 @@ export function Hero({ play, reduced }: HeroProps) {
             <div className="hero__ctas hero-reveal">
               <LetterLink
                 text="下载 Android 版"
-                href="./download/DeepCook-0.5.1-preview.apk"
+                href={appDownload.url}
                 download
                 className="btn"
                 arrow
@@ -207,9 +208,9 @@ export function Hero({ play, reduced }: HeroProps) {
 
           <div className="hero__meta hero-reveal">
             <div className="hero__meta-lines">
-              <span>VERSION 0.5.1</span>
-              <span>ANDROID 8.0+ · 17.5 MB</span>
-              <span>完全离线可用</span>
+              <span>VERSION {appDownload.version}</span>
+              <span>ANDROID 8.0+ · {appDownload.sizeLabel}</span>
+              <span>菜谱离线翻阅 · 账号云端同步</span>
             </div>
             <div className="hero__scroll">
               <span>SCROLL TO COOK</span>

@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/download/DeepCook-0.6.1.apk",
+      "destination": "https://deepcook-backend.jijiz.cn/deepcook-api/v1/downloads/DeepCook-0.6.1.apk",
+      "statusCode": 302
+    },
+    {
+      "source": "/download/DeepCook-0.5.1-preview.apk",
+      "destination": "https://deepcook-backend.jijiz.cn/deepcook-api/v1/downloads/DeepCook-0.6.1.apk",
+      "statusCode": 302
+    }
+  ]
+}

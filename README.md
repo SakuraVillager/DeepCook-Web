@@ -4,7 +4,7 @@ DeepCook 官网、Android APP 介绍页与浏览器版。首页以「火候」�
 
 - 设计参考：`rerise.co` 的编辑式排版、逐字动画、翻字导航、全屏滚动叙事与慢速缓动
 - 色彩与结构为 DeepCook 重做：暖米纸、灶火黄、墨黑与橄榄绿；6 个「火候」章节
-- 官网保留原有介绍与 APK（0.5.1）；网页版原有找菜、收藏、阅读和个人菜谱以 Android 0.3.0 及随包菜谱为功能基线；评分、营养表、评论和交作业已按远程 Android `main` 接入。未实现的计时、营养计算和 AI 不在网页版提供
+- 官网保留原有介绍与正式 APK（0.6.1）；网页版原有找菜、收藏、阅读和个人菜谱以 Android 0.3.0 及随包菜谱为功能基线；评分、营养表、评论和交作业已按远程 Android `main` 接入。未实现的计时、营养计算和 AI 不在网页版提供
 
 ## 本地运行
 
@@ -32,7 +32,8 @@ npm run preview
 - `/android/` → Android APP 介绍、阅读/AI 功能说明和当前 APK 下载
 - `/app/` → 浏览器版，内部通过 hash 路由导航，可直接刷新任意功能页
 - `/catalog/` → Android 菜谱、引用图片及来源/许可清单
-- `/download/DeepCook-0.5.1-preview.apk` → 下载文件
+- `/download/DeepCook-0.6.1.apk` → 正式安装包下载入口（重定向至服务器 HTTPS 下载）
+- `/download/DeepCook-0.5.1-preview.apk` → 旧地址兼容跳转至新版
 - `/photos/*.jpg` → 首页使用的菜谱图
 
 `base` 为 `./`，可部署在任意子路径。`appType` 为 `mpa`，请确保静态服务器支持目录索引（`/app/` → `/app/index.html`、`/android/` → `/android/index.html`）；不支持时可改用对应的 `index.html` 直链。
@@ -71,15 +72,15 @@ npm run preview
 - 网页版菜谱数据与图片从 `~/DeepCook/app/src/main/assets` 当前工作区只读复制，包含本地尚未提交的菜谱及图片；不执行 fetch/pull，不修改 Android 工程。
 - 菜谱内容来源：HowToCook（Unlicense）、Based Cooking（Unlicense）；部分图片来自 FoodiesFeed（CC0 等效）。
 - 首页营养数值、评分、评论均为 App 中的**示例数据**，页面已明确标注。
-- APK 为 `artifacts/DeepCook-0.5.1-preview.apk` 的副本，使用本机 Debug 签名，仅用于体验。
+- APK 为 0.6.1 正式签名 Release 构建，提供服务器直接下载与 GitHub Releases 两个入口，避免超过 EdgeOne 单文件大小限制；安装包和校验文件不包含签名私钥。
 
 ## 更新下载版本
 
-1. 用新的 Preview APK 替换 `public/download/DeepCook-0.5.1-preview.apk`（或改名）。
-2. 同步修改首页 Hero、下载卡片、Header、Footer 和 `src/AndroidIntro.tsx` 中的版本号、大小与链接；发布新版 AI 包后移除介绍页中等待新版安装包的说明。
-3. 如需更新菜谱截图，从 App assets 复制到 `public/photos/`，并在 `src/data/recipes.ts` 中更新封面路径。
+1. 在 APP 仓库构建正式签名 Release APK，验证版本、签名和 SHA-256 后发布到 GitHub Releases，并上传服务器的发布文件目录。
+2. 更新 `src/data/app-download.ts` 的版本、文件名、大小、校验值和下载地址，网站各入口共享该配置；同步 `edgeone.json` 的下载重定向。服务器通过已有 HTTPS API 路径提供流式下载、断点续传与 `.sha256` 校验文件，不将安装包写入数据库。
+3. APK 不再放入静态产物；保留旧路径的重定向，避免用户继续下载旧包。正式签名与旧调试版不同，旧用户需先同步资料，再卸载后安装正式版。
 
-APP 介绍页沿用官网共用 Header、Footer、Cursor 和字体，采用自然响应式布局；菜谱、阅读、AI 图片区域由现有照片和 HTML/CSS 界面示意组成，未新增大型图片。当前提供 v0.5.1 Preview APK，明确提示包含 AI 功能的新版安装包待更新。
+APP 介绍页沿用官网共用 Header、Footer、Cursor 和字体，采用自然响应式布局；菜谱、阅读、AI 图片区域由现有照片和 HTML/CSS 界面示意组成，未新增大型图片。当前提供 v0.6.1 正式签名 APK。
 
 ## 浏览器版
 

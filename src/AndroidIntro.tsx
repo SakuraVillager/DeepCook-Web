@@ -1,3 +1,4 @@
+import { appDownload } from './data/app-download'
 import { useEffect } from 'react'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
@@ -292,7 +293,7 @@ export function AndroidIntro() {
               <div className="android-chat__hint">
                 从一顿简单的晚饭开始。<span>↗</span>
               </div>
-              <figcaption>AI 对话示意 · AI 功能在 APP 内体验</figcaption>
+              <figcaption>AI 对话示意 · 需配置 AI 服务</figcaption>
             </figure>
           </div>
         </section>
@@ -316,7 +317,7 @@ export function AndroidIntro() {
               <span className="site-header__seal">炊</span>
               <div>
                 <h3>DeepCook for Android</h3>
-                <p>当前下载包 · v0.5.1 Preview</p>
+                <p>正式版 · v{appDownload.version}</p>
               </div>
             </div>
             <div className="android-download__specs">
@@ -324,7 +325,7 @@ export function AndroidIntro() {
                 ANDROID <b>8.0+</b>
               </span>
               <span>
-                APK <b>17.5 MB</b>
+                APK <b>{appDownload.sizeLabel}</b>
               </span>
               <span>
                 菜谱 <b>494 道</b>
@@ -332,15 +333,19 @@ export function AndroidIntro() {
             </div>
             <a
               className="btn btn--ink"
-              href="../download/DeepCook-0.5.1-preview.apk"
+              href={appDownload.url}
               download
             >
-              下载 APK <span aria-hidden="true">↓</span>
+              服务器直接下载 <span aria-hidden="true">↓</span>
+            </a>
+            <a
+              className="android-download__mirror"
+              href={appDownload.githubUrl}
+            >
+              GitHub 下载 <span aria-hidden="true">↗</span>
             </a>
             <p className="android-download__note">
-              目前提供 0.5.1 体验包，包含 AI
-              功能的新版安装包将随后更新。首次安装请允许安装未知来源应用；当前体验包使用
-              Debug 签名。
+              安装包使用正式签名。首次使用需联网注册或登录；旧调试版请先同步资料，卸载后再安装本正式版。
             </p>
             <a className="android-download__web" href="../app/">
               也可以先用浏览器打开 <span aria-hidden="true">↗</span>

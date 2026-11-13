@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react'
+import { appDownload } from '../data/app-download'
 import { navItems } from '../data/recipes'
 import { scrollToSection, scrollToTop } from '../lib/scroll'
 
@@ -54,17 +55,18 @@ export function Footer({
             <h4>获取 / GET</h4>
             <a href={`${assetPrefix}android/`}>APP 介绍</a>
             <a
-              href={`${assetPrefix}download/DeepCook-0.5.1-preview.apk`}
+              href={appDownload.url}
               download
             >
               下载 Android 版
             </a>
+            <a href={appDownload.githubUrl}>GitHub 下载</a>
             <a href={`${assetPrefix}app/`}>在线使用</a>
             <a
               href={`${homeHref}#download`}
               onClick={(event) => go(event, '#download')}
             >
-              版本 v0.5.1
+              版本 v{appDownload.version}
             </a>
           </div>
 
