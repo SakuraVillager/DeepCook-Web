@@ -782,7 +782,7 @@
   color: var(--muted);
 }
 
-.nutri__foot span {
+.nutri__foot a {
   font-family: var(--font-display);
   color: var(--ink);
   letter-spacing: 0.12em;
@@ -956,7 +956,7 @@
   color: rgba(243, 237, 224, 0.72);
 }
 
-.quote cite {
+.quote__link {
   display: block;
   margin-top: 7px;
   font-style: normal;

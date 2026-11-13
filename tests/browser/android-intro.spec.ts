@@ -107,7 +107,7 @@ test('three APP features alternate on desktop and stack on phones with a dedicat
       const picture = feature.locator('img.android-screen')
       await picture.evaluate((element: HTMLImageElement) => element.decode())
       await expect(picture).toBeVisible()
-      await expect(feature.locator('figcaption')).toContainText('界面示意')
+      await expect(feature.locator('figcaption')).toContainText('功能预览')
       const copy = await feature.locator('.android-feature__copy').boundingBox()
       const visual = await feature
         .locator('.android-feature__visual')

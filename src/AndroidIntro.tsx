@@ -140,8 +140,8 @@ export function AndroidIntro() {
             <AppScreen
               name="find"
               eager
-              alt="DeepCook 找菜功能示意：菜名与食材搜索、分类筛选和双列菜谱卡片"
-              caption="找菜与收藏 / APP 功能界面示意"
+              alt="DeepCook 找菜功能预览：菜名与食材搜索、分类筛选和双列菜谱卡片"
+              caption="找菜与收藏 / APP 功能预览"
             />
           </div>
         </section>
@@ -193,8 +193,8 @@ export function AndroidIntro() {
             </div>
             <AppScreen
               name="cook"
-              alt="DeepCook 做菜模式示意：红烧肉当前步骤、步骤目录和下厨计时器"
-              caption="分步做菜与计时 / APP 功能界面示意"
+              alt="DeepCook 做菜模式预览：红烧肉当前步骤、步骤目录和下厨计时器"
+              caption="分步做菜与计时 / APP 功能预览"
             />
           </div>
         </section>
@@ -246,8 +246,8 @@ export function AndroidIntro() {
             </div>
             <AppScreen
               name="ai"
-              alt="DeepCook AI 下厨功能示意：人数换算、缺料替代和问 AI 建议面板"
-              caption="AI 功能界面示意 / 在线回答需配置 AI 服务"
+              alt="DeepCook AI 下厨功能预览：人数换算、缺料替代和问 AI 建议面板"
+              caption="AI 功能预览 / 在线回答需配置 AI 服务"
             />
           </div>
         </section>

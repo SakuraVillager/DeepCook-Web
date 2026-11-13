@@ -18,12 +18,13 @@ export function RecipeNutrition({
 }) {
   const [expanded, setExpanded] = useState(false)
   const note = nutrition
-    ? 'App 内置示例，非本菜谱的实测营养值。'
-    : '暂无营养数据，缺失项显示“无”。'
+    ? nutrition.note
+    : '营养数据为大致估算，仅供饮食参考；实际数值随食材、份量和烹饪方式变化。'
+  const basis = nutrition?.basis === 'recipe' ? '整道菜' : '每份'
   return (
     <section className="k-nutrition" aria-labelledby="recipe-nutrition-title">
       <header>
-        <h2 id="recipe-nutrition-title">每份营养</h2>
+        <h2 id="recipe-nutrition-title">{basis}营养估算</h2>
         <Flip onClick={() => setExpanded(true)}>查看全部 ↗</Flip>
       </header>
       <dl className="k-nutrition__summary">
@@ -31,7 +32,7 @@ export function RecipeNutrition({
           <div key={key}>
             <dt>{name}</dt>
             <dd>
-              <b>{nutrition?.[key] ?? '无'}</b>
+              <b>{nutrition?.[key] ?? '—'}</b>
               {nutrition?.[key] != null && <span>{unit}</span>}
             </dd>
           </div>
@@ -42,11 +43,11 @@ export function RecipeNutrition({
         <Modal title="完整营养表" onClose={() => setExpanded(false)}>
           <p className="k-fine">{note}</p>
           <table className="k-nutrition__table">
-            <caption className="sr-only">每份营养成分</caption>
+            <caption className="sr-only">{basis}营养成分估算</caption>
             <thead>
               <tr>
                 <th scope="col">营养素</th>
-                <th scope="col">每份含量</th>
+                <th scope="col">{basis}含量</th>
               </tr>
             </thead>
             <tbody>
@@ -55,7 +56,7 @@ export function RecipeNutrition({
                   <th scope="row">{name}</th>
                   <td>
                     {nutrition?.[key] == null
-                      ? '无'
+                      ? '—'
                       : `${nutrition[key]} ${unit}`}
                   </td>
                 </tr>

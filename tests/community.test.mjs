@@ -23,14 +23,17 @@ test('community uses persisted records without injecting ratings or posts and pr
     catalog,
   )
   assert.deepEqual(rated.ratings, [9])
-  assert.deepEqual(content.nutrition, {
-    calories: 480,
-    fat: 22,
-    protein: 26,
-    carbs: 44,
-    fiber: 3.5,
-    sodium: 650,
-  })
+  assert.equal(content.nutrition, null)
+  const eggs = catalog.find((recipe) => recipe.id === 'silky-eggs')
+  const estimated = recipeCommunity(
+    emptyCommunity(eggs.id),
+    eggs,
+    catalog,
+  ).nutrition
+  assert.equal(estimated.calories, 339)
+  assert.equal(estimated.basis, 'recipe')
+  assert.match(estimated.note, /大致估算/)
+
   const other = catalog.find((r, i) => i >= 12 && !r.featured)
   assert.deepEqual(
     recipeCommunity(emptyCommunity(other.id), other, catalog).ratings,

@@ -72,7 +72,7 @@ export function Download() {
             </div>
             <div className="download-card__bottom">
               <div className="download-card__meta">
-                ONLINE · BETA
+                ONLINE · WEB APP
                 <br />
                 无需安装 · 浏览器直接打开
               </div>

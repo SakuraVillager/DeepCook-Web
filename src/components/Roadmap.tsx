@@ -80,7 +80,7 @@ export function Roadmap() {
                 一起下厨。
               </p>
             </div>
-            <div className="concept__chat" aria-label="AI 下厨对话示意">
+            <div className="concept__chat" aria-label="AI 下厨对话预览">
               <p className="bubble bubble--user">
                 冰箱里只剩番茄、鸡蛋和半颗包菜。今晚想吃得清淡一点，只有 20
                 分钟。

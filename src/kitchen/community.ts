@@ -1,4 +1,7 @@
 import type { Recipe } from './types'
+import { recipeNutrition } from './nutrition.ts'
+import type { Nutrition } from './nutrition.ts'
+export type { Nutrition } from './nutrition.ts'
 
 export type ComposerKind = 'rating' | 'comment' | 'submission'
 export interface KitchenPost {
@@ -37,14 +40,6 @@ export interface RecipeCommunity {
   ratingCounts?: number[]
   postCounts?: { comment: number; submission: number }
   localRating?: number | null
-}
-export interface Nutrition {
-  calories: number | null
-  fat: number | null
-  protein: number | null
-  carbs: number | null
-  fiber: number | null
-  sodium: number | null
 }
 export const emptyCommunity = (recipeId: string): CommunityRecord => ({
   schema: 1,
@@ -114,21 +109,10 @@ export function isCloudPhoto(path: unknown): path is string {
 export function recipeCommunity(
   record: CommunityRecord,
   recipe: Recipe,
-  catalog: Recipe[],
+  _catalog: Recipe[],
 ): RecipeCommunity {
-  const index = catalog.findIndex((r) => r.id === recipe.id)
-  const seeded = index >= 0 && (index < 12 || recipe.featured)
   return {
-    nutrition: seeded
-      ? {
-          calories: 480,
-          fat: 22,
-          protein: 26,
-          carbs: 44,
-          fiber: 3.5,
-          sodium: 650,
-        }
-      : null,
+    nutrition: recipeNutrition(recipe),
     ownRating: record.ownRating,
     ratings: record.ownRating === null ? [] : [record.ownRating],
     posts: [...record.posts].sort(

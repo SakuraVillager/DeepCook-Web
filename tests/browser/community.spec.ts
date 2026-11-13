@@ -369,18 +369,16 @@ test('local ratings propagate between tabs and community layout fits narrow and 
 test('compact rating and nutrition stay beside the cover and the full table shows all six App fields', async ({
   page,
 }) => {
-  await open(page)
+  await open(page, 'silky-eggs')
   await expect(page.locator('.k-detail-intro .k-rating')).toHaveCount(1)
   await expect(page.locator('.k-detail-intro .k-nutrition')).toHaveCount(1)
   await expect(page.locator('.k-nutrition__summary b')).toHaveText([
-    '480',
-    '22',
-    '26',
-    '44',
+    '339',
+    '26.9',
+    '23.2',
+    '1.4',
   ])
-  await expect(page.locator('.k-nutrition > .k-fine')).toContainText(
-    'App 内置示例',
-  )
+  await expect(page.locator('.k-nutrition > .k-fine')).toContainText('大致估算')
   for (const width of [1024, 1440]) {
     await page.setViewportSize({ width, height: 1000 })
     const cover = (await page.locator('.k-recipe-visual').boundingBox())!
@@ -397,13 +395,13 @@ test('compact rating and nutrition stay beside the cover and the full table show
   const modal = page.getByRole('dialog', { name: '完整营养表' })
   await expect(modal.getByRole('row')).toHaveCount(7)
   await expect(
-    modal.getByRole('row', { name: '热量 480 kcal', exact: true }),
+    modal.getByRole('row', { name: '热量 339 kcal', exact: true }),
   ).toBeVisible()
   await expect(
-    modal.getByRole('row', { name: '膳食纤维 3.5 g', exact: true }),
+    modal.getByRole('row', { name: '膳食纤维 0 g', exact: true }),
   ).toBeVisible()
   await expect(
-    modal.getByRole('row', { name: '钠 650 mg', exact: true }),
+    modal.getByRole('row', { name: '钠 284 mg', exact: true }),
   ).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(modal).toHaveCount(0)
@@ -418,26 +416,24 @@ test('missing nutrition is never inferred and its full table fits a narrow phone
   await open(page, 'world-danish-pancake')
   await page.setViewportSize({ width: 320, height: 844 })
   await expect(page.locator('.k-nutrition__summary b')).toHaveText([
-    '无',
-    '无',
-    '无',
-    '无',
+    '—',
+    '—',
+    '—',
+    '—',
   ])
-  await expect(page.locator('.k-nutrition > .k-fine')).toContainText(
-    '暂无营养数据',
-  )
+  await expect(page.locator('.k-nutrition > .k-fine')).toContainText('大致估算')
   const cover = (await page.locator('.k-recipe-visual').boundingBox())!
   const rating = (await page.locator('.k-rating').boundingBox())!
   expect(rating.y).toBeGreaterThan(cover.y + cover.height)
   await page.getByRole('button', { name: '查看全部 ↗' }).click()
   const modal = page.getByRole('dialog')
   await expect(modal.getByRole('cell')).toHaveText([
-    '无',
-    '无',
-    '无',
-    '无',
-    '无',
-    '无',
+    '—',
+    '—',
+    '—',
+    '—',
+    '—',
+    '—',
   ])
   const box = (await modal.boundingBox())!
   expect(box.x).toBeGreaterThanOrEqual(0)

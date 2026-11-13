@@ -19,7 +19,7 @@ for name in sorted(assets):
     out = target / name
     out.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source / name, out)
-for name in ['recipes.json', 'catalog_sources.json', 'photo_sources.json', 'howtocook_index.json', 'HOWTOCOOK-LICENSE.txt', 'BASED-COOKING-LICENSE.txt']:
+for name in ['recipes.json', 'nutrition_estimates.json', 'catalog_sources.json', 'photo_sources.json', 'howtocook_index.json', 'HOWTOCOOK-LICENSE.txt', 'BASED-COOKING-LICENSE.txt']:
     shutil.copyfile(source / name, target / name)
 shutil.copyfile(source.parents[3] / 'THIRD_PARTY_NOTICES.md', target / 'THIRD_PARTY_NOTICES.md')
 print(f'Copied {len(recipes)} recipes and {len(assets)} referenced images.')

@@ -82,7 +82,7 @@ Web 使用 React 19、TypeScript、Vite 多页面构建；官网动效由 GSAP /
 - 尊重 `prefers-reduced-motion`，减少动态效果时跳过强制动画等待；提供语义化标题、图片替代文本、可见键盘焦点和进度语义。
 - 手机与 iPad 的横向翻步保留纵向滚动、双指缩放和文字选择，避免阅读手势与翻页相互抢占。
 
-APP 介绍页以找菜、分步做菜和 AI 下厨三个关键功能为主线，桌面图文左右交错，手机切换为上下结构。图片由内置 imagegen 按现有应用功能制作，页面明确标为功能界面示意；末尾保留原下载区。网页品牌标识与 favicon 使用 Android 厨师帽图标的原始矢量路径及配色，素材和提示词见 [APP 视觉素材说明](docs/android-visuals.md)。
+APP 介绍页以找菜、分步做菜和 AI 下厨三个关键功能为主线，桌面图文左右交错，手机切换为上下结构。图片由内置 imagegen 按现有应用功能制作，页面明确标为功能预览；末尾保留原下载区。网页品牌标识与 favicon 使用 Android 厨师帽图标的原始矢量路径及配色，素材和提示词见 [APP 视觉素材说明](docs/android-visuals.md)。
 
 相关实现位于 [画布样式](src/styles/canvas.css)、[详情样式](src/styles/recipe.css)、[阅读样式](src/styles/reader.css) 与 [触控回归](tests/browser/reader-touch.spec.ts)。
 
@@ -182,13 +182,21 @@ Python 测试需先在虚拟环境安装服务依赖。已有 Chrome 时可通�
 
 ## 当前能力边界
 
-- **Web 与 Android 按场景互补。** 网页提供找菜、阅读、个人菜谱和云端互动；App 源码包含计时、AI 厨房与语音模块。网页版尚未接入 AI、烹饪计时和营养计算，公开正式 APK 不包含开发者 AI 服务密钥，在线 AI 能力需要先配置服务。
-- **营养数据有明确来源边界。** 当前部分菜谱展示 App 固定营养示例，并在界面标明；其余显示「无」。这些数值不作为本菜谱的实测或计算结果。
+- **Web 与 Android 按场景互补。** 网页提供找菜、阅读、个人菜谱和云端互动；App 源码包含计时、AI 厨房与语音模块。网页版尚未接入 AI 和烹饪计时，公开正式 APK 不包含开发者 AI 服务密钥，在线 AI 能力需要先配置服务。
+- **营养数据采用统一估算口径。** 根据 CoFID 2021 与 USDA SR Legacy 的常用食材成分、标注用量和人数进行粗略估算；明确人数时按份折算，其余按整道菜合计。数值仅供饮食参考，未提供的值显示「—」。
 - **离线能力依赖已有内容。** Web 首次访问需要联网，之后可读取缓存的菜谱文本；图片按需缓存，最多 160 个资源，未缓存图片显示占位。注册、云端写入和跨设备同步需要网络。
 - **账号恢复与部署仍有扩展空间。** 当前提供用户名密码注册、登录、退出与改密，尚未启用邮箱验证和邮件找回；备份为单机快照，未配置异地容灾。服务定位为小规模单机使用，暂无高可用集群或公开压测结论。
 
 ## 内容与许可
 
-菜谱内容来源于 HowToCook、Based Cooking 与项目自编内容；HowToCook 和 Based Cooking 使用 Unlicense，部分照片来自 FoodiesFeed（CC0 等效）。原始路径、固定来源版本与许可随内容清单保留，详情页可查看来源。首页展示的菜谱步骤、AI 对话与营养卡片用于介绍；实际使用入口为 `/app/`，互动记录由对应存储模式读取，前端不再注入样例评分或帖子。
+菜谱内容来源于 HowToCook、Based Cooking 与项目自编内容；HowToCook 和 Based Cooking 使用 Unlicense，部分照片来自 FoodiesFeed（CC0 等效）。原始路径、固定来源版本与许可随内容清单保留，详情页可查看来源。首页展示菜谱步骤、AI 功能预览与营养估算卡片；实际使用入口为 `/app/`，互动记录由对应存储模式读取，前端不再注入样例评分或帖子。
 
 [互动移植说明](docs/community-port.md) 记录最初移植时的行为与来源版本；后续账号、云端图片和同步能力以本 README 及当前源码为准。
+
+## 营养估算口径
+
+营养成分参考 [CoFID 2021](https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid) 和 [USDA FoodData Central SR Legacy](https://fdc.nal.usda.gov/download-datasets/)，食材条目保留来源编号、单位和文件校验值。程序统一处理常用食材、克／千克／斤／两、毫升／升、用量区间及人数；按件计算时使用来源表的标准单件重量近似，体积按 1 mL≈1 g 近似。少量辅料、可选食材及区间取值记录在生成文件中。
+
+构建工具位于 Android 项目的 `tools/build_nutrition.py`，两端共用生成的 `nutrition_estimates.json`。估算与菜谱原料、用量和人数绑定，配方变化后重新生成；显示时校验配方一致性。页面提示「营养数据为大致估算，仅供饮食参考」，未提供的数值统一显示「—」。
+
+发布文案逐项调整见 [发布文案清单](docs/release-copy-audit.md)。
