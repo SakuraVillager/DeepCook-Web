@@ -120,7 +120,7 @@ function AvatarCrop({
     </Modal>
   )
 }
-export function Profile() {
+export function Profile({ focusFood = false }: { focusFood?: boolean }) {
   const { user, commit, go, ready, notify } = useKitchen(),
     [name, setName] = useState(user.profile.name),
     [photo, setPhoto] = useState(''),
@@ -129,6 +129,11 @@ export function Profile() {
   useEffect(() => {
     setName(user.profile.name)
   }, [user.profile.name])
+  useEffect(() => {
+    if (!focusFood) return
+    const timer = window.setTimeout(() => document.getElementById('k-taste')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120)
+    return () => window.clearTimeout(timer)
+  }, [focusFood])
   const toggle = async (kind: 'likes' | 'avoids', tag: string) => {
     const on = !user.profile[kind].includes(tag)
     try {
@@ -273,7 +278,7 @@ export function Profile() {
           </div>
         </section>
       </div>
-      <section className="k-taste">
+      <section className="k-taste" id="k-taste">
         <div className="k-section-title">
           <span className="label">TASTE NOTES</span>
           <h2>喜欢的，与不想吃的。</h2>
@@ -307,7 +312,7 @@ export function Profile() {
             </fieldset>
           ))}
         </div>
-        <FoodProfileSetup embedded />
+        <FoodProfileSetup />
       </section>
       {photo && (
         <AvatarCrop

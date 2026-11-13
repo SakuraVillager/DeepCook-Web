@@ -24,7 +24,7 @@ export function AccountPage({
 
   useEffect(() => {
     if (auth.ready && auth.account && !auth.expired && !auth.syncing)
-      go(registering ? '/food-profile' : destination)
+      go(registering ? '/profile?food=1' : destination)
   }, [auth.ready, auth.account, auth.expired, auth.syncing, destination, go, registering])
 
   if (!auth.enabled)
@@ -125,7 +125,7 @@ export function AccountPage({
                   })
                   setPassword('')
                   setConfirm('')
-                  notify(registering ? '厨房账号已创建。' : '欢迎回来。')
+                  notify(registering ? '厨房账号已创建，推荐偏好可在「喜欢的，与不想吃的」下方设置。' : '欢迎回来。')
                 } catch (problem) {
                   setError(
                     problem instanceof Error
