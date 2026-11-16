@@ -65,7 +65,8 @@ export function Cook() {
         const top =
           viewport.getBoundingClientRect().top -
           screen.getBoundingClientRect().top
-        const height = Math.max(1, (screen.clientHeight - top) / scale)
+        const bottomGap = parseFloat(getComputedStyle(screen).paddingBottom)
+        const height = Math.max(1, (screen.clientHeight - top - bottomGap) / scale)
         if (
           Math.abs(
             parseFloat(
