@@ -131,41 +131,15 @@
 .chapter__canvas .showcase__foot { margin: 0; }
 .chapter__canvas .showcase__foot .label { display: block; font-size: 10px; }
 
-/* 03 composition. The viewport-sized pin and page-driven recipe are below. */
-.chapter__canvas .cook__grid { height: 100%; grid-template-columns: 40% 56%; gap: 4%; align-items: stretch; }
-.chapter__canvas .cook__left { position: static; padding: 0; display: flex; flex-direction: column; }
-.chapter__canvas .cook__description { margin-top: 24px; font-size: 17px; line-height: 1.8; }
-.chapter__canvas .cook__points { max-width: none; margin-top: 24px; }
-.chapter__canvas .cook__point { grid-template-columns: 26px 1fr; gap: 12px; padding: 16px 0; font-size: 14px; line-height: 1.7; }
-.chapter__canvas .cook__point > span { font-size: 11px; }
-.chapter__canvas .cook__foot { padding-top: 14px; gap: 10px; font-size: 10px; line-height: 1.6; }
-.cook .chapter__canvas {
-  --reader-padding: 22px;
-  --reader-gap: 12px;
-  --reader-title: 24px;
-  --reader-text: 20px;
-  --reader-number: 28px;
-}
-.chapter__canvas .cook__panel { height: 100%; min-height: 0; padding: var(--reader-padding); border: 1px solid var(--line); border-radius: 16px; background: var(--paper-3); display: grid; grid-template-rows: auto 2px auto minmax(0,1fr) auto; gap: var(--reader-gap); }
-.chapter__canvas .cook__panel-head { align-items: center; padding: 0; }
-.chapter__canvas .cook__panel-head > div { display: grid; gap: 4px; }
-.chapter__canvas .cook__panel-head .label { display: block; line-height: 1.4; }
-.chapter__canvas .cook__recipe-title { margin: 0; font-size: 26px; font-weight: 650; line-height: 1.2; }
-.chapter__canvas .cook__counter { font-size: 14px; }
-.chapter__canvas .cook__progress { height: 2px; margin: 0; align-self: center; }
-.chapter__canvas .timer { margin: 0; padding: 12px 18px; border-radius: 10px; }
-.chapter__canvas .timer__label { font-size: 12px; }
-.chapter__canvas .timer__label small { font-size: 10px; }
-.chapter__canvas .timer__time { font-size: 38px; }
-.chapter__canvas .cook__steps { min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; overflow-anchor: none; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; padding-right: 12px; scroll-padding-block: 4px; }
-.chapter__canvas .step { width: 100%; min-height: 144px; grid-template-columns: 38px minmax(0,1fr); gap: 14px; padding: 18px 0; align-items: start; text-align: left; opacity: .68; }
-.chapter__canvas .step.is-active { opacity: 1; }
-.chapter__canvas .step__num { font-size: var(--reader-number); font-weight: 650; line-height: 1.3; }
-.chapter__canvas .step__copy { display: grid; grid-template-columns: minmax(0,1fr); align-content: start; gap: 8px; }
-.chapter__canvas .step__title { display: block; grid-column: 1; grid-row: 1; font-size: var(--reader-title); font-weight: 650; line-height: 1.3; }
-.chapter__canvas .step__text { display: block; grid-column: 1; grid-row: 2; max-width: none; margin: 0; font-size: var(--reader-text); line-height: 1.6; }
-.chapter__canvas .step__timer { font-family: var(--font-zh); grid-row: 3; grid-column: 1; justify-self: start; margin: 0; padding: 3px 7px; font-size: 10px; line-height: 1.4; letter-spacing: 0; white-space: nowrap; }
-.chapter__canvas .cook__panel > .cook__foot { padding: 0; align-items: center; }
+/* 03: use the original Cook styles from sections.css within the current viewport. */
+.cook .chapter__canvas { grid-template-rows: minmax(0, 1fr); gap: 0; }
+.cook .chapter__canvas .cook__grid { height: 100%; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: clamp(40px, 6.5vw, 112px); align-items: start; }
+.cook .chapter__canvas .cook__left { position: static; }
+.cook .chapter__canvas .cook__panel { height: auto; min-height: 100%; }
+.cook .chapter__canvas .cook__steps { overflow: visible; }
+.cook .chapter__canvas .step { width: 100%; text-align: left; align-items: start; }
+.cook .chapter__canvas .step__copy { display: block; }
+.cook .chapter__canvas .step__title, .cook .chapter__canvas .step__text { display: block; }
 
 /* 04 */
 .understand .chapter__canvas { grid-template-rows: 5% 20% 69%; }
@@ -306,27 +280,6 @@
 .canvas-portrait .recipe-card__foot { font-size: 12px; }
 .canvas-portrait .recipe-card__english { font-size: 11px; }
 
-.canvas-portrait .cook__grid { grid-template-columns: 1fr; grid-template-rows: 32% 65%; gap: 3%; }
-.cook .canvas-portrait { --reader-padding: 16px; --reader-gap: 10px; --reader-title: 22px; --reader-text: 18px; --reader-number: 24px; }
-.canvas-portrait .cook__left { display: grid; grid-template-columns: 46% 51%; grid-template-rows: 44% 45% 7%; gap: 2% 3%; }
-.canvas-portrait .cook__left .h2 { font-size: 34px; }
-.canvas-portrait .cook__description { margin: 0; font-size: 13px; line-height: 1.6; }
-.canvas-portrait .cook__points { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin: 0; }
-.canvas-portrait .cook__point { display: block; padding: 8px 0 0; border: 0; font-size: 12px; line-height: 1.5; }
-.canvas-portrait .cook__point > span { display: inline; font-size: 10px; padding: 0; margin-right: 6px; }
-.canvas-portrait .cook__point > div { display: inline; }
-.canvas-portrait .cook__point br { display: none; }
-.canvas-portrait .cook__left > .cook__foot { grid-column: 1 / -1; padding: 0; font-size: 9px; }
-.canvas-portrait .cook__panel-head { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; }
-.canvas-portrait .cook__panel-head .label { font-size: 9px; }
-.canvas-portrait .cook__recipe-title { font-size: 22px; }
-.canvas-portrait .cook__counter { font-size: 12px; }
-.canvas-portrait .timer { gap: 10px; padding: 8px 12px; }
-.canvas-portrait .timer__left { gap: 8px; }
-.canvas-portrait .timer__label { font-size: 10px; }
-.canvas-portrait .timer__label small { font-size: 8px; }
-.canvas-portrait .timer__time { font-size: 28px; }
-.canvas-portrait .cook__panel > .cook__foot { font-size: 8px; gap: 6px; }
 
 .canvas-portrait .understand__lead { font-size: 14px; line-height: 1.6; }
 .canvas-portrait .understand__overview { grid-template-rows: 8% 60% 28%; }
@@ -442,21 +395,6 @@
 .canvas-compact .recipe-card__meta { font-size: 12px; }
 .canvas-compact .recipe-card__foot { font-size: 10px; }
 
-.canvas-compact .cook__left .h2 { font-size: 30px; }
-.cook .canvas-compact { --reader-padding: 12px; --reader-gap: 8px; --reader-title: 20px; --reader-text: 17px; --reader-number: 23px; }
-.canvas-compact .cook__description { font-size: 11.5px; line-height: 1.5; }
-.canvas-compact .cook__point { padding-top: 4px; font-size: 10.5px; line-height: 1.4; }
-.canvas-compact .cook__point > span { font-size: 9px; margin-right: 4px; }
-.canvas-compact .cook__left > .cook__foot { font-size: 8px; }
-.canvas-compact .cook__panel-head > div { gap: 3px; }
-.canvas-compact .cook__panel-head .label { font-size: 8px; }
-.canvas-compact .cook__recipe-title { font-size: 20px; }
-.canvas-compact .cook__counter { font-size: 11px; }
-.canvas-compact .timer { padding: 6px 10px; }
-.canvas-compact .timer__time { font-size: 26px; }
-.canvas-compact .timer__label { font-size: 9px; }
-.canvas-compact .timer__label small { font-size: 7px; }
-.canvas-compact .cook__panel > .cook__foot { font-size: 7px; }
 
 .canvas-compact .understand__lead { font-size: 11.5px; line-height: 1.45; }
 .canvas-compact .understand__description { font-size: 12px; line-height: 1.45; }
@@ -532,22 +470,7 @@
 .canvas-narrow .showcase__sub { font-size: 14px; }
 .canvas-narrow .showcase__track .recipe-card { width: 530px; }
 
-.canvas-narrow .cook__grid { grid-template-rows: 30% 67%; }
 .cook .canvas-narrow { --reader-padding: 18px; --reader-gap: 10px; --reader-title: 24px; --reader-text: 20px; --reader-number: 28px; }
-.canvas-narrow .cook__left { grid-template-rows: 50% 43% 5%; row-gap: 1%; }
-.canvas-narrow .cook__left .h2 { font-size: 50px; }
-.canvas-narrow .cook__description { font-size: 18px; line-height: 1.5; }
-.canvas-narrow .cook__point { padding-top: 4px; font-size: 16px; line-height: 1.4; }
-.canvas-narrow .cook__point > span { font-size: 11px; }
-.canvas-narrow .cook__left > .cook__foot { font-size: 10px; line-height: 1.2; }
-.canvas-narrow .cook__panel-head .label { font-size: 10px; }
-.canvas-narrow .cook__recipe-title { font-size: 24px; }
-.canvas-narrow .cook__counter { font-size: 15px; }
-.canvas-narrow .timer { padding: 8px 14px; }
-.canvas-narrow .timer__label { font-size: 12px; }
-.canvas-narrow .timer__label small { font-size: 10px; }
-.canvas-narrow .timer__time { font-size: 34px; }
-.canvas-narrow .cook__panel > .cook__foot { font-size: 9px; line-height: 1.3; }
 
 .canvas-narrow .understand__heading { grid-template-columns: 58% 38%; grid-template-rows: 1fr; gap: 4%; }
 .canvas-narrow .understand__lead { font-size: 16px; line-height: 1.6; }
@@ -661,3 +584,15 @@
 }
 .canvas-portrait .next__download,
 .canvas-compact .next__download { font-size: 11px; }
+
+.cook .canvas-portrait .cook__grid { grid-template-columns: 1fr; grid-template-rows: 38% 59%; gap: 3%; }
+.cook .canvas-portrait .cook__left { display: grid; grid-template-columns: 46% 51%; grid-template-rows: auto 1fr auto auto; gap: 8px 3%; padding: 0; }
+.cook .canvas-portrait .sec-head__label { grid-column: 1 / -1; }
+.cook .canvas-portrait .cook__left .h2 { margin-top: 0 !important; font-size: 34px; }
+.cook .canvas-portrait .cook__description { margin-top: 0 !important; font-size: 13px; line-height: 1.6; }
+.cook .canvas-portrait .cook__points { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0; }
+.cook .canvas-portrait .cook__point { display: block; padding: 8px 0 0; border: 0; font-size: 12px; line-height: 1.5; }
+.cook .canvas-portrait .cook__point > span { display: inline; font-size: 10px; padding: 0; margin-right: 6px; }
+.cook .canvas-portrait .cook__point > div { display: inline; }
+.cook .canvas-portrait .cook__point br { display: none; }
+.cook .canvas-portrait .cook__left > .cook__foot { grid-column: 1 / -1; padding: 0; font-size: 9px; }

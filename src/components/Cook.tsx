@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { cookSteps } from '../data/recipes'
-import { ChapterLabel } from './ChapterLabel'
 import { DesignCanvas } from './DesignCanvas'
 import { getLenis } from '../lib/scroll'
 
@@ -148,16 +147,19 @@ export function Cook() {
           className="container chapter__canvas"
           label="烹饪模式画布"
         >
-          <ChapterLabel index="03" title="COOK" heat="大火 · HIGH HEAT" />
           <div className="cook__grid">
             <div className="cook__left">
-              <h2 className="h2" data-reveal>
+              <div className="sec-head__label">
+                <span className="heat-tag">大火 · HIGH HEAT</span>
+                <span className="label">03 / COOK</span>
+              </div>
+              <h2 className="h2" style={{ marginTop: 28 }} data-reveal>
                 一步一步，
                 <br />
                 不慌不忙。
               </h2>
 
-              <p className="body-lg cook__description" data-reveal>
+              <p className="body-lg cook__description" style={{ marginTop: 26, maxWidth: 440 }} data-reveal>
                 烹饪模式把一步铺满一屏。翻步只看当前一步，步骤目录随时跳转；返回详情时，
                 还会回到你刚才读到的那一步。
               </p>
@@ -199,10 +201,7 @@ export function Cook() {
             >
               <div className="cook__panel" ref={panel}>
                 <div className="cook__panel-head">
-                  <div>
-                    <span className="label">烹饪模式 / 步骤节选</span>
-                    <h3 className="cook__recipe-title">红烧肉</h3>
-                  </div>
+                  <span className="label">烹饪模式 / 步骤节选</span>
                   <span className="cook__counter">
                     <b>0{active + 1}</b> / 06
                   </span>

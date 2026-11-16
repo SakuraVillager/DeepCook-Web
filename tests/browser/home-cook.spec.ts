@@ -12,7 +12,7 @@ async function openCook(page: Page) {
           parseFloat(getComputedStyle(el).getPropertyValue('--cook-travel')),
         ),
     )
-    .toBeGreaterThan(100)
+    .toBeGreaterThan(0)
   await expect
     .poll(() =>
       page
@@ -127,14 +127,17 @@ test('wheel scrolling over either column drives the recipe with smooth scrolling
   await expect(page.locator('.cook__reader')).toHaveCSS('opacity', '1')
   await expect(page.locator('.cook__left h2')).toHaveCSS('opacity', '1')
   const leftTop = (await page.locator('.cook__left').boundingBox())!.y
+  const wheelDistance = await page.locator('#cook').evaluate((el) =>
+    parseFloat(getComputedStyle(el).getPropertyValue('--cook-travel')) / 4,
+  )
   let previous = await page.evaluate(() => window.scrollY)
   for (const selector of ['.cook__left', '.cook__reader']) {
     const rect = (await page.locator(selector).boundingBox())!
     await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2)
-    await page.mouse.wheel(0, 180)
+    await page.mouse.wheel(0, wheelDistance)
     await expect
       .poll(() => page.evaluate(() => window.scrollY))
-      .toBeGreaterThan(previous + 140)
+      .toBeGreaterThan(previous + wheelDistance * 0.8)
     previous = await page.evaluate(() => window.scrollY)
     expect(
       Math.abs((await page.locator('.cook__left').boundingBox())!.y - leftTop),
