@@ -137,9 +137,11 @@
 .cook .chapter__canvas .cook__left { position: static; }
 .cook .chapter__canvas .cook__panel { height: auto; min-height: 100%; }
 .cook .chapter__canvas .cook__steps { overflow: visible; }
-.cook .chapter__canvas .step { width: 100%; min-height: 180px; padding-block: 44px; text-align: left; align-items: start; }
+.cook .chapter__canvas .step { width: 100%; padding-block: 28px; text-align: left; align-items: start; }
 .cook .chapter__canvas .step__copy { display: block; }
 .cook .chapter__canvas .step__title, .cook .chapter__canvas .step__text { display: block; }
+.cook .chapter__canvas .step__title { font-size: 18px; }
+.cook .chapter__canvas .step__text { font-size: 16px; }
 
 /* 04 */
 .understand .chapter__canvas { grid-template-rows: 5% 20% 69%; }
@@ -586,7 +588,6 @@
 .canvas-compact .next__download { font-size: 11px; }
 
 .cook .canvas-portrait .cook__grid { grid-template-columns: 1fr; grid-template-rows: 38% 59%; gap: 3%; }
-.cook .canvas-portrait .step { min-height: 150px; padding-block: 32px; }
 .cook .canvas-portrait .cook__left { display: grid; grid-template-columns: 46% 51%; grid-template-rows: auto 1fr auto auto; gap: 8px 3%; padding: 0; }
 .cook .canvas-portrait .sec-head__label { grid-column: 1 / -1; }
 .cook .canvas-portrait .cook__left .h2 { margin-top: 0 !important; font-size: 34px; }

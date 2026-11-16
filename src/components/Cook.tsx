@@ -65,7 +65,12 @@ export function Cook() {
         const top =
           viewport.getBoundingClientRect().top -
           screen.getBoundingClientRect().top
-        const bottomGap = parseFloat(getComputedStyle(screen).paddingBottom)
+        const canvas = host.querySelector<HTMLElement>('.chapter__canvas')
+        const bottomGap = canvas
+          ? canvas.getBoundingClientRect().top - screen.getBoundingClientRect().top +
+            parseFloat(getComputedStyle(canvas).paddingTop) * scale
+          : parseFloat(getComputedStyle(screen).paddingTop)
+        screen.style.setProperty('--cook-bottom-gap', `${bottomGap}px`)
         const height = Math.max(1, (screen.clientHeight - top - bottomGap) / scale)
         if (
           Math.abs(

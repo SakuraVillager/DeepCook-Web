@@ -59,7 +59,7 @@ test('the recipe scrolls inside a screen-sized pinned chapter, then leaves with 
     await page
       .locator('.cook__reader')
       .evaluate((el) =>
-        Math.abs(innerHeight - el.getBoundingClientRect().bottom - parseFloat(getComputedStyle(document.querySelector('.cook__viewport')!).paddingBottom)),
+        Math.abs(innerHeight - el.getBoundingClientRect().bottom - parseFloat(getComputedStyle(document.querySelector('.cook__viewport')!).getPropertyValue('--cook-bottom-gap'))),
       ),
   ).toBeLessThan(2)
   const top = (await left.boundingBox())!.y
@@ -83,7 +83,7 @@ test('the recipe scrolls inside a screen-sized pinned chapter, then leaves with 
       await page
         .locator('.cook__reader')
         .evaluate((el) =>
-          Math.abs(innerHeight - el.getBoundingClientRect().bottom - parseFloat(getComputedStyle(document.querySelector('.cook__viewport')!).paddingBottom)),
+          Math.abs(innerHeight - el.getBoundingClientRect().bottom - parseFloat(getComputedStyle(document.querySelector('.cook__viewport')!).getPropertyValue('--cook-bottom-gap'))),
         ),
     ).toBeLessThan(2)
     expect(Math.abs((await viewport.boundingBox())!.y)).toBeLessThan(2)
@@ -103,6 +103,9 @@ test('the recipe scrolls inside a screen-sized pinned chapter, then leaves with 
   )
   await expect(page.locator('.cook__panel .step').last()).toBeInViewport()
   await expect(page.locator('.cook__panel > .cook__foot')).toBeInViewport()
+  const bottomGap = (await page.locator('#understand').boundingBox())!.y -
+    ((await panel.boundingBox())!.y + (await panel.boundingBox())!.height)
+  expect(Math.abs(bottomGap - panelStart)).toBeLessThan(3)
   await at(page, 1, 250)
   expect(Math.abs((await left.boundingBox())!.y - (top - 250))).toBeLessThan(3)
   expect(Math.abs((await viewport.boundingBox())!.y + 250)).toBeLessThan(3)
@@ -164,7 +167,7 @@ test('phone and tablet layouts keep the visible canvas bounded while reading the
       await page
         .locator('.cook__reader')
         .evaluate((el) =>
-          Math.abs(innerHeight - el.getBoundingClientRect().bottom - parseFloat(getComputedStyle(document.querySelector('.cook__viewport')!).paddingBottom)),
+          Math.abs(innerHeight - el.getBoundingClientRect().bottom - parseFloat(getComputedStyle(document.querySelector('.cook__viewport')!).getPropertyValue('--cook-bottom-gap'))),
         ),
     ).toBeLessThan(2)
     const initial = (await page.locator('.cook__left').boundingBox())!.y
